@@ -1,0 +1,129 @@
+---
+// src/components/Header.astro
+interface Props {
+  resume:         any;
+  lang:           string;
+  t:              (key: string) => string;
+  availableLangs: string[];
+}
+
+const { resume, lang, t, availableLangs } = Astro.props;
+const { basics } = resume;
+---
+
+<header class="mb-10 print:mb-6">
+  <!-- Barra superior: selector de idioma + botón imprimir -->
+  <div class="flex justify-between items-center mb-6 no-print">
+    <!-- Selector de idioma -->
+    <nav aria-label={t('nav.language')} class="flex gap-2">
+      {availableLangs.map((l) => (
+        <a
+          href={`/${l}/`}
+          aria-current={l === lang ? 'page' : undefined}
+          class:list={[
+            'px-3 py-1 rounded-full text-sm font-medium transition-colors',
+            l === lang
+              ? 'bg-gray-900 text-white'
+              : 'bg-white border border-gray-200 text-gray-600 hover:border-gray-400',
+          ]}
+        >
+          {l.toUpperCase()}
+        </a>
+      ))}
+    </nav>
+
+    <!-- Botón imprimir -->
+    <button
+      onclick="window.print()"
+      class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200
+             text-sm text-gray-600 hover:border-gray-400 transition-colors bg-white"
+      aria-label={t('nav.print')}
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+           fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <polyline points="6 9 6 2 18 2 18 9"/>
+        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+        <rect x="6" y="14" width="12" height="8"/>
+      </svg>
+      {t('nav.print')}
+    </button>
+  </div>
+
+  <!-- Perfil: foto + nombre + datos de contacto -->
+  <div class="flex flex-col sm:flex-row gap-6 items-start">
+    {basics.image && (
+      <img
+        src={basics.image}
+        alt={basics.name}
+        width="96"
+        height="96"
+        class="w-24 h-24 rounded-full object-cover border-2 border-white shadow-md flex-shrink-0"
+      />
+    )}
+
+    <div class="flex-1 min-w-0">
+      <h1 class="text-3xl font-bold tracking-tight text-gray-900 print:text-2xl">
+        {basics.name}
+      </h1>
+      {basics.label && (
+        <p class="mt-1 text-lg text-gray-500">{basics.label}</p>
+      )}
+      {basics.summary && (
+        <p class="mt-3 text-sm text-gray-600 leading-relaxed max-w-2xl">
+          {basics.summary}
+        </p>
+      )}
+
+      <!-- Datos de contacto -->
+      <ul class="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-gray-600">
+        {basics.email && (
+          <li>
+            <a href={`mailto:${basics.email}`} target="_blank" rel="noopener"
+               class="hover:text-gray-900 transition-colors">
+              {basics.email}
+            </a>
+          </li>
+        )}
+        {basics.phone && (
+          <li>
+            <a href={`tel:${basics.phone}`} class="hover:text-gray-900 transition-colors">
+              {basics.phone}
+            </a>
+          </li>
+        )}
+        {basics.url && (
+          <li>
+            <a href={basics.url} target="_blank" rel="noopener noreferrer"
+               class="hover:text-gray-900 transition-colors">
+              {basics.url.replace(/^https?:\/\//, '')}
+            </a>
+          </li>
+        )}
+        {basics.location?.city && (
+          <li class="text-gray-400">
+            {[basics.location.city, basics.location.region].filter(Boolean).join(', ')}
+          </li>
+        )}
+      </ul>
+
+      <!-- Redes sociales -->
+      {basics.profiles?.length > 0 && (
+        <ul class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+          {basics.profiles.filter((p: any) => p.url).map((profile: any) => (
+            <li>
+              <a
+                href={profile.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-gray-500 hover:text-gray-900 transition-colors"
+              >
+                {profile.network}
+                {profile.username && <span class="text-gray-400"> @{profile.username}</span>}
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  </div>
+</header>

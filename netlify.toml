@@ -1,0 +1,7 @@
+[build]
+  publish = "dist"
+  command = "pnpm build"
+
+[[edge_functions]]
+  path = "/api/auth/callback"
+  function = "auth"

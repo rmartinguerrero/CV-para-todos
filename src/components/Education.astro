@@ -1,0 +1,60 @@
+---
+// src/components/Education.astro
+interface Props {
+  resume: any;
+  t:      (key: string) => string;
+}
+const { resume, t } = Astro.props;
+---
+
+<section class="mb-10 print:mb-6" aria-labelledby="education-heading">
+  <h2
+    id="education-heading"
+    class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-5 pb-2 border-b border-gray-100"
+  >
+    {t('section.education')}
+  </h2>
+
+  <ol class="space-y-5">
+    {resume.education.filter((edu: any) => edu.institution).map((edu: any) => (
+      <li class="grid sm:grid-cols-[1fr_auto] gap-x-6">
+        <div>
+          <div class="flex flex-wrap items-baseline gap-x-2">
+            <h3 class="font-semibold text-gray-900">
+              {[edu.studyType, edu.area].filter(Boolean).join(' — ')}
+            </h3>
+            {edu.url ? (
+              <a
+                href={edu.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-sm text-gray-500 hover:text-gray-900 transition-colors"
+              >
+                {edu.institution} ↗
+              </a>
+            ) : (
+              <span class="text-sm text-gray-500">{edu.institution}</span>
+            )}
+          </div>
+          {edu.score && (
+            <p class="text-sm text-gray-500 mt-0.5">{edu.score}</p>
+          )}
+          {edu.courses?.length > 0 && (
+            <ul class="mt-2 flex flex-wrap gap-1.5">
+              {edu.courses.filter(Boolean).map((course: string) => (
+                <li class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                  {course}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+        <time class="text-xs text-gray-400 whitespace-nowrap sm:text-right mt-0.5">
+          {edu.startDate}
+          {edu.startDate && edu.endDate && ' — '}
+          {edu.endDate}
+        </time>
+      </li>
+    ))}
+  </ol>
+</section>

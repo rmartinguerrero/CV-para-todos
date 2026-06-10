@@ -1,0 +1,244 @@
+{
+  "$schema": "https://jsonresume.org/schema.json",
+  "basics": {
+    "name": "Raúl Martín Guerrero",
+    "label": "Tecnico Informatico / Tecnico di Stampa Professionale",
+    "image": "/fotocv.jpg",
+    "summary": "Tecnico di stampa professionale con 3 anni di esperienza nella manutenzione, sostituzione di componenti e risoluzione di guasti su apparecchiature di stampa. Professionista con 16 anni di esperienza tecnica precedente in ambienti aziendali, con forte metodologia, capacità diagnostica e orientamento alla risoluzione efficace dei problemi informatici.",
+    "location": {
+      "city": "Treviso",
+      "countryCode": "IT"
+    }
+  },
+
+  "work": [
+    {
+      "name": "Bettiol S.R.L.",
+      "position": "Tecnico Specializzato di Stampanti",
+      "startDate": "2026-01",
+      "location": "Treviso, Italia",
+      "summary": "Riparazione e manutenzione meccanica ed elettronica di apparecchiature di stampa professionale in laboratorio e in loco.",
+      "highlights": [
+        "Diagnosi e riparazione di fotocopiatrici multifunzione e monocromatiche.",
+        "Installazione di stampanti Sharp, Brother, Ricoh, BigPad e attrezzature professionali da ufficio.",
+        "Installazione, configurazione personalizzata e messa in servizio.",
+        "Aggiornamenti e verifiche di funzionamento integrale per garantire le prestazioni ottimali dell'apparecchiatura."
+      ]
+    },
+    {
+      "name": "MTSolution S.R.L.",
+      "position": "Tecnico Specialista Sharp",
+      "startDate": "2024-02",
+      "location": "Treviso, Italia",
+      "summary": "Riparazione e manutenzione meccanica ed elettronica di apparecchiature di stampa professionale in laboratorio e presso il cliente.",
+      "highlights": [
+        "Diagnosi e riparazione di fotocopiatrici multifunzione e monocromatiche",
+        "Interventi su plotter, BigPad e attrezzature professionali da ufficio",
+        "Installazione, configurazione personalizzata e messa in funzione dei dispositivi",
+        "Aggiornamento firmware e verifica del corretto funzionamento"
+      ]
+    },
+    {
+      "name": "Geox S.P.A.",
+      "position": "Tecnico Informatico",
+      "startDate": "2023-10",
+      "endDate": "2024-02",
+      "location": "Montebelluna, Italia",
+      "summary": "Supporto IT interno in ambiente aziendale internazionale.",
+      "highlights": [
+        "Installazione e disinstallazione delle postazioni di lavoro",
+        "Gestione ticket tramite Jira",
+        "Amministrazione utenti in Active Directory",
+        "Supporto tecnico ai dipendenti"
+      ]
+    },
+    {
+      "name": "Il Fornaio del Casale S.P.A.",
+      "position": "Operatore Logistico (Picking)",
+      "startDate": "2023-01",
+      "endDate": "2023-10",
+      "location": "Veneto, Italia",
+      "summary": "Gestione logistica in magazzino di distribuzione alimentare nazionale e internazionale.",
+      "highlights": [
+        "Preparazione ordini con transpallet elettrico",
+        "Carico container marittimi e rimorchi",
+        "Movimentazione pallet in altezza",
+        "Organizzazione e chiusura giornaliera del magazzino"
+      ]
+    },
+    {
+      "name": "Sabacaucho S.A.U.",
+      "position": "Tecnico Informatico",
+      "startDate": "2022-06",
+      "endDate": "2022-10",
+      "location": "Barcellona, Spagna",
+      "summary": "Supporto IT interno in ambiente industriale.",
+      "highlights": [
+        "Preparazione e configurazione delle postazioni di lavoro",
+        "Gestione utenti",
+        "Supervisione dei server di backup",
+        "Risoluzione problemi tecnici"
+      ]
+    },
+    {
+      "name": "Merkal Calzados S.L.",
+      "position": "Tecnico Informatico",
+      "startDate": "2021-04",
+      "endDate": "2022-04",
+      "location": "Barcellona, Spagna",
+      "summary": "Supporto IT per uffici centrali e rete di negozi.",
+      "highlights": [
+        "Configurazione dispositivi per negozi e uffici",
+        "Gestione utenti e dipendenti",
+        "Risoluzione incidenti remoti multi-sede",
+        "Supervisione server di backup e connettività"
+      ]
+    },
+    {
+      "name": "NestTReT S.L.",
+      "position": "Operatore di Sistemi 24/7",
+      "startDate": "2020-04",
+      "endDate": "2021-04",
+      "location": "Barcellona, Spagna",
+      "summary": "Monitoraggio e operazioni in ambienti critici per grandi aziende.",
+      "highlights": [
+        "Monitoraggio e escalation incidenti livello 1-2-3",
+        "Deploy in preproduzione e produzione",
+        "Gestione server Windows, Unix, RedHat e Solaris",
+        "Operazioni per IBM e Banco Sabadell"
+      ]
+    },
+    {
+      "name": "Nolimits Travel S.L.",
+      "position": "Tecnico Informatico",
+      "startDate": "2018-11",
+      "endDate": "2020-11",
+      "location": "Barcellona, Spagna",
+      "summary": "Gestione completa del supporto IT aziendale.",
+      "highlights": [
+        "Supporto hardware e software ai dipendenti",
+        "Gestione Active Directory",
+        "Configurazione e formazione Freshdesk",
+        "Gestione inventario e rack"
+      ]
+    },
+    {
+      "name": "RTVE S.A.",
+      "position": "Tecnico Informatico",
+      "startDate": "2014-03",
+      "endDate": "2016-02",
+      "location": "Madrid, Spagna",
+      "summary": "Supporto IT in ambiente aziendale media.",
+      "highlights": [
+        "Supporto tecnico interno ed esterno",
+        "Manutenzione apparecchiature e servizi interattivi",
+        "Gestione inventario multimediale",
+        "Risoluzione problemi web di primo livello"
+      ]
+    },
+    {
+      "name": "Accenture",
+      "position": "QA Tester",
+      "startDate": "2012-07",
+      "endDate": "2014-03",
+      "location": "Madrid, Spagna",
+      "summary": "Testing funzionale in progetti di telecomunicazioni.",
+      "highlights": [
+        "Validazione applicazioni commerciali",
+        "Test in ambienti di preproduzione",
+        "Individuazione e documentazione bug"
+      ]
+    },
+    {
+      "name": "Entelgy S.L.",
+      "position": "Tecnico Help Desk",
+      "startDate": "2008-01",
+      "endDate": "2010-12",
+      "location": "Madrid, Spagna",
+      "summary": "Supporto tecnico remoto a clienti aziendali.",
+      "highlights": [
+        "Supporto remoto livello 1 e 2",
+        "Gestione licenze e database",
+        "Installazione e recupero sistemi"
+      ]
+    },
+    {
+      "name": "Iberedes S.L.",
+      "position": "Tecnico Informatico",
+      "startDate": "2007-01",
+      "endDate": "2007-12",
+      "location": "Madrid, Spagna",
+      "summary": "Supporto tecnico a utenti e aziende.",
+      "highlights": [
+        "Riparazione computer e reti",
+        "Installazione software",
+        "Rimozione virus e migrazione email"
+      ]
+    },
+    {
+      "name": "Teduinsa S.A.",
+      "position": "Tecnico Linea di Assemblaggio",
+      "startDate": "2005-12",
+      "endDate": "2007-11",
+      "location": "Madrid, Spagna",
+      "summary": "Assemblaggio e controllo qualità di apparecchiature elettroniche.",
+      "highlights": [
+        "Assemblaggio desktop e laptop",
+        "Controllo qualità per grandi catene",
+        "Ricondizionamento e riparazione PC e televisori"
+      ]
+    }
+  ],
+
+  "education": [
+    {
+      "institution": "Istruzione obbligatoria",
+      "endDate": "2003-07-07"
+    },
+    {
+      "institution": "Formazione Professionale Informatica",
+      "endDate": "2005-07-10"
+    }
+  ],
+
+  "certificates": [
+    {
+      "name": "CR5/B-CR5 - Corso tecnico Sharp Academy",
+      "date": "2024-06-12",
+      "issuer": "Sharp Europe"
+    },
+    {
+      "name": "Blog per la comunicazione aziendale",
+      "date": "2018-11-10",
+      "issuer": "GDOCE"
+    },
+    {
+      "name": "Firma digitale",
+      "date": "2019-01-03",
+      "issuer": "Educ@atic"
+    },
+    {
+      "name": "SPSS: Applicazione e analisi statistica",
+      "date": "2019-04-30",
+      "issuer": "Educ@atic"
+    },
+    {
+      "name": "Protezione dei dispositivi in rete",
+      "date": "2019-07-24",
+      "issuer": "GDOCE"
+    }
+  ],
+
+  "skills": [
+    { "name": "Hardware" },
+    { "name": "Software" },
+    { "name": "Manualità" },
+    { "name": "Curiosità" },
+    { "name": "Apprendimento rapido" }
+  ],
+
+  "languages": [
+    { "language": "Spagnolo", "fluency": "Madrelingua" },
+    { "language": "Italiano", "fluency": "Intermedio" }
+  ]
+}
