@@ -1,0 +1,64 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jsonresume/resume-schema/v1.0.0/schema.json",
+  "basics": {
+    "name": "",
+    "label": "",
+    "image": "",
+    "email": "",
+    "phone": "",
+    "url": "",
+    "summary": "",
+    "location": {
+      "city": "",
+      "countryCode": "GB",
+      "region": ""
+    },
+    "profiles": [
+      { "network": "LinkedIn", "username": "", "url": "" },
+      { "network": "GitHub",   "username": "", "url": "" }
+    ]
+  },
+  "work": [
+    {
+      "name": "",
+      "position": "",
+      "url": "",
+      "startDate": "",
+      "endDate": "",
+      "summary": "",
+      "highlights": []
+    }
+  ],
+  "education": [
+    {
+      "institution": "",
+      "url": "",
+      "area": "",
+      "studyType": "",
+      "startDate": "",
+      "endDate": "",
+      "score": "",
+      "courses": []
+    }
+  ],
+  "skills": [
+    { "name": "", "level": "", "keywords": [] }
+  ],
+  "languages": [
+    { "language": "English", "fluency": "Native" }
+  ],
+  "projects": [
+    {
+      "name": "",
+      "description": "",
+      "highlights": [],
+      "keywords": [],
+      "url": ""
+    }
+  ],
+  "meta": {
+    "canonical": "https://raw.githubusercontent.com/jsonresume/resume-schema/master/resume.json",
+    "version": "v1.0.0",
+    "lastModified": ""
+  }
+}

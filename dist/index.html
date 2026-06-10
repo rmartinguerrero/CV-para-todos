@@ -1,0 +1,10 @@
+<!DOCTYPE html><html> <head><meta charset="UTF-8"><title>Redirigiendo…</title><script>(function(){const available = ["es","it"];
+const defaultLang = "es";
+
+    // Detección de idioma en el cliente
+    const preferred = navigator.languages
+      .map(l => l.split('-')[0])
+      .find(l => available.includes(l));
+    const lang = preferred ?? defaultLang;
+    window.location.replace(`/${lang}/`);
+  })();</script><noscript><meta http-equiv="refresh" content="0; url=/es/"></noscript><link rel="stylesheet" href="/_astro/index.0AA-es87.css"></head> <body></body></html>

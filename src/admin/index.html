@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="es" translate="no">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CV Para Todos — Panel de edición</title>
+<style>
+/* ─── Reset & tokens ─────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #0e0f14;
+  --surface:  #16181f;
+  --panel:    #1c1f28;
+  --border:   #2a2d3a;
+  --accent:   #4f7ef7;
+  --accent2:  #7c5ef7;
+  --text:     #d4d6e0;
+  --muted:    #666b80;
+  --danger:   #e05c5c;
+  --success:  #4caf87;
+  --warn:     #e0a050;
+  --radius:   8px;
+  --font:     'Inter', system-ui, sans-serif;
+  --mono:     'JetBrains Mono', 'Fira Code', monospace;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+/* ─── Top bar ─────────────────────────────────────────────── */
+#topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.logo {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: -0.3px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.logo-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+
+.progress-wrap {
+  flex: 1;
+  max-width: 340px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.progress-track {
+  flex: 1;
+  height: 3px;
+  background: var(--border);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  border-radius: 99px;
+  transition: width .4s ease;
+  width: 0%;
+}
+.progress-label {
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+  min-width: 48px;
+  text-align: right;
+}
+
+.btn-save {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 16px;
+  cursor: pointer;
+  transition: opacity .15s, transform .1s;
+}
+.btn-save:hover  { opacity: .88; }
+.btn-save:active { transform: scale(.97); }
+.btn-save svg { flex-shrink: 0; }
+
+/* ─── Step tabs ────────────────────────────────────────────── */
+#steptabs {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  padding: 0 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+#steptabs::-webkit-scrollbar { height: 0; }
+
+.steptab {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 16px;
+  font-size: 12px;
+  color: var(--muted);
+  cursor: pointer;
+  border: none;
+  background: none;
+  border-bottom: 2px solid transparent;
+  font-family: var(--font);
+  white-space: nowrap;
+  transition: color .15s, border-color .15s;
+}
+.steptab:hover { color: var(--text); }
+.steptab.active {
+  color: #fff;
+  border-bottom-color: var(--accent);
+}
+.steptab .step-num {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--border);
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  font-weight: 600;
+  transition: background .15s;
+}
+.steptab.active .step-num { background: var(--accent); }
+.steptab.done .step-num   { background: var(--success); }
+
+/* ─── Main layout ──────────────────────────────────────────── */
+#main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  height: calc(100vh - 90px);
+}
+
+/* ─── Form panel ───────────────────────────────────────────── */
+#formpanel {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 28px;
+  min-width: 0;
+}
+#formpanel::-webkit-scrollbar { width: 5px; }
+#formpanel::-webkit-scrollbar-track { background: transparent; }
+#formpanel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+/* ─── Preview sidebar ──────────────────────────────────────── */
+#preview {
+  width: 320px;
+  flex-shrink: 0;
+  background: var(--panel);
+  border-left: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+#preview::-webkit-scrollbar { width: 5px; }
+#preview::-webkit-scrollbar-track { background: transparent; }
+#preview::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+.preview-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
+}
+
+/* ─── Step content ─────────────────────────────────────────── */
+.step-panel { display: none; }
+.step-panel.active { display: block; }
+
+.section-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.section-head h2 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+}
+.section-badge {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 99px;
+}
+.badge-global { background: rgba(79,126,247,.18); color: var(--accent); }
+.badge-local  { background: rgba(124,94,247,.18);  color: var(--accent2); }
+
+/* ─── Form grid ─────────────────────────────────────────────── */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 20px;
+}
+.form-grid .full { grid-column: 1 / -1; }
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.field label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.field .global-tag {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  background: rgba(79,126,247,.15);
+  color: var(--accent);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+.field input,
+.field textarea,
+.field select {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 13px;
+  padding: 8px 10px;
+  width: 100%;
+  transition: border-color .15s, box-shadow .15s;
+  outline: none;
+}
+.field input:focus,
+.field textarea:focus,
+.field select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,126,247,.15);
+}
+.field textarea {
+  resize: vertical;
+  min-height: 72px;
+  line-height: 1.5;
+}
+.field input::placeholder,
+.field textarea::placeholder { color: var(--muted); opacity: .7; }
+
+/* ─── Lang tabs (dentro del paso) ──────────────────────────── */
+.lang-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 18px;
+}
+.lang-tab {
+  padding: 5px 14px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: none;
+  color: var(--muted);
+  font-family: var(--font);
+  transition: all .15s;
+}
+.lang-tab:hover  { border-color: var(--accent); color: var(--text); }
+.lang-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* ─── Repeater (experience / education / skills) ────────────── */
+.repeater-item {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 12px;
+  position: relative;
+}
+.repeater-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.repeater-item-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+}
+.btn-remove {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--muted);
+  font-size: 11px;
+  padding: 3px 9px;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: border-color .15s, color .15s;
+}
+.btn-remove:hover { border-color: var(--danger); color: var(--danger); }
+
+.btn-add {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  color: var(--muted);
+  font-size: 12px;
+  font-family: var(--font);
+  padding: 10px 16px;
+  width: 100%;
+  cursor: pointer;
+  transition: border-color .15s, color .15s;
+  justify-content: center;
+  margin-top: 4px;
+}
+.btn-add:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ─── Nav buttons ──────────────────────────────────────────── */
+.step-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+.btn-nav {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 13px;
+  font-family: var(--font);
+  font-weight: 500;
+  padding: 8px 18px;
+  cursor: pointer;
+  transition: border-color .15s;
+}
+.btn-nav:hover   { border-color: var(--accent); }
+.btn-nav:disabled { opacity: .35; cursor: default; pointer-events: none; }
+.btn-next {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.btn-next:hover { opacity: .88; }
+
+/* ─── Preview card ──────────────────────────────────────────── */
+.pv-avatar {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border);
+  display: block;
+}
+.pv-avatar-placeholder {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+.pv-name   { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 2px; }
+.pv-label  { font-size: 12px; color: var(--muted); }
+.pv-section { font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; margin-top: 16px; }
+.pv-item   { font-size: 12px; color: var(--text); margin-bottom: 6px; line-height: 1.4; }
+.pv-item strong { color: #fff; font-weight: 600; }
+.pv-item span   { color: var(--muted); }
+.pv-chip {
+  display: inline-block;
+  background: var(--border);
+  color: var(--text);
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 99px;
+  margin: 2px 2px 0 0;
+}
+
+/* ─── Toast ─────────────────────────────────────────────────── */
+#toast {
+  position: fixed;
+  bottom: 24px; right: 24px;
+  background: var(--success);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: 10px;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity .2s, transform .2s;
+  pointer-events: none;
+  z-index: 999;
+}
+#toast.show { opacity: 1; transform: translateY(0); }
+#toast.error { background: var(--danger); }
+
+/* ─── Sync badge (campos globales) ─────────────────────────── */
+.sync-badge {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  background: rgba(76,175,135,.15);
+  color: var(--success);
+  padding: 1px 5px;
+  border-radius: 4px;
+  margin-left: 4px;
+  opacity: 0;
+  transition: opacity .5s;
+}
+.sync-badge.show { opacity: 1; }
+
+/* ─── Template selector ─────────────────────────────────────── */
+.template-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.template-card {
+  background: var(--panel);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  cursor: pointer;
+  transition: border-color .15s;
+  text-align: center;
+}
+.template-card:hover          { border-color: var(--muted); }
+.template-card.selected       { border-color: var(--accent); background: rgba(79,126,247,.08); }
+.template-card .tpl-name      { font-size: 12px; font-weight: 600; color: #fff; margin-top: 8px; }
+.template-card .tpl-desc      { font-size: 10px; color: var(--muted); margin-top: 2px; }
+.template-card .tpl-icon      { font-size: 24px; }
+
+@media (max-width: 720px) {
+  .form-grid { grid-template-columns: 1fr; }
+  #preview   { display: none; }
+  .template-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ─── Top bar ──────────────────────────────────────────── -->
+<div id="topbar">
+  <div class="logo">
+    <div class="logo-dot"></div>
+    CV Para Todos
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-track">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+    <div class="progress-label" id="progress-label">0 / 4</div>
+  </div>
+
+  <button class="btn-save" onclick="saveAll()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+      <polyline points="17 21 17 13 7 13 7 21"/>
+      <polyline points="7 3 7 8 15 8"/>
+    </svg>
+    Guardar y publicar
+  </button>
+</div>
+
+<!-- ─── Step tabs ─────────────────────────────────────────── -->
+<div id="steptabs" role="tablist">
+  <button class="steptab active" role="tab" aria-selected="true"  onclick="goStep(0)">
+    <span class="step-num">1</span> Contacto
+  </button>
+  <button class="steptab" role="tab" aria-selected="false" onclick="goStep(1)">
+    <span class="step-num">2</span> Experiencia
+  </button>
+  <button class="steptab" role="tab" aria-selected="false" onclick="goStep(2)">
+    <span class="step-num">3</span> Formación
+  </button>
+  <button class="steptab" role="tab" aria-selected="false" onclick="goStep(3)">
+    <span class="step-num">4</span> Habilidades &amp; Proyectos
+  </button>
+  <button class="steptab" role="tab" aria-selected="false" onclick="goStep(4)">
+    <span class="step-num">5</span> Plantilla
+  </button>
+</div>
+
+<!-- ─── Main ──────────────────────────────────────────────── -->
+<div id="main">
+  <div id="formpanel">
+
+    <!-- ══ PASO 1: CONTACTO ══════════════════════════════════ -->
+    <div class="step-panel active" id="step-0" role="tabpanel">
+      <div class="section-head">
+        <h2>Información de contacto</h2>
+        <span class="section-badge badge-global">Global — se sincroniza entre idiomas</span>
+      </div>
+
+      <!-- Lang tabs -->
+      <div class="lang-tabs" id="lang-tabs-0">
+        <button class="lang-tab active" onclick="setLang(0,'es')">ES</button>
+        <button class="lang-tab"        onclick="setLang(0,'it')">IT</button>
+        <button class="lang-tab"        onclick="setLang(0,'en')">EN</button>
+      </div>
+
+      <!-- Campos globales (se sincronizan) -->
+      <div class="form-grid" style="margin-bottom:16px;">
+        <div class="field full">
+          <label>
+            Nombre completo
+            <span class="global-tag">global</span>
+            <span class="sync-badge" id="sync-name">✓ sincronizado</span>
+          </label>
+          <input type="text" id="g-name" placeholder="Ej: María García" oninput="syncGlobal('name',this.value)" />
+        </div>
+        <div class="field">
+          <label>Email <span class="global-tag">global</span></label>
+          <input type="email" id="g-email" placeholder="correo@ejemplo.com" oninput="syncGlobal('email',this.value)" />
+        </div>
+        <div class="field">
+          <label>Teléfono <span class="global-tag">global</span></label>
+          <input type="tel" id="g-phone" placeholder="+34 600 000 000" oninput="syncGlobal('phone',this.value)" />
+        </div>
+        <div class="field">
+          <label>Web personal <span class="global-tag">global</span></label>
+          <input type="url" id="g-url" placeholder="https://tudominio.com" oninput="syncGlobal('url',this.value)" />
+        </div>
+        <div class="field">
+          <label>Foto (URL) <span class="global-tag">global</span></label>
+          <input type="url" id="g-image" placeholder="https://github.com/tu-usuario.png" oninput="syncGlobal('image',this.value)" />
+        </div>
+        <div class="field">
+          <label>Ciudad <span class="global-tag">global</span></label>
+          <input type="text" id="g-city" placeholder="Madrid" oninput="syncGlobal('city',this.value)" />
+        </div>
+        <div class="field">
+          <label>LinkedIn URL <span class="global-tag">global</span></label>
+          <input type="url" id="g-linkedin" placeholder="https://linkedin.com/in/tu-perfil" oninput="syncGlobal('linkedin',this.value)" />
+        </div>
+        <div class="field">
+          <label>GitHub URL <span class="global-tag">global</span></label>
+          <input type="url" id="g-github" placeholder="https://github.com/tu-usuario" oninput="syncGlobal('github',this.value)" />
+        </div>
+      </div>
+
+      <!-- Campos locales (traducibles por idioma) -->
+      <div class="form-grid" id="contact-local-es">
+        <div class="field">
+          <label>Título profesional <span class="badge-local" style="font-size:9px;padding:1px 5px;border-radius:4px;font-weight:700;">traducir</span></label>
+          <input type="text" id="es-label" placeholder="Diseñadora UX · Madrid" oninput="updatePreview()" />
+        </div>
+        <div class="field full">
+          <label>Resumen profesional</label>
+          <textarea id="es-summary" placeholder="Breve descripción de tu perfil profesional en español..." oninput="updatePreview()"></textarea>
+        </div>
+      </div>
+      <div class="form-grid" id="contact-local-it" style="display:none">
+        <div class="field">
+          <label>Titolo professionale</label>
+          <input type="text" id="it-label" placeholder="Designer UX · Milano" oninput="updatePreview()" />
+        </div>
+        <div class="field full">
+          <label>Riepilogo professionale</label>
+          <textarea id="it-summary" placeholder="Breve descrizione del tuo profilo professionale in italiano..."></textarea>
+        </div>
+      </div>
+      <div class="form-grid" id="contact-local-en" style="display:none">
+        <div class="field">
+          <label>Professional title</label>
+          <input type="text" id="en-label" placeholder="UX Designer · London" oninput="updatePreview()" />
+        </div>
+        <div class="field full">
+          <label>Professional summary</label>
+          <textarea id="en-summary" placeholder="Brief description of your professional profile in English..."></textarea>
+        </div>
+      </div>
+
+      <div class="step-nav">
+        <button class="btn-nav" disabled>← Atrás</button>
+        <button class="btn-nav btn-next" onclick="goStep(1)">Experiencia →</button>
+      </div>
+    </div>
+
+    <!-- ══ PASO 2: EXPERIENCIA ════════════════════════════════ -->
+    <div class="step-panel" id="step-1" role="tabpanel">
+      <div class="section-head">
+        <h2>Experiencia profesional</h2>
+        <span class="section-badge badge-local">Por idioma</span>
+      </div>
+
+      <div class="lang-tabs" id="lang-tabs-1">
+        <button class="lang-tab active" onclick="setLang(1,'es')">ES</button>
+        <button class="lang-tab"        onclick="setLang(1,'it')">IT</button>
+        <button class="lang-tab"        onclick="setLang(1,'en')">EN</button>
+      </div>
+
+      <div id="exp-lang-es">
+        <div id="exp-list-es"></div>
+        <button class="btn-add" onclick="addExp('es')">+ Añadir puesto</button>
+      </div>
+      <div id="exp-lang-it" style="display:none">
+        <div id="exp-list-it"></div>
+        <button class="btn-add" onclick="addExp('it')">+ Aggiungi posizione</button>
+      </div>
+      <div id="exp-lang-en" style="display:none">
+        <div id="exp-list-en"></div>
+        <button class="btn-add" onclick="addExp('en')">+ Add position</button>
+      </div>
+
+      <div class="step-nav">
+        <button class="btn-nav" onclick="goStep(0)">← Contacto</button>
+        <button class="btn-nav btn-next" onclick="goStep(2)">Formación →</button>
+      </div>
+    </div>
+
+    <!-- ══ PASO 3: FORMACIÓN ══════════════════════════════════ -->
+    <div class="step-panel" id="step-2" role="tabpanel">
+      <div class="section-head">
+        <h2>Formación académica</h2>
+        <span class="section-badge badge-local">Por idioma</span>
+      </div>
+
+      <div class="lang-tabs" id="lang-tabs-2">
+        <button class="lang-tab active" onclick="setLang(2,'es')">ES</button>
+        <button class="lang-tab"        onclick="setLang(2,'it')">IT</button>
+        <button class="lang-tab"        onclick="setLang(2,'en')">EN</button>
+      </div>
+
+      <div id="edu-lang-es">
+        <div id="edu-list-es"></div>
+        <button class="btn-add" onclick="addEdu('es')">+ Añadir titulación</button>
+      </div>
+      <div id="edu-lang-it" style="display:none">
+        <div id="edu-list-it"></div>
+        <button class="btn-add" onclick="addEdu('it')">+ Aggiungi titolo di studio</button>
+      </div>
+      <div id="edu-lang-en" style="display:none">
+        <div id="edu-list-en"></div>
+        <button class="btn-add" onclick="addEdu('en')">+ Add qualification</button>
+      </div>
+
+      <div class="step-nav">
+        <button class="btn-nav" onclick="goStep(1)">← Experiencia</button>
+        <button class="btn-nav btn-next" onclick="goStep(3)">Habilidades →</button>
+      </div>
+    </div>
+
+    <!-- ══ PASO 4: HABILIDADES & PROYECTOS ════════════════════ -->
+    <div class="step-panel" id="step-3" role="tabpanel">
+      <div class="section-head">
+        <h2>Habilidades &amp; Proyectos</h2>
+        <span class="section-badge badge-local">Por idioma</span>
+      </div>
+
+      <div class="lang-tabs" id="lang-tabs-3">
+        <button class="lang-tab active" onclick="setLang(3,'es')">ES</button>
+        <button class="lang-tab"        onclick="setLang(3,'it')">IT</button>
+        <button class="lang-tab"        onclick="setLang(3,'en')">EN</button>
+      </div>
+
+      <!-- Habilidades -->
+      <p style="color:var(--muted);font-size:12px;margin-bottom:12px;">Agrupa por categoría: Idiomas, Tecnologías, Soft skills…</p>
+      <div id="skills-lang-es">
+        <div id="skills-list-es"></div>
+        <button class="btn-add" onclick="addSkill('es')">+ Añadir grupo de habilidades</button>
+      </div>
+      <div id="skills-lang-it" style="display:none">
+        <div id="skills-list-it"></div>
+        <button class="btn-add" onclick="addSkill('it')">+ Aggiungi gruppo di competenze</button>
+      </div>
+      <div id="skills-lang-en" style="display:none">
+        <div id="skills-list-en"></div>
+        <button class="btn-add" onclick="addSkill('en')">+ Add skill group</button>
+      </div>
+
+      <!-- Proyectos -->
+      <div style="margin-top:28px;">
+        <div class="section-head" style="margin-bottom:12px;">
+          <h2 style="font-size:14px;">Proyectos destacados</h2>
+        </div>
+        <div class="lang-tabs" id="lang-tabs-proj">
+          <button class="lang-tab active" onclick="setProjLang('es')">ES</button>
+          <button class="lang-tab"        onclick="setProjLang('it')">IT</button>
+          <button class="lang-tab"        onclick="setProjLang('en')">EN</button>
+        </div>
+        <div id="proj-lang-es">
+          <div id="proj-list-es"></div>
+          <button class="btn-add" onclick="addProj('es')">+ Añadir proyecto</button>
+        </div>
+        <div id="proj-lang-it" style="display:none">
+          <div id="proj-list-it"></div>
+          <button class="btn-add" onclick="addProj('it')">+ Aggiungi progetto</button>
+        </div>
+        <div id="proj-lang-en" style="display:none">
+          <div id="proj-list-en"></div>
+          <button class="btn-add" onclick="addProj('en')">+ Add project</button>
+        </div>
+      </div>
+
+      <div class="step-nav">
+        <button class="btn-nav" onclick="goStep(2)">← Formación</button>
+        <button class="btn-nav btn-next" onclick="goStep(4)">Plantilla →</button>
+      </div>
+    </div>
+
+    <!-- ══ PASO 5: PLANTILLA ══════════════════════════════════ -->
+    <div class="step-panel" id="step-4" role="tabpanel">
+      <div class="section-head">
+        <h2>Elige tu plantilla</h2>
+        <span class="section-badge badge-global">Global</span>
+      </div>
+
+      <p style="color:var(--muted);font-size:12px;margin-bottom:20px;">
+        La plantilla define el aspecto visual de tu CV. Puedes cambiarla en cualquier momento.
+      </p>
+
+      <div class="template-grid">
+        <div class="template-card selected" onclick="selectTemplate('minimalist')" id="tpl-minimalist">
+          <div class="tpl-icon">📄</div>
+          <div class="tpl-name">The Archivist</div>
+          <div class="tpl-desc">Letras &amp; Humanidades<br>Clásico · Dos columnas</div>
+        </div>
+        <div class="template-card" onclick="selectTemplate('modern')" id="tpl-modern">
+          <div class="tpl-icon">🧩</div>
+          <div class="tpl-name">The Blueprint</div>
+          <div class="tpl-desc">Ciencias &amp; Ingeniería<br>Bento Box · Glassmorphism</div>
+        </div>
+        <div class="template-card" onclick="selectTemplate('creative')" id="tpl-creative">
+          <div class="tpl-icon">🎨</div>
+          <div class="tpl-name">The Gallery</div>
+          <div class="tpl-desc">Arte &amp; Diseño<br>Inmersivo · Tipografía grande</div>
+        </div>
+      </div>
+
+      <div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-top:8px;">
+        <p style="font-size:12px;color:var(--muted);margin-bottom:4px;">Plantilla seleccionada</p>
+        <p style="font-size:14px;font-weight:600;color:#fff;" id="tpl-selected-label">The Archivist — Letras &amp; Humanidades</p>
+      </div>
+
+      <div class="step-nav">
+        <button class="btn-nav" onclick="goStep(3)">← Habilidades</button>
+        <button class="btn-save" style="padding:8px 20px;" onclick="saveAll()">
+          ✓ Guardar y publicar
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /formpanel -->
+
+  <!-- ─── Preview sidebar ──────────────────────────────────── -->
+  <div id="preview">
+    <div class="preview-title">Vista previa</div>
+
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div class="pv-avatar-placeholder" id="pv-avatar-wrap">?</div>
+      <div>
+        <div class="pv-name"  id="pv-name">Tu nombre</div>
+        <div class="pv-label" id="pv-label">Tu título profesional</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="pv-section">Contacto</div>
+      <div class="pv-item" id="pv-email">—</div>
+      <div class="pv-item" id="pv-phone">—</div>
+      <div class="pv-item" id="pv-city">—</div>
+    </div>
+
+    <div>
+      <div class="pv-section">Experiencia</div>
+      <div id="pv-exp" class="pv-item" style="color:var(--muted);">Sin datos aún</div>
+    </div>
+
+    <div>
+      <div class="pv-section">Formación</div>
+      <div id="pv-edu" class="pv-item" style="color:var(--muted);">Sin datos aún</div>
+    </div>
+
+    <div>
+      <div class="pv-section">Habilidades</div>
+      <div id="pv-skills"></div>
+    </div>
+
+    <div style="margin-top:auto;padding-top:16px;border-top:1px solid var(--border);">
+      <div class="pv-section" style="margin-top:0;">Idiomas activos</div>
+      <div id="pv-langs" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;"></div>
+    </div>
+  </div>
+</div><!-- /main -->
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// ESTADO DEL FORMULARIO
+// ═══════════════════════════════════════════════════════════════
+const LANGS = ['es', 'it', 'en'];
+
+// Campos globales (mismo valor en todos los idiomas)
+const global = {
+  name: '', email: '', phone: '', url: '',
+  image: '', city: '', linkedin: '', github: ''
+};
+
+// Estructura de datos por idioma
+const data = {};
+LANGS.forEach(l => {
+  data[l] = {
+    label: '', summary: '',
+    work: [], education: [], skills: [], projects: []
+  };
+});
+
+let currentStep = 0;
+let activeLang  = { 0:'es', 1:'es', 2:'es', 3:'es', proj:'es' };
+let selectedTemplate = 'minimalist';
+
+const TOTAL_STEPS = 5;
+
+// ═══════════════════════════════════════════════════════════════
+// NAVEGACIÓN POR PASOS
+// ═══════════════════════════════════════════════════════════════
+function goStep(n) {
+  document.querySelectorAll('.step-panel').forEach((p, i) => {
+    p.classList.toggle('active', i === n);
+  });
+  document.querySelectorAll('.steptab').forEach((t, i) => {
+    t.classList.toggle('active', i === n);
+    t.setAttribute('aria-selected', i === n);
+    if (i < n) t.classList.add('done');
+  });
+  currentStep = n;
+  updateProgress();
+  updatePreview();
+}
+
+function updateProgress() {
+  const filled = countFilledSteps();
+  const pct = Math.round((filled / TOTAL_STEPS) * 100);
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = filled + ' / ' + TOTAL_STEPS;
+}
+
+function countFilledSteps() {
+  let n = 0;
+  if (global.name.trim()) n++;
+  if (LANGS.some(l => data[l].work.length > 0)) n++;
+  if (LANGS.some(l => data[l].education.length > 0)) n++;
+  if (LANGS.some(l => data[l].skills.length > 0)) n++;
+  if (selectedTemplate) n++;
+  return n;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CAMPOS GLOBALES (sincronización entre idiomas)
+// ═══════════════════════════════════════════════════════════════
+function syncGlobal(field, value) {
+  global[field] = value;
+  // Mostrar badge de sincronización
+  const badge = document.getElementById('sync-' + field);
+  if (badge) {
+    badge.classList.add('show');
+    clearTimeout(badge._t);
+    badge._t = setTimeout(() => badge.classList.remove('show'), 1800);
+  }
+  updatePreview();
+  updateActiveLangs();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TABS DE IDIOMA
+// ═══════════════════════════════════════════════════════════════
+function setLang(step, lang) {
+  activeLang[step] = lang;
+  // Actualizar tabs
+  const tabs = document.querySelectorAll(`#lang-tabs-${step} .lang-tab`);
+  tabs.forEach((t, i) => t.classList.toggle('active', LANGS[i] === lang));
+  // Mostrar panel correcto
+  const panels = {
+    0: ['contact-local'],
+    1: ['exp-lang'],
+    2: ['edu-lang'],
+    3: ['skills-lang'],
+  };
+  if (panels[step]) {
+    panels[step].forEach(prefix => {
+      LANGS.forEach(l => {
+        const el = document.getElementById(prefix + '-' + l);
+        if (el) el.style.display = l === lang ? '' : 'none';
+      });
+    });
+  }
+  // Leer valores locales al cambiar de idioma
+  if (step === 0) readLocalContact(lang);
+}
+
+function setProjLang(lang) {
+  activeLang['proj'] = lang;
+  const tabs = document.querySelectorAll('#lang-tabs-proj .lang-tab');
+  tabs.forEach((t, i) => t.classList.toggle('active', LANGS[i] === lang));
+  LANGS.forEach(l => {
+    const el = document.getElementById('proj-lang-' + l);
+    if (el) el.style.display = l === lang ? '' : 'none';
+  });
+}
+
+function readLocalContact(lang) {
+  data[lang].label   = document.getElementById(lang + '-label')?.value   || '';
+  data[lang].summary = document.getElementById(lang + '-summary')?.value || '';
+}
+
+/// ═══════════════════════════════════════════════════════════════
+// REPEATERS: EXPERIENCE (CORREGIDO — SIN PÉRDIDA DE FOCO)
+// ═══════════════════════════════════════════════════════════════
+function addExp(lang) {
+  data[lang].work.push({ name:'', position:'', startDate:'', endDate:'', summary:'' });
+  renderExp(lang);
+}
+
+function renderExp(lang) {
+  const list = document.getElementById('exp-list-' + lang);
+  if (!list) return;
+  list.innerHTML = '';
+  data[lang].work.forEach((job, i) => {
+    const ph = lang === 'es' ? ['Empresa','Cargo','Descripción del puesto...']
+             : lang === 'it' ? ['Azienda','Ruolo','Descrizione del ruolo...']
+             :                 ['Company','Position','Role description...'];
+    list.innerHTML += `
+    <div class="repeater-item">
+      <div class="repeater-item-header">
+        <span class="repeater-item-title" id="exp-title-${lang}-${i}">${job.position || ph[1]} ${job.name ? '· '+job.name : ''}</span>
+        <button class="btn-remove" onclick="removeExp('${lang}',${i})">Eliminar</button>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Empresa <span class="global-tag">global</span></label>
+          <input type="text" value="${job.name}" placeholder="${ph[0]}"
+            oninput="data['${lang}'].work[${i}].name=this.value;syncExpGlobal(${i},this.value);updatePreview();document.getElementById('exp-title-${lang}-${i}').textContent=(data['${lang}'].work[${i}].position || '${ph[1]}') + (this.value ? ' · ' + this.value : '')" />
+        </div>
+        <div class="field">
+          <label>Cargo</label>
+          <input type="text" value="${job.position}" placeholder="${ph[1]}"
+            oninput="data['${lang}'].work[${i}].position=this.value;updatePreview();document.getElementById('exp-title-${lang}-${i}').textContent=(this.value || '${ph[1]}') + (data['['+lang+']'].work[${i}].name ? ' · ' + data['${lang}'].work[${i}].name : '')" />
+        </div>
+        <div class="field">
+          <label>Inicio <span class="global-tag">global</span></label>
+          <input type="month" value="${job.startDate}"
+            oninput="data['${lang}'].work[${i}].startDate=this.value;syncExpDate(${i},'start',this.value);updatePreview()" />
+        </div>
+        <div class="field">
+          <label>Fin <span class="global-tag">global</span> (vacío = Actualidad)</label>
+          <input type="month" value="${job.endDate}"
+            oninput="data['${lang}'].work[${i}].endDate=this.value;syncExpDate(${i},'end',this.value);updatePreview()" />
+        </div>
+        <div class="field full">
+          <label>Descripción</label>
+          <textarea placeholder="${ph[2]}"
+            oninput="data['${lang}'].work[${i}].summary=this.value;updatePreview()">${job.summary}</textarea>
+        </div>
+      </div>
+    </div>`;
+  });
+  updatePreview();
+}
+
+function removeExp(lang, i) {
+  data[lang].work.splice(i, 1);
+  renderExp(lang);
+}
+
+function syncExpGlobal(i, name) {
+  LANGS.forEach(l => {
+    if (data[l].work[i] !== undefined) data[l].work[i].name = name;
+  });
+}
+function syncExpDate(i, type, val) {
+  LANGS.forEach(l => {
+    if (data[l].work[i] !== undefined) {
+      if (type === 'start') data[l].work[i].startDate = val;
+      else                  data[l].work[i].endDate   = val;
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// REPEATERS: EDUCATION (CORREGIDO — SIN PÉRDIDA DE FOCO)
+// ═══════════════════════════════════════════════════════════════
+function addEdu(lang) {
+  data[lang].education.push({ institution:'', area:'', studyType:'', startDate:'', endDate:'', score:'' });
+  renderEdu(lang);
+}
+
+function renderEdu(lang) {
+  const list = document.getElementById('edu-list-' + lang);
+  if (!list) return;
+  list.innerHTML = '';
+  data[lang].education.forEach((edu, i) => {
+    const ph = lang === 'es' ? ['Universidad / Centro','Especialidad','Tipo de título','Nota (opcional)']
+             : lang === 'it' ? ['Università / Istituto','Specializzazione','Tipo di laurea','Voto (opzionale)']
+             :                 ['University / Institution','Field of study','Degree type','Grade (optional)'];
+    list.innerHTML += `
+    <div class="repeater-item">
+      <div class="repeater-item-header">
+        <span class="repeater-item-title" id="edu-title-${lang}-${i}">${edu.studyType || ph[2]} ${edu.institution ? '· '+edu.institution : ''}</span>
+        <button class="btn-remove" onclick="removeEdu('${lang}',${i})">Eliminar</button>
+      </div>
+      <div class="form-grid">
+        <div class="field full">
+          <label>Institución <span class="global-tag">global</span></label>
+          <input type="text" value="${edu.institution}" placeholder="${ph[0]}"
+            oninput="data['${lang}'].education[${i}].institution=this.value;syncEduInst(${i},this.value);updatePreview();document.getElementById('edu-title-${lang}-${i}').textContent=(data['${lang}'].education[${i}].studyType || '${ph[2]}') + (this.value ? ' · ' + this.value : '')" />
+        </div>
+        <div class="field">
+          <label>Especialidad</label>
+          <input type="text" value="${edu.area}" placeholder="${ph[1]}"
+            oninput="data['${lang}'].education[${i}].area=this.value;updatePreview()" />
+        </div>
+        <div class="field">
+          <label>Tipo de título</label>
+          <input type="text" value="${edu.studyType}" placeholder="${ph[2]}"
+            oninput="data['${lang}'].education[${i}].studyType=this.value;updatePreview();document.getElementById('edu-title-${lang}-${i}').textContent=(this.value || '${ph[2]}') + (data['${lang}'].education[${i}].institution ? ' · ' + data['${lang}'].education[${i}].institution : '')" />
+        </div>
+        <div class="field">
+          <label>Inicio <span class="global-tag">global</span></label>
+          <input type="month" value="${edu.startDate}"
+            oninput="data['${lang}'].education[${i}].startDate=this.value;syncEduDate(${i},'start',this.value);updatePreview()" />
+        </div>
+        <div class="field">
+          <label>Fin <span class="global-tag">global</span></label>
+          <input type="month" value="${edu.endDate}"
+            oninput="data['${lang}'].education[${i}].endDate=this.value;syncEduDate(${i},'end',this.value);updatePreview()" />
+        </div>
+        <div class="field">
+          <label>Nota / Calificación</label>
+          <input type="text" value="${edu.score}" placeholder="${ph[3]}"
+            oninput="data['${lang}'].education[${i}].score=this.value;updatePreview()" />
+        </div>
+      </div>
+    </div>`;
+  });
+  updatePreview();
+}
+
+function removeEdu(lang, i) {
+  data[lang].education.splice(i, 1);
+  renderEdu(lang);
+}
+function syncEduInst(i, val) {
+  LANGS.forEach(l => { if (data[l].education[i]) data[l].education[i].institution = val; });
+}
+function syncEduDate(i, type, val) {
+  LANGS.forEach(l => {
+    if (data[l].education[i]) {
+      if (type==='start') data[l].education[i].startDate = val;
+      else                data[l].education[i].endDate   = val;
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// REPEATERS: SKILLS (CORREGIDO — SIN PÉRDIDA DE FOCO)
+// ═══════════════════════════════════════════════════════════════
+function addSkill(lang) {
+  data[lang].skills.push({ name:'', level:'', keywords:[] });
+  renderSkills(lang);
+}
+
+function renderSkills(lang) {
+  const list = document.getElementById('skills-list-' + lang);
+  if (!list) return;
+  list.innerHTML = '';
+  data[lang].skills.forEach((sk, i) => {
+    const phKw = lang==='es' ? 'Ej: JavaScript, React, Node.js (separados por coma)'
+               : lang==='it' ? 'Es: JavaScript, React, Node.js (separati da virgola)'
+               :               'E.g.: JavaScript, React, Node.js (comma-separated)';
+    list.innerHTML += `
+    <div class="repeater-item">
+      <div class="repeater-item-header">
+        <span class="repeater-item-title" id="skill-title-${lang}-${i}">${sk.name || 'Grupo de habilidades'}</span>
+        <button class="btn-remove" onclick="removeSkill('${lang}',${i})">Eliminar</button>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Categoría (ej: Tecnologías)</label>
+          <input type="text" value="${sk.name}" placeholder="Tecnologías"
+            oninput="data['${lang}'].skills[${i}].name=this.value;updatePreview();document.getElementById('skill-title-${lang}-${i}').textContent=this.value || 'Grupo de habilidades'" />
+        </div>
+        <div class="field">
+          <label>Nivel (opcional)</label>
+          <input type="text" value="${sk.level}" placeholder="Avanzado"
+            oninput="data['${lang}'].skills[${i}].level=this.value;updatePreview()" />
+        </div>
+        <div class="field full">
+          <label>Palabras clave</label>
+          <input type="text" value="${sk.keywords.join(', ')}" placeholder="${phKw}"
+            oninput="data['${lang}'].skills[${i}].keywords=this.value.split(',').map(s=>s.trim()).filter(Boolean);updatePreview()" />
+        </div>
+      </div>
+    </div>`;
+  });
+  updatePreview();
+}
+
+function removeSkill(lang, i) {
+  data[lang].skills.splice(i, 1);
+  renderSkills(lang);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// REPEATERS: PROJECTS (CORREGIDO — SIN PÉRDIDA DE FOCO)
+// ═══════════════════════════════════════════════════════════════
+function addProj(lang) {
+  data[lang].projects.push({ name:'', description:'', url:'', keywords:[] });
+  renderProj(lang);
+}
+
+function renderProj(lang) {
+  const list = document.getElementById('proj-list-' + lang);
+  if (!list) return;
+  list.innerHTML = '';
+  data[lang].projects.forEach((proj, i) => {
+    const ph = lang==='es' ? ['Nombre del proyecto','Descripción breve','https://...','React, Node.js, ...']
+             : lang==='it' ? ['Nome del progetto','Breve descrizione','https://...','React, Node.js, ...']
+             :               ['Project name','Short description','https://...','React, Node.js, ...'];
+    list.innerHTML += `
+    <div class="repeater-item">
+      <div class="repeater-item-header">
+        <span class="repeater-item-title" id="proj-title-${lang}-${i}">${proj.name || ph[0]}</span>
+        <button class="btn-remove" onclick="removeProj('${lang}',${i})">Eliminar</button>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Nombre</label>
+          <input type="text" value="${proj.name}" placeholder="${ph[0]}"
+            oninput="data['${lang}'].projects[${i}].name=this.value;updatePreview();document.getElementById('proj-title-${lang}-${i}').textContent=this.value || '${ph[0]}'" />
+        </div>
+        <div class="field">
+          <label>URL <span class="global-tag">global</span></label>
+          <input type="url" value="${proj.url}" placeholder="${ph[2]}"
+            oninput="data['${lang}'].projects[${i}].url=this.value;syncProjUrl(${i},this.value);updatePreview()" />
+        </div>
+        <div class="field full">
+          <label>Descripción</label>
+          <textarea placeholder="${ph[1]}"
+            oninput="data['${lang}'].projects[${i}].description=this.value;updatePreview()">${proj.description}</textarea>
+        </div>
+        <div class="field full">
+          <label>Tecnologías (separadas por coma)</label>
+          <input type="text" value="${proj.keywords.join(', ')}" placeholder="${ph[3]}"
+            oninput="data['${lang}'].projects[${i}].keywords=this.value.split(',').map(s=>s.trim()).filter(Boolean);updatePreview()" />
+        </div>
+      </div>
+    </div>`;
+  });
+  updatePreview();
+}
+
+function removeProj(lang, i) {
+  data[lang].projects.splice(i, 1);
+  renderProj(lang);
+}
+function syncProjUrl(i, url) {
+  LANGS.forEach(l => { if (data[l].projects[i]) data[l].projects[i].url = url; });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TEMPLATE
+// ═══════════════════════════════════════════════════════════════
+const TPL_LABELS = {
+  minimalist: 'The Archivist — Letras & Humanidades',
+  modern:     'The Blueprint — Ciencias & Ingeniería',
+  creative:   'The Gallery — Arte & Diseño',
+};
+
+function selectTemplate(id) {
+  selectedTemplate = id;
+  document.querySelectorAll('.template-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('tpl-' + id).classList.add('selected');
+  document.getElementById('tpl-selected-label').textContent = TPL_LABELS[id];
+  updateProgress();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// VISTA PREVIA
+// ═══════════════════════════════════════════════════════════════
+function updatePreview() {
+  // Nombre y label (ES por defecto)
+  document.getElementById('pv-name').textContent  = global.name  || 'Tu nombre';
+  const label = document.getElementById('es-label')?.value
+             || document.getElementById('it-label')?.value
+             || document.getElementById('en-label')?.value
+             || 'Tu título profesional';
+  document.getElementById('pv-label').textContent  = label;
+
+  // Avatar
+  const wrap = document.getElementById('pv-avatar-wrap');
+  if (global.image) {
+    wrap.innerHTML = `<img class="pv-avatar" src="${global.image}" alt="${global.name}" onerror="this.parentElement.innerHTML='${(global.name||'?')[0].toUpperCase()}'" />`;
+  } else {
+    wrap.innerHTML = (global.name||'?')[0].toUpperCase();
+  }
+
+  // Contacto
+  document.getElementById('pv-email').innerHTML = global.email ? `<strong>Email</strong> <span>${global.email}</span>` : '—';
+  document.getElementById('pv-phone').innerHTML = global.phone ? `<strong>Tel</strong> <span>${global.phone}</span>` : '';
+  document.getElementById('pv-city').innerHTML  = global.city  ? `<span>${global.city}</span>` : '';
+
+  // Experiencia (primer puesto del primer idioma con datos)
+  const expLang = LANGS.find(l => data[l].work.length > 0);
+  const expEl   = document.getElementById('pv-exp');
+  if (expLang && data[expLang].work[0]?.name) {
+    const job = data[expLang].work[0];
+    expEl.innerHTML = `<strong>${job.position}</strong> <span>· ${job.name}</span>`;
+    expEl.style.color = '';
+  } else {
+    expEl.textContent = 'Sin datos aún';
+    expEl.style.color = 'var(--muted)';
+  }
+
+  // Educación
+  const eduLang = LANGS.find(l => data[l].education.length > 0);
+  const eduEl   = document.getElementById('pv-edu');
+  if (eduLang && data[eduLang].education[0]?.institution) {
+    const edu = data[eduLang].education[0];
+    eduEl.innerHTML = `<strong>${edu.studyType} ${edu.area}</strong> <span>· ${edu.institution}</span>`;
+    eduEl.style.color = '';
+  } else {
+    eduEl.textContent = 'Sin datos aún';
+    eduEl.style.color = 'var(--muted)';
+  }
+
+  // Skills chips
+  const skillLang = LANGS.find(l => data[l].skills.length > 0);
+  const skEl = document.getElementById('pv-skills');
+  if (skillLang) {
+    skEl.innerHTML = data[skillLang].skills
+      .flatMap(s => s.keywords.slice(0, 3))
+      .slice(0, 8)
+      .map(kw => `<span class="pv-chip">${kw}</span>`)
+      .join('');
+  } else {
+    skEl.innerHTML = '';
+  }
+
+  updateActiveLangs();
+  updateProgress();
+}
+
+function updateActiveLangs() {
+  const wrap = document.getElementById('pv-langs');
+  const active = LANGS.filter(l => {
+    const hasLocal  = data[l].label || data[l].work.length > 0 || data[l].education.length > 0;
+    const hasGlobal = global.name.trim() !== '';
+    return hasGlobal && hasLocal;
+  });
+  wrap.innerHTML = active.length
+    ? active.map(l => `<span class="pv-chip">${l.toUpperCase()}</span>`).join('')
+    : `<span style="color:var(--muted);font-size:12px;">Rellena al menos un idioma</span>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GUARDADO — genera los JSON y los descarga
+// ═══════════════════════════════════════════════════════════════
+function buildResumeJson(lang) {
+  const d = data[lang];
+  return {
+    $schema: "https://raw.githubusercontent.com/jsonresume/resume-schema/v1.0.0/schema.json",
+    basics: {
+      name:    global.name,
+      label:   d.label,
+      image:   global.image,
+      email:   global.email,
+      phone:   global.phone,
+      url:     global.url,
+      summary: d.summary,
+      location: { city: global.city, countryCode: lang==='es'?'ES':lang==='it'?'IT':'GB', region:'' },
+      profiles: [
+        global.linkedin ? { network:'LinkedIn', username:'', url: global.linkedin } : null,
+        global.github   ? { network:'GitHub',   username:'', url: global.github }   : null,
+      ].filter(Boolean)
+    },
+    work:      d.work.map(j => ({...j, highlights:[]})),
+    education: d.education,
+    skills:    d.skills,
+    projects:  d.projects,
+    languages: lang==='es' ? [{language:'Español',fluency:'Nativo'}]
+             : lang==='it' ? [{language:'Italiano',fluency:'Madrelingua'}]
+             :               [{language:'English', fluency:'Native'}],
+    meta: {
+      canonical: "https://raw.githubusercontent.com/jsonresume/resume-schema/master/resume.json",
+      version:   "v1.0.0",
+      lastModified: new Date().toISOString(),
+      template: selectedTemplate
+    }
+  };
+}
+
+function saveAll() {
+  // Recoger campos de contacto local del DOM antes de guardar
+  LANGS.forEach(l => {
+    data[l].label   = document.getElementById(l + '-label')?.value   || data[l].label;
+    data[l].summary = document.getElementById(l + '-summary')?.value || data[l].summary;
+  });
+
+  if (!global.name.trim()) {
+    showToast('Añade tu nombre antes de guardar', true);
+    goStep(0);
+    return;
+  }
+
+  // Descargar los JSON activos (los que tienen nombre + algún contenido local)
+  const saved = [];
+  LANGS.forEach(l => {
+    const hasContent = data[l].label || data[l].work.length || data[l].education.length;
+    if (hasContent) {
+      downloadJson(`resume.${l}.json`, buildResumeJson(l));
+      saved.push(l.toUpperCase());
+    }
+  });
+
+  // Si no hay contenido local en ningún idioma, guardar ES por defecto
+  if (saved.length === 0) {
+    downloadJson('resume.es.json', buildResumeJson('es'));
+    saved.push('ES');
+  }
+
+  showToast(`✓ Archivos descargados: ${saved.join(', ')}`);
+}
+
+function downloadJson(filename, obj) {
+  const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function showToast(msg, isError = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className   = 'show' + (isError ? ' error' : '');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => { t.className = ''; }, 3200);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+updatePreview();
+</script>
+</body>
+</html>

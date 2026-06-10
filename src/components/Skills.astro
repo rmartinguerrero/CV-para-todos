@@ -1,0 +1,56 @@
+---
+// src/components/Skills.astro
+interface Props {
+  resume: any;
+  t:      (key: string) => string;
+}
+const { resume, t } = Astro.props;
+---
+
+<section class="mb-10 print:mb-6" aria-labelledby="skills-heading">
+  <h2
+    id="skills-heading"
+    class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-5 pb-2 border-b border-gray-100"
+  >
+    {t('section.skills')}
+  </h2>
+
+  <dl class="grid sm:grid-cols-2 gap-x-8 gap-y-4">
+    {resume.skills.filter((s: any) => s.name).map((skill: any) => (
+      <div>
+        <dt class="text-sm font-medium text-gray-800">
+          {skill.name}
+          {skill.level && (
+            <span class="ml-1.5 text-xs font-normal text-gray-400">· {skill.level}</span>
+          )}
+        </dt>
+        {skill.keywords?.length > 0 && (
+          <dd class="mt-1.5 flex flex-wrap gap-1.5">
+            {skill.keywords.filter(Boolean).map((kw: string) => (
+              <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                {kw}
+              </span>
+            ))}
+          </dd>
+        )}
+      </div>
+    ))}
+  </dl>
+
+  <!-- Idiomas -->
+  {resume.languages?.length > 0 && (
+    <div class="mt-6">
+      <h3 class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">
+        {t('section.languages')}
+      </h3>
+      <ul class="flex flex-wrap gap-2">
+        {resume.languages.filter((l: any) => l.language).map((lang: any) => (
+          <li class="text-sm text-gray-700">
+            <span class="font-medium">{lang.language}</span>
+            {lang.fluency && <span class="text-gray-400"> · {lang.fluency}</span>}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )}
+</section>

@@ -1,0 +1,248 @@
+{
+  "$schema": "https://jsonresume.org/schema.json",
+  "basics": {
+    "name": "Raúl Martín Guerrero",
+    "label": "Técnico Informático / Técnico de Impresión Profesional",
+    "image": "/fotocv.jpg",
+    "summary": "Técnico de impresión profesional con 3 años de experiencia en mantenimiento, sustitución de componentes y resolución de averías en equipos de impresión. Profesional con 16 años de trayectoria técnica previa en entornos corporativos, aportando metodología, capacidad de diagnóstico y orientación a la resolución eficaz de incidencias informáticas.",
+    "location": {
+      "city": "Treviso",
+      "countryCode": "IT"
+    }
+  },
+  "work": [
+    {
+      "name": "Bettiol S.R.L.",
+      "position": "Técnico Especialista de Impresoras",
+      "startDate": "2026-01",
+      "location": "Treviso, Italia",
+      "summary": "Reparación y mantenimiento mecánico y electrónico de equipos de impresión profesional en laboratorio e in-situ.",
+      "highlights": [
+        "Diagnóstico y reparación de fotocopiadoras multifunción y monocromáticas.",
+        "Instalación de impresoras Sharp, Brother, Ricoh, BigPad y equipamiento profesional de oficina.",
+        "Instalación, configuración personalizada y puesta en marcha.",
+        "Actualizaciones y verificaciones de funcionamiento integral para garantizar el correcto rendimiento del equipo."
+      ]
+    },
+    {
+      "name": "MTSolution S.R.L.",
+      "position": "Técnico Especialista Sharp",
+      "startDate": "2024-02",
+      "location": "Treviso, Italia",
+      "summary": "Reparación y mantenimiento mecánico y electrónico de equipos de impresión profesional en laboratorio e in-situ.",
+      "highlights": [
+        "Diagnóstico y reparación de fotocopiadoras multifunción y monocromáticas",
+        "Intervenciones en plotters, BigPad y equipamiento profesional de oficina",
+        "Instalación, configuración personalizada y puesta en marcha de equipos",
+        "Actualización firmware y verificación de funcionamiento integral"
+      ]
+    },
+    {
+      "name": "Geox S.P.A.",
+      "position": "Técnico Informático",
+      "startDate": "2023-10",
+      "endDate": "2024-02",
+      "location": "Montebelluna, Italia",
+      "summary": "Soporte IT interno en entorno corporativo internacional.",
+      "highlights": [
+        "Instalación y desinstalación de puestos de trabajo",
+        "Gestión de incidencias mediante Jira",
+        "Administración de usuarios en Active Directory",
+        "Soporte técnico a empleados en entorno empresarial"
+      ]
+    },
+    {
+      "name": "Il Fornaio del Casale S.P.A.",
+      "position": "Operario Logístico (Picking)",
+      "startDate": "2023-01",
+      "endDate": "2023-10",
+      "location": "Veneto, Italia",
+      "summary": "Gestión logística en almacén de distribución alimentaria nacional e internacional.",
+      "highlights": [
+        "Preparación de pedidos con traspalet eléctrico",
+        "Carga de contenedores marítimos y tráileres",
+        "Reposición de pallets en altura",
+        "Organización y cierre diario de almacén"
+      ]
+    },
+    {
+      "name": "Sabacaucho S.A.U.",
+      "position": "Técnico Informático",
+      "startDate": "2022-06",
+      "endDate": "2022-10",
+      "location": "Barcelona, España",
+      "summary": "Soporte IT interno en entorno industrial.",
+      "highlights": [
+        "Preparación y configuración de puestos de trabajo",
+        "Gestión de usuarios",
+        "Supervisión de servidores de backup",
+        "Resolución de incidencias técnicas"
+      ]
+    },
+    {
+      "name": "Merkal Calzados S.L.",
+      "position": "Técnico Informático",
+      "startDate": "2021-04",
+      "endDate": "2022-04",
+      "location": "Barcelona, España",
+      "summary": "Soporte IT a oficinas centrales y red de tiendas.",
+      "highlights": [
+        "Configuración de equipos para tiendas y oficinas",
+        "Gestión de usuarios y empleados",
+        "Resolución de incidencias remotas multi-sede",
+        "Supervisión de servidores de backup y conectividad"
+      ]
+    },
+    {
+      "name": "NestTReT S.L.",
+      "position": "Operador de Sistemas 24/7",
+      "startDate": "2020-04",
+      "endDate": "2021-04",
+      "location": "Barcelona, España",
+      "summary": "Monitorización y operaciones en entornos críticos para grandes corporaciones.",
+      "highlights": [
+        "Supervisión y escalado de incidencias nivel 1-2-3",
+        "Deploys en preproducción y producción",
+        "Gestión de servidores Windows, Unix, RedHat y Solaris",
+        "Operaciones para IBM y Banco Sabadell"
+      ]
+    },
+    {
+      "name": "Nolimits Travel S.L.",
+      "position": "Técnico Informático",
+      "startDate": "2018-11",
+      "endDate": "2020-11",
+      "location": "Barcelona, España",
+      "summary": "Gestión integral del soporte IT corporativo.",
+      "highlights": [
+        "Soporte hardware y software a empleados",
+        "Gestión de Active Directory",
+        "Configuración y formación en Freshdesk",
+        "Gestión de inventario y racks"
+      ]
+    },
+    {
+      "name": "RTVE S.A.",
+      "position": "Técnico Informático",
+      "startDate": "2014-03",
+      "endDate": "2016-02",
+      "location": "Madrid, España",
+      "summary": "Soporte IT en entorno corporativo de medios de comunicación.",
+      "highlights": [
+        "Soporte técnico interno y externo",
+        "Mantenimiento de equipos y servicios interactivos",
+        "Control de inventario multimedia",
+        "Resolución de incidencias web de primer nivel"
+      ]
+    },
+    {
+      "name": "Accenture",
+      "position": "QA Tester",
+      "startDate": "2012-07",
+      "endDate": "2014-03",
+      "location": "Madrid, España",
+      "summary": "Testing funcional en proyectos de telecomunicaciones.",
+      "highlights": [
+        "Validación de aplicaciones comerciales",
+        "Pruebas en entornos de preproducción",
+        "Detección y documentación de incidencias"
+      ]
+    },
+    {
+      "name": "Entelgy S.L.",
+      "position": "Técnico Help Desk",
+      "startDate": "2008-01",
+      "endDate": "2010-12",
+      "location": "Madrid, España",
+      "summary": "Soporte técnico remoto a clientes corporativos.",
+      "highlights": [
+        "Asistencia remota nivel 1 y 2",
+        "Gestión de licencias y bases de datos",
+        "Instalación y recuperación de sistemas"
+      ]
+    },
+    {
+      "name": "Iberedes S.L.",
+      "position": "Técnico Informático",
+      "startDate": "2007-01",
+      "endDate": "2007-12",
+      "location": "Madrid, España",
+      "summary": "Soporte técnico a usuarios y empresas.",
+      "highlights": [
+        "Reparación de equipos y redes",
+        "Instalación de software",
+        "Eliminación de virus y migración de correo"
+      ]
+    },
+    {
+      "name": "Teduinsa S.A.",
+      "position": "Técnico en Cadena de Montaje",
+      "startDate": "2005-12",
+      "endDate": "2007-11",
+      "location": "Madrid, España",
+      "summary": "Montaje y control de calidad de equipos electrónicos.",
+      "highlights": [
+        "Montaje de equipos sobremesa y portátiles",
+        "Control de calidad para grandes superficies",
+        "Reacondicionamiento y reparación de ordenadores y TV's"
+      ]
+    }
+  ], 
+
+  "education": [
+    {
+      "institution": "Estudios obligatorios 130313031147/0",
+      "endDate": "2003-07-07"
+    },
+    {
+      "institution": "FPGM Informática",
+      "endDate": "2005-07-10"
+    }
+  ],
+  "certificates": [
+    {
+      "name": "CR5/B-CR5 -Curso tecnico Sharp Academy.",
+      "date": "2024-06-12",
+      "issuer": "Sharp Europe"
+    },
+    {
+      "name": " F160380AA-132/1211 - Blog para la comunicación en negocios.",
+      "date": "2018-11-10",
+      "issuer": "GDOCE"
+    },
+    {
+      "name": " F160380AA-134/141 - La firma digital",
+      "date": "2019-01-03",
+      "issuer": "Educ@atic"
+    },
+    {
+      "name": "F160084AA-28/143 - SPSS: Aplicación y análisis estadístico.",
+      "date": "2019-04-30",
+      "issuer": "Educ@atic"
+    },
+    {
+      "name": "F180337AA-4/125 - Protección de equipos en la red.",
+      "date": "2019-07-24",
+      "issuer": "GDOCE"
+    }],
+  "skills": [{
+    "name": "Hardware"
+  },
+  {
+    "name": "Software"
+  },
+  {
+    "name": "Manualidad"
+  },
+  {
+    "name": "Curiosidad"
+  },
+  {
+    "name": "Aprendizaje rápido"
+  }
+  ],
+  "languages": [
+    { "language": "Español", "fluency": "Nativo" },
+    { "language": "Italiano", "fluency": "Intermedio" }
+  ]
+}
