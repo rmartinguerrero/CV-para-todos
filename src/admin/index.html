@@ -493,7 +493,6 @@ body {
 </head>
 <body>
 
-<!-- ─── Top bar ──────────────────────────────────────────── -->
 <div id="topbar">
   <div class="logo">
     <div class="logo-dot"></div>
@@ -517,7 +516,6 @@ body {
   </button>
 </div>
 
-<!-- ─── Step tabs ─────────────────────────────────────────── -->
 <div id="steptabs" role="tablist">
   <button class="steptab active" role="tab" aria-selected="true"  onclick="goStep(0)">
     <span class="step-num">1</span> Contacto
@@ -536,25 +534,21 @@ body {
   </button>
 </div>
 
-<!-- ─── Main ──────────────────────────────────────────────── -->
 <div id="main">
   <div id="formpanel">
 
-    <!-- ══ PASO 1: CONTACTO ══════════════════════════════════ -->
     <div class="step-panel active" id="step-0" role="tabpanel">
       <div class="section-head">
         <h2>Información de contacto</h2>
         <span class="section-badge badge-global">Global — se sincroniza entre idiomas</span>
       </div>
 
-      <!-- Lang tabs -->
       <div class="lang-tabs" id="lang-tabs-0">
         <button class="lang-tab active" onclick="setLang(0,'es')">ES</button>
         <button class="lang-tab"        onclick="setLang(0,'it')">IT</button>
         <button class="lang-tab"        onclick="setLang(0,'en')">EN</button>
       </div>
 
-      <!-- Campos globales (se sincronizan) -->
       <div class="form-grid" style="margin-bottom:16px;">
         <div class="field full">
           <label>
@@ -594,7 +588,6 @@ body {
         </div>
       </div>
 
-      <!-- Campos locales (traducibles por idioma) -->
       <div class="form-grid" id="contact-local-es">
         <div class="field">
           <label>Título profesional <span class="badge-local" style="font-size:9px;padding:1px 5px;border-radius:4px;font-weight:700;">traducir</span></label>
@@ -632,7 +625,6 @@ body {
       </div>
     </div>
 
-    <!-- ══ PASO 2: EXPERIENCIA ════════════════════════════════ -->
     <div class="step-panel" id="step-1" role="tabpanel">
       <div class="section-head">
         <h2>Experiencia profesional</h2>
@@ -664,7 +656,6 @@ body {
       </div>
     </div>
 
-    <!-- ══ PASO 3: FORMACIÓN ══════════════════════════════════ -->
     <div class="step-panel" id="step-2" role="tabpanel">
       <div class="section-head">
         <h2>Formación académica</h2>
@@ -696,7 +687,6 @@ body {
       </div>
     </div>
 
-    <!-- ══ PASO 4: HABILIDADES & PROYECTOS ════════════════════ -->
     <div class="step-panel" id="step-3" role="tabpanel">
       <div class="section-head">
         <h2>Habilidades &amp; Proyectos</h2>
@@ -709,7 +699,6 @@ body {
         <button class="lang-tab"        onclick="setLang(3,'en')">EN</button>
       </div>
 
-      <!-- Habilidades -->
       <p style="color:var(--muted);font-size:12px;margin-bottom:12px;">Agrupa por categoría: Idiomas, Tecnologías, Soft skills…</p>
       <div id="skills-lang-es">
         <div id="skills-list-es"></div>
@@ -724,7 +713,6 @@ body {
         <button class="btn-add" onclick="addSkill('en')">+ Add skill group</button>
       </div>
 
-      <!-- Proyectos -->
       <div style="margin-top:28px;">
         <div class="section-head" style="margin-bottom:12px;">
           <h2 style="font-size:14px;">Proyectos destacados</h2>
@@ -754,7 +742,6 @@ body {
       </div>
     </div>
 
-    <!-- ══ PASO 5: PLANTILLA ══════════════════════════════════ -->
     <div class="step-panel" id="step-4" role="tabpanel">
       <div class="section-head">
         <h2>Elige tu plantilla</h2>
@@ -796,10 +783,7 @@ body {
       </div>
     </div>
 
-  </div><!-- /formpanel -->
-
-  <!-- ─── Preview sidebar ──────────────────────────────────── -->
-  <div id="preview">
+  </div><div id="preview">
     <div class="preview-title">Vista previa</div>
 
     <div style="display:flex;align-items:center;gap:12px;">
@@ -837,9 +821,7 @@ body {
       <div id="pv-langs" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;"></div>
     </div>
   </div>
-</div><!-- /main -->
-
-<div id="toast"></div>
+</div><div id="toast"></div>
 
 <script>
 // ═══════════════════════════════════════════════════════════════
@@ -956,12 +938,13 @@ function setProjLang(lang) {
 }
 
 function readLocalContact(lang) {
-  data[lang].label   = document.getElementById(lang + '-label')?.value   || '';
-  data[lang].summary = document.getElementById(lang + '-summary')?.value || '';
+  if (!document.getElementById(lang + '-label')) return;
+  data[lang].label   = document.getElementById(lang + '-label').value   || '';
+  data[lang].summary = document.getElementById(lang + '-summary').value || '';
 }
 
-/// ═══════════════════════════════════════════════════════════════
-// REPEATERS: EXPERIENCE (CORREGIDO — SIN PÉRDIDA DE FOCO)
+// ═══════════════════════════════════════════════════════════════
+// REPEATERS: EXPERIENCIA
 // ═══════════════════════════════════════════════════════════════
 function addExp(lang) {
   data[lang].work.push({ name:'', position:'', startDate:'', endDate:'', summary:'' });
@@ -983,61 +966,36 @@ function renderExp(lang) {
         <button class="btn-remove" onclick="removeExp('${lang}',${i})">Eliminar</button>
       </div>
       <div class="form-grid">
-        <div class="field">
-          <label>Empresa <span class="global-tag">global</span></label>
-          <input type="text" value="${job.name}" placeholder="${ph[0]}"
-            oninput="data['${lang}'].work[${i}].name=this.value;syncExpGlobal(${i},this.value);updatePreview();document.getElementById('exp-title-${lang}-${i}').textContent=(data['${lang}'].work[${i}].position || '${ph[1]}') + (this.value ? ' · ' + this.value : '')" />
-        </div>
-        <div class="field">
-          <label>Cargo</label>
-          <input type="text" value="${job.position}" placeholder="${ph[1]}"
-            oninput="data['${lang}'].work[${i}].position=this.value;updatePreview();document.getElementById('exp-title-${lang}-${i}').textContent=(this.value || '${ph[1]}') + (data['['+lang+']'].work[${i}].name ? ' · ' + data['${lang}'].work[${i}].name : '')" />
-        </div>
-        <div class="field">
-          <label>Inicio <span class="global-tag">global</span></label>
-          <input type="month" value="${job.startDate}"
-            oninput="data['${lang}'].work[${i}].startDate=this.value;syncExpDate(${i},'start',this.value);updatePreview()" />
-        </div>
-        <div class="field">
-          <label>Fin <span class="global-tag">global</span> (vacío = Actualidad)</label>
-          <input type="month" value="${job.endDate}"
-            oninput="data['${lang}'].work[${i}].endDate=this.value;syncExpDate(${i},'end',this.value);updatePreview()" />
-        </div>
-        <div class="field full">
-          <label>Descripción</label>
-          <textarea placeholder="${ph[2]}"
-            oninput="data['${lang}'].work[${i}].summary=this.value;updatePreview()">${job.summary}</textarea>
-        </div>
+        <div class="field"><label>Empresa/Organización</label><input type="text" value="${job.name}" oninput="updateExpData('${lang}',${i},'name',this.value)" placeholder="${ph[0]}"></div>
+        <div class="field"><label>Cargo/Puesto</label><input type="text" value="${job.position}" oninput="updateExpData('${lang}',${i},'position',this.value)" placeholder="${ph[1]}"></div>
+        <div class="field"><label>Fecha inicio</label><input type="text" value="${job.startDate}" oninput="updateExpData('${lang}',${i},'startDate',this.value)" placeholder="AAAA-MM o 'Actual'"></div>
+        <div class="field"><label>Fecha fin</label><input type="text" value="${job.endDate}" oninput="updateExpData('${lang}',${i},'endDate',this.value)" placeholder="AAAA-MM o 'Actual'"></div>
+        <div class="field full"><label>Resumen de logros</label><textarea oninput="updateExpData('${lang}',${i},'summary',this.value)" placeholder="${ph[2]}">${job.summary}</textarea></div>
       </div>
     </div>`;
   });
   updatePreview();
 }
 
-function removeExp(lang, i) {
-  data[lang].work.splice(i, 1);
+function updateExpData(lang, idx, field, val) {
+  data[lang].work[idx][field] = val;
+  if (field === 'name' || field === 'position') {
+    const titleEl = document.getElementById(`exp-title-${lang}-${idx}`);
+    if (titleEl) titleEl.textContent = `${data[lang].work[idx].position || 'Puesto'} ${data[lang].work[idx].name ? '· '+data[lang].work[idx].name : ''}`;
+  }
+  updatePreview();
+}
+
+function removeExp(lang, idx) {
+  data[lang].work.splice(idx, 1);
   renderExp(lang);
 }
 
-function syncExpGlobal(i, name) {
-  LANGS.forEach(l => {
-    if (data[l].work[i] !== undefined) data[l].work[i].name = name;
-  });
-}
-function syncExpDate(i, type, val) {
-  LANGS.forEach(l => {
-    if (data[l].work[i] !== undefined) {
-      if (type === 'start') data[l].work[i].startDate = val;
-      else                  data[l].work[i].endDate   = val;
-    }
-  });
-}
-
 // ═══════════════════════════════════════════════════════════════
-// REPEATERS: EDUCATION (CORREGIDO — SIN PÉRDIDA DE FOCO)
+// REPEATERS: FORMACIÓN
 // ═══════════════════════════════════════════════════════════════
 function addEdu(lang) {
-  data[lang].education.push({ institution:'', area:'', studyType:'', startDate:'', endDate:'', score:'' });
+  data[lang].education.push({ institution:'', area:'', studyType:'', startDate:'', endDate:'' });
   renderEdu(lang);
 }
 
@@ -1046,73 +1004,43 @@ function renderEdu(lang) {
   if (!list) return;
   list.innerHTML = '';
   data[lang].education.forEach((edu, i) => {
-    const ph = lang === 'es' ? ['Universidad / Centro','Especialidad','Tipo de título','Nota (opcional)']
-             : lang === 'it' ? ['Università / Istituto','Specializzazione','Tipo di laurea','Voto (opzionale)']
-             :                 ['University / Institution','Field of study','Degree type','Grade (optional)'];
     list.innerHTML += `
     <div class="repeater-item">
       <div class="repeater-item-header">
-        <span class="repeater-item-title" id="edu-title-${lang}-${i}">${edu.studyType || ph[2]} ${edu.institution ? '· '+edu.institution : ''}</span>
+        <span class="repeater-item-title" id="edu-title-${lang}-${i}">${edu.studyType || 'Titulación'} ${edu.institution ? '· '+edu.institution : ''}</span>
         <button class="btn-remove" onclick="removeEdu('${lang}',${i})">Eliminar</button>
       </div>
       <div class="form-grid">
-        <div class="field full">
-          <label>Institución <span class="global-tag">global</span></label>
-          <input type="text" value="${edu.institution}" placeholder="${ph[0]}"
-            oninput="data['${lang}'].education[${i}].institution=this.value;syncEduInst(${i},this.value);updatePreview();document.getElementById('edu-title-${lang}-${i}').textContent=(data['${lang}'].education[${i}].studyType || '${ph[2]}') + (this.value ? ' · ' + this.value : '')" />
-        </div>
-        <div class="field">
-          <label>Especialidad</label>
-          <input type="text" value="${edu.area}" placeholder="${ph[1]}"
-            oninput="data['${lang}'].education[${i}].area=this.value;updatePreview()" />
-        </div>
-        <div class="field">
-          <label>Tipo de título</label>
-          <input type="text" value="${edu.studyType}" placeholder="${ph[2]}"
-            oninput="data['${lang}'].education[${i}].studyType=this.value;updatePreview();document.getElementById('edu-title-${lang}-${i}').textContent=(this.value || '${ph[2]}') + (data['${lang}'].education[${i}].institution ? ' · ' + data['${lang}'].education[${i}].institution : '')" />
-        </div>
-        <div class="field">
-          <label>Inicio <span class="global-tag">global</span></label>
-          <input type="month" value="${edu.startDate}"
-            oninput="data['${lang}'].education[${i}].startDate=this.value;syncEduDate(${i},'start',this.value);updatePreview()" />
-        </div>
-        <div class="field">
-          <label>Fin <span class="global-tag">global</span></label>
-          <input type="month" value="${edu.endDate}"
-            oninput="data['${lang}'].education[${i}].endDate=this.value;syncEduDate(${i},'end',this.value);updatePreview()" />
-        </div>
-        <div class="field">
-          <label>Nota / Calificación</label>
-          <input type="text" value="${edu.score}" placeholder="${ph[3]}"
-            oninput="data['${lang}'].education[${i}].score=this.value;updatePreview()" />
-        </div>
+        <div class="field"><label>Institución/Universidad</label><input type="text" value="${edu.institution}" oninput="updateEduData('${lang}',${i},'institution',this.value)" placeholder="Ej: Universidad Complutense"></div>
+        <div class="field"><label>Título obtenido</label><input type="text" value="${edu.studyType}" oninput="updateEduData('${lang}',${i},'studyType',this.value)" placeholder="Ej: Grado, Máster, Licenciatura"></div>
+        <div class="field full"><label>Campo de estudio / Especialidad</label><input type="text" value="${edu.area}" oninput="updateEduData('${lang}',${i},'area',this.value)" placeholder="Ej: Ingeniería del Software, Bellas Artes"></div>
+        <div class="field"><label>Fecha inicio</label><input type="text" value="${edu.startDate}" oninput="updateEduData('${lang}',${i},'startDate',this.value)" placeholder="AAAA-MM"></div>
+        <div class="field"><label>Fecha fin</label><input type="text" value="${edu.endDate}" oninput="updateEduData('${lang}',${i},'endDate',this.value)" placeholder="AAAA-MM o 'En curso'"></div>
       </div>
     </div>`;
   });
   updatePreview();
 }
 
-function removeEdu(lang, i) {
-  data[lang].education.splice(i, 1);
+function updateEduData(lang, idx, field, val) {
+  data[lang].education[idx][field] = val;
+  if (field === 'institution' || field === 'studyType') {
+    const titleEl = document.getElementById(`edu-title-${lang}-${idx}`);
+    if (titleEl) titleEl.textContent = `${data[lang].education[idx].studyType || 'Titulación'} ${data[lang].education[idx].institution ? '· '+data[lang].education[idx].institution : ''}`;
+  }
+  updatePreview();
+}
+
+function removeEdu(lang, idx) {
+  data[lang].education.splice(idx, 1);
   renderEdu(lang);
-}
-function syncEduInst(i, val) {
-  LANGS.forEach(l => { if (data[l].education[i]) data[l].education[i].institution = val; });
-}
-function syncEduDate(i, type, val) {
-  LANGS.forEach(l => {
-    if (data[l].education[i]) {
-      if (type==='start') data[l].education[i].startDate = val;
-      else                data[l].education[i].endDate   = val;
-    }
-  });
 }
 
 // ═══════════════════════════════════════════════════════════════
-// REPEATERS: SKILLS (CORREGIDO — SIN PÉRDIDA DE FOCO)
+// REPEATERS: HABILIDADES
 // ═══════════════════════════════════════════════════════════════
 function addSkill(lang) {
-  data[lang].skills.push({ name:'', level:'', keywords:[] });
+  data[lang].skills.push({ name:'', keywords:'' });
   renderSkills(lang);
 }
 
@@ -1121,47 +1049,35 @@ function renderSkills(lang) {
   if (!list) return;
   list.innerHTML = '';
   data[lang].skills.forEach((sk, i) => {
-    const phKw = lang==='es' ? 'Ej: JavaScript, React, Node.js (separados por coma)'
-               : lang==='it' ? 'Es: JavaScript, React, Node.js (separati da virgola)'
-               :               'E.g.: JavaScript, React, Node.js (comma-separated)';
     list.innerHTML += `
     <div class="repeater-item">
       <div class="repeater-item-header">
-        <span class="repeater-item-title" id="skill-title-${lang}-${i}">${sk.name || 'Grupo de habilidades'}</span>
+        <span class="repeater-item-title" id="skill-title-${lang}-${i}">${sk.name || 'Categoría'}</span>
         <button class="btn-remove" onclick="removeSkill('${lang}',${i})">Eliminar</button>
       </div>
       <div class="form-grid">
-        <div class="field">
-          <label>Categoría (ej: Tecnologías)</label>
-          <input type="text" value="${sk.name}" placeholder="Tecnologías"
-            oninput="data['${lang}'].skills[${i}].name=this.value;updatePreview();document.getElementById('skill-title-${lang}-${i}').textContent=this.value || 'Grupo de habilidades'" />
-        </div>
-        <div class="field">
-          <label>Nivel (opcional)</label>
-          <input type="text" value="${sk.level}" placeholder="Avanzado"
-            oninput="data['${lang}'].skills[${i}].level=this.value;updatePreview()" />
-        </div>
-        <div class="field full">
-          <label>Palabras clave</label>
-          <input type="text" value="${sk.keywords.join(', ')}" placeholder="${phKw}"
-            oninput="data['${lang}'].skills[${i}].keywords=this.value.split(',').map(s=>s.trim()).filter(Boolean);updatePreview()" />
-        </div>
+        <div class="field"><label>Categoría / Grupo</label><input type="text" value="${sk.name}" oninput="updateSkillData('${lang}',${i},'name',this.value)" placeholder="Ej: Idiomas, Tecnologías, Herramientas"></div>
+        <div class="field"><label>Habilidades (separadas por comas)</label><input type="text" value="${sk.keywords}" oninput="updateSkillData('${lang}',${i},'keywords',this.value)" placeholder="Ej: JavaScript, React, Node.js"></div>
       </div>
     </div>`;
   });
   updatePreview();
 }
 
-function removeSkill(lang, i) {
-  data[lang].skills.splice(i, 1);
-  renderSkills(lang);
+function updateSkillData(lang, idx, field, val) {
+  data[lang].skills[idx][field] = val;
+  if (field === 'name') {
+    const titleEl = document.getElementById(`skill-title-${lang}-${idx}`);
+    if (titleEl) titleEl.textContent = val || 'Categoría';
+  }
+  updatePreview();
 }
 
 // ═══════════════════════════════════════════════════════════════
-// REPEATERS: PROJECTS (CORREGIDO — SIN PÉRDIDA DE FOCO)
+// REPEATERS: PROYECTOS
 // ═══════════════════════════════════════════════════════════════
 function addProj(lang) {
-  data[lang].projects.push({ name:'', description:'', url:'', keywords:[] });
+  data[lang].projects.push({ name:'', description:'', url:'' });
   renderProj(lang);
 }
 
@@ -1170,148 +1086,196 @@ function renderProj(lang) {
   if (!list) return;
   list.innerHTML = '';
   data[lang].projects.forEach((proj, i) => {
-    const ph = lang==='es' ? ['Nombre del proyecto','Descripción breve','https://...','React, Node.js, ...']
-             : lang==='it' ? ['Nome del progetto','Breve descrizione','https://...','React, Node.js, ...']
-             :               ['Project name','Short description','https://...','React, Node.js, ...'];
     list.innerHTML += `
     <div class="repeater-item">
       <div class="repeater-item-header">
-        <span class="repeater-item-title" id="proj-title-${lang}-${i}">${proj.name || ph[0]}</span>
+        <span class="repeater-item-title" id="proj-title-${lang}-${i}">${proj.name || 'Proyecto'}</span>
         <button class="btn-remove" onclick="removeProj('${lang}',${i})">Eliminar</button>
       </div>
       <div class="form-grid">
-        <div class="field">
-          <label>Nombre</label>
-          <input type="text" value="${proj.name}" placeholder="${ph[0]}"
-            oninput="data['${lang}'].projects[${i}].name=this.value;updatePreview();document.getElementById('proj-title-${lang}-${i}').textContent=this.value || '${ph[0]}'" />
-        </div>
-        <div class="field">
-          <label>URL <span class="global-tag">global</span></label>
-          <input type="url" value="${proj.url}" placeholder="${ph[2]}"
-            oninput="data['${lang}'].projects[${i}].url=this.value;syncProjUrl(${i},this.value);updatePreview()" />
-        </div>
-        <div class="field full">
-          <label>Descripción</label>
-          <textarea placeholder="${ph[1]}"
-            oninput="data['${lang}'].projects[${i}].description=this.value;updatePreview()">${proj.description}</textarea>
-        </div>
-        <div class="field full">
-          <label>Tecnologías (separadas por coma)</label>
-          <input type="text" value="${proj.keywords.join(', ')}" placeholder="${ph[3]}"
-            oninput="data['${lang}'].projects[${i}].keywords=this.value.split(',').map(s=>s.trim()).filter(Boolean);updatePreview()" />
-        </div>
+        <div class="field"><label>Nombre del proyecto</label><input type="text" value="${proj.name}" oninput="updateProjData('${lang}',${i},'name',this.value)" placeholder="Ej: Mi Portfolio, App del Tiempo"></div>
+        <div class="field"><label>Enlace / URL</label><input type="text" value="${proj.url}" oninput="updateProjData('${lang}',${i},'url',this.value)" placeholder="https://..."></div>
+        <div class="field full"><label>Descripción corta</label><textarea oninput="updateProjData('${lang}',${i},'description',this.value)" placeholder="Breve explicación del proyecto...">${proj.description}</textarea></div>
       </div>
     </div>`;
   });
-  updatePreview();
 }
 
-function removeProj(lang, i) {
-  data[lang].projects.splice(i, 1);
+function updateProjData(lang, idx, field, val) {
+  data[lang].projects[idx][field] = val;
+  if (field === 'name') {
+    const titleEl = document.getElementById(`proj-title-${lang}-${idx}`);
+    if (titleEl) titleEl.textContent = val || 'Proyecto';
+  }
+}
+
+function removeProj(lang, idx) {
+  data[lang].projects.splice(idx, 1);
   renderProj(lang);
 }
-function syncProjUrl(i, url) {
-  LANGS.forEach(l => { if (data[l].projects[i]) data[l].projects[i].url = url; });
+
+function removeSkill(lang, idx) {
+  data[lang].skills.splice(idx, 1);
+  renderSkills(lang);
 }
 
 // ═══════════════════════════════════════════════════════════════
-// TEMPLATE
+// PLANTILLAS Visuales
 // ═══════════════════════════════════════════════════════════════
-const TPL_LABELS = {
-  minimalist: 'The Archivist — Letras & Humanidades',
-  modern:     'The Blueprint — Ciencias & Ingeniería',
-  creative:   'The Gallery — Arte & Diseño',
-};
-
 function selectTemplate(id) {
   selectedTemplate = id;
   document.querySelectorAll('.template-card').forEach(c => c.classList.remove('selected'));
   document.getElementById('tpl-' + id).classList.add('selected');
-  document.getElementById('tpl-selected-label').textContent = TPL_LABELS[id];
+
+  const labels = {
+    minimalist: 'The Archivist — Letras & Humanidades',
+    modern: 'The Blueprint — Ciencias & Ingeniería',
+    creative: 'The Gallery — Arte & Diseño'
+  };
+  document.getElementById('tpl-selected-label').textContent = labels[id];
   updateProgress();
 }
 
 // ═══════════════════════════════════════════════════════════════
-// VISTA PREVIA
+// VISTA PREVIA DINÁMICA (Barra lateral derecha)
 // ═══════════════════════════════════════════════════════════════
 function updatePreview() {
-  // Nombre y label (ES por defecto)
-  document.getElementById('pv-name').textContent  = global.name  || 'Tu nombre';
-  const label = document.getElementById('es-label')?.value
-             || document.getElementById('it-label')?.value
-             || document.getElementById('en-label')?.value
-             || 'Tu título profesional';
-  document.getElementById('pv-label').textContent  = label;
+  const currentLang = activeLang[currentStep] || 'es';
 
-  // Avatar
-  const wrap = document.getElementById('pv-avatar-wrap');
+  // Básicos
+  document.getElementById('pv-name').textContent = global.name || 'Tu nombre';
+  document.getElementById('pv-label').textContent = data[currentLang].label || 'Tu título profesional';
+  document.getElementById('pv-email').textContent = global.email ? '✉ ' + global.email : '—';
+  document.getElementById('pv-phone').textContent = global.phone ? '📞 ' + global.phone : '—';
+  document.getElementById('pv-city').textContent = global.city ? '📍 ' + global.city : '—';
+
+  // Avatar circular
+  const avWrap = document.getElementById('pv-avatar-wrap');
   if (global.image) {
-    wrap.innerHTML = `<img class="pv-avatar" src="${global.image}" alt="${global.name}" onerror="this.parentElement.innerHTML='${(global.name||'?')[0].toUpperCase()}'" />`;
+    avWrap.innerHTML = `<img src="${global.image}" class="pv-avatar" alt="Avatar">`;
   } else {
-    wrap.innerHTML = (global.name||'?')[0].toUpperCase();
+    avWrap.className = 'pv-avatar-placeholder';
+    avWrap.textContent = global.name ? global.name.charAt(0).toUpperCase() : '?';
   }
 
-  // Contacto
-  document.getElementById('pv-email').innerHTML = global.email ? `<strong>Email</strong> <span>${global.email}</span>` : '—';
-  document.getElementById('pv-phone').innerHTML = global.phone ? `<strong>Tel</strong> <span>${global.phone}</span>` : '';
-  document.getElementById('pv-city').innerHTML  = global.city  ? `<span>${global.city}</span>` : '';
-
-  // Experiencia (primer puesto del primer idioma con datos)
-  const expLang = LANGS.find(l => data[l].work.length > 0);
-  const expEl   = document.getElementById('pv-exp');
-  if (expLang && data[expLang].work[0]?.name) {
-    const job = data[expLang].work[0];
-    expEl.innerHTML = `<strong>${job.position}</strong> <span>· ${job.name}</span>`;
-    expEl.style.color = '';
+  // Lista de Experiencias en Preview
+  const pvExp = document.getElementById('pv-exp');
+  if (data[currentLang].work.length > 0) {
+    pvExp.innerHTML = data[currentLang].work.map(w => `
+      <div style="margin-bottom:8px;">
+        <strong>${w.position || 'Puesto'}</strong><br>
+        <span>${w.name || 'Empresa'} (${w.startDate || 'Inicio'} - ${w.endDate || 'Fin'})</span>
+      </div>
+    `).join('');
   } else {
-    expEl.textContent = 'Sin datos aún';
-    expEl.style.color = 'var(--muted)';
+    pvExp.textContent = 'Sin datos aún';
   }
 
-  // Educación
-  const eduLang = LANGS.find(l => data[l].education.length > 0);
-  const eduEl   = document.getElementById('pv-edu');
-  if (eduLang && data[eduLang].education[0]?.institution) {
-    const edu = data[eduLang].education[0];
-    eduEl.innerHTML = `<strong>${edu.studyType} ${edu.area}</strong> <span>· ${edu.institution}</span>`;
-    eduEl.style.color = '';
+  // Lista de Formación en Preview
+  const pvEdu = document.getElementById('pv-edu');
+  if (data[currentLang].education.length > 0) {
+    pvEdu.innerHTML = data[currentLang].education.map(e => `
+      <div style="margin-bottom:8px;">
+        <strong>${e.studyType || 'Titulación'}</strong><br>
+        <span>${e.institution || 'Centro'}</span>
+      </div>
+    `).join('');
   } else {
-    eduEl.textContent = 'Sin datos aún';
-    eduEl.style.color = 'var(--muted)';
+    pvEdu.textContent = 'Sin datos aún';
   }
 
-  // Skills chips
-  const skillLang = LANGS.find(l => data[l].skills.length > 0);
-  const skEl = document.getElementById('pv-skills');
-  if (skillLang) {
-    skEl.innerHTML = data[skillLang].skills
-      .flatMap(s => s.keywords.slice(0, 3))
-      .slice(0, 8)
-      .map(kw => `<span class="pv-chip">${kw}</span>`)
-      .join('');
-  } else {
-    skEl.innerHTML = '';
-  }
-
-  updateActiveLangs();
-  updateProgress();
+  // Lista de Habilidades en Preview (Chips de Tailwind)
+  const pvSk = document.getElementById('pv-skills');
+  pvSk.innerHTML = '';
+  data[currentLang].skills.forEach(s => {
+    if (s.keywords) {
+      s.keywords.split(',').forEach(k => {
+        if (k.trim()) pvSk.innerHTML += `<span class="pv-chip">${k.trim()}</span>`;
+      });
+    }
+  });
 }
 
 function updateActiveLangs() {
   const wrap = document.getElementById('pv-langs');
-  const active = LANGS.filter(l => {
-    const hasLocal  = data[l].label || data[l].work.length > 0 || data[l].education.length > 0;
-    const hasGlobal = global.name.trim() !== '';
-    return hasGlobal && hasLocal;
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  LANGS.forEach(l => {
+    const hasContent = data[l].label || data[l].work.length || data[l].education.length;
+    if (hasContent || l === 'es') {
+      wrap.innerHTML += `<span class="pv-chip" style="background:rgba(76,175,135,.15);color:var(--success);font-weight:600;">${l.toUpperCase()}</span>`;
+    }
   });
-  wrap.innerHTML = active.length
-    ? active.map(l => `<span class="pv-chip">${l.toUpperCase()}</span>`).join('')
-    : `<span style="color:var(--muted);font-size:12px;">Rellena al menos un idioma</span>`;
 }
 
+function showToast(msg, isError = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className   = 'show' + (isError ? ' error' : '');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.className = '', 4000);
+}
+
+// Initialization
+window.addEventListener('DOMContentLoaded', () => {
+  LANGS.forEach(l => { renderExp(l); renderEdu(l); renderSkills(l); renderProj(l); });
+  updateProgress();
+  updatePreview();
+  updateActiveLangs();
+});
+
 // ═══════════════════════════════════════════════════════════════
-// GUARDADO — genera los JSON y los descarga
+// GUARDADO AUTOMÁTICO DIRECTO A GITHUB (Ruta Canva — SIN DESCARGAS)
 // ═══════════════════════════════════════════════════════════════
+async function saveAll() {
+  // Aseguramos la persistencia de los campos de texto traducibles del paso activo
+  LANGS.forEach(l => {
+    readLocalContact(l);
+  });
+
+  if (!global.name.trim()) {
+    showToast('Añade tu nombre antes de guardar', true);
+    goStep(0);
+    return;
+  }
+
+  showToast('Sincronizando cambios con tu repositorio...');
+
+  let savedCount = 0;
+  
+  // Enviamos cada uno de los idiomas activos al backend secuencialmente
+  for (const l of LANGS) {
+    const d = data[l];
+    const hasContent = d.label || d.work.length || d.education.length || d.skills.length || d.projects.length;
+    
+    // Sincronizamos si tiene contenido mapeado, o si es ES por defecto para asegurar un archivo maestro
+    if (hasContent || (l === 'es' && savedCount === 0)) {
+      const resumeJson = buildResumeJson(l);
+
+      try {
+        const response = await fetch('/.netlify/functions/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ lang: l, resumeData: resumeJson })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error || 'Error al comunicarse con el backend');
+        }
+        
+        savedCount++;
+      } catch (err) {
+        showToast(`❌ Error al guardar (${l.toUpperCase()}): ${err.message}`, true);
+        return; // Rompemos el bucle si ocurre un error para alertar al usuario
+      }
+    }
+  }
+
+  showToast(`✓ ¡Éxito! Sincronizados ${savedCount} idiomas en GitHub. Tu web se actualizará en breve.`);
+}
+
 function buildResumeJson(lang) {
   const d = data[lang];
   return {
@@ -1332,7 +1296,11 @@ function buildResumeJson(lang) {
     },
     work:      d.work.map(j => ({...j, highlights:[]})),
     education: d.education,
-    skills:    d.skills,
+    skills:    d.skills.map(s => ({
+      name: s.name,
+      level: "",
+      keywords: s.keywords ? s.keywords.split(',').map(k => k.trim()) : []
+    })),
     projects:  d.projects,
     languages: lang==='es' ? [{language:'Español',fluency:'Nativo'}]
              : lang==='it' ? [{language:'Italiano',fluency:'Madrelingua'}]
@@ -1345,60 +1313,6 @@ function buildResumeJson(lang) {
     }
   };
 }
-
-function saveAll() {
-  // Recoger campos de contacto local del DOM antes de guardar
-  LANGS.forEach(l => {
-    data[l].label   = document.getElementById(l + '-label')?.value   || data[l].label;
-    data[l].summary = document.getElementById(l + '-summary')?.value || data[l].summary;
-  });
-
-  if (!global.name.trim()) {
-    showToast('Añade tu nombre antes de guardar', true);
-    goStep(0);
-    return;
-  }
-
-  // Descargar los JSON activos (los que tienen nombre + algún contenido local)
-  const saved = [];
-  LANGS.forEach(l => {
-    const hasContent = data[l].label || data[l].work.length || data[l].education.length;
-    if (hasContent) {
-      downloadJson(`resume.${l}.json`, buildResumeJson(l));
-      saved.push(l.toUpperCase());
-    }
-  });
-
-  // Si no hay contenido local en ningún idioma, guardar ES por defecto
-  if (saved.length === 0) {
-    downloadJson('resume.es.json', buildResumeJson('es'));
-    saved.push('ES');
-  }
-
-  showToast(`✓ Archivos descargados: ${saved.join(', ')}`);
-}
-
-function downloadJson(filename, obj) {
-  const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
-  const a    = document.createElement('a');
-  a.href     = URL.createObjectURL(blob);
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(a.href);
-}
-
-function showToast(msg, isError = false) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className   = 'show' + (isError ? ' error' : '');
-  clearTimeout(t._t);
-  t._t = setTimeout(() => { t.className = ''; }, 3200);
-}
-
-// ═══════════════════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════════════════
-updatePreview();
 </script>
 </body>
 </html>
