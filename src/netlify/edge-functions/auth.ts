@@ -4,9 +4,7 @@
 // Le dice a VS Code: "Tranquilo, este archivo usa el entorno de Deno, no te asustes por las URLs"
 // @ts-types="https://edge.netlify.com"
 
-import type { Context } from "https://edge.netlify.com";
-
-export default async (request: Request, context: Context) => {
+export default async (request: Request, context: any) => {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
   
