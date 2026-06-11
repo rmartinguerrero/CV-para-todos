@@ -1225,13 +1225,10 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// GUARDADO AUTOMÁTICO DIRECTO A GITHUB (Ruta Canva — SIN DESCARGAS)
+// GUARDADO DIRECTO A GITHUB API (Modo Autónomo)
 // ═══════════════════════════════════════════════════════════════
 async function saveAll() {
-  // Aseguramos la persistencia de los campos de texto traducibles del paso activo
-  LANGS.forEach(l => {
-    readLocalContact(l);
-  });
+  LANGS.forEach(l => readLocalContact(l));
 
   if (!global.name.trim()) {
     showToast('Añade tu nombre antes de guardar', true);
@@ -1239,41 +1236,106 @@ async function saveAll() {
     return;
   }
 
-  showToast('Sincronizando cambios con tu repositorio...');
+  // ⚠️ Para pruebas directas: introduce aquí las credenciales de tu cuenta secundaria
+  // NOTA: En producción, estos valores se pueden capturar con un pequeño modal de Login/Config
+  const GITHUB_TOKEN = "TU_PERSONAL_ACCESS_TOKEN_AQUÍ";
+  const GITHUB_OWNER = "TU_USUARIO_SECUNDARIO_DE_GITHUB";
+  const GITHUB_REPO  = "EL_NOMBRE_DE_TU_REPOSITORIO"; 
 
+  if (GITHUB_TOKEN.startsWith("TU_")) {
+    showToast('❌ Configura primero tus credenciales de GitHub en el código', true);
+    return;
+  }
+
+  showToast('Sincronizando cambios directamente con GitHub...');
   let savedCount = 0;
-  
-  // Enviamos cada uno de los idiomas activos al backend secuencialmente
+
   for (const l of LANGS) {
     const d = data[l];
     const hasContent = d.label || d.work.length || d.education.length || d.skills.length || d.projects.length;
     
-    // Sincronizamos si tiene contenido mapeado, o si es ES por defecto para asegurar un archivo maestro
     if (hasContent || (l === 'es' && savedCount === 0)) {
       const resumeJson = buildResumeJson(l);
+      const path = `src/data/resume.${l}.json`;
+      const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${path}`;
 
       try {
-        const response = await fetch('/.netlify/functions/save', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ lang: l, resumeData: resumeJson })
+        // 1. Intentar obtener el SHA del archivo si ya existe
+        let sha = null;
+        const checkRes = await fetch(url, {
+          headers: { "Authorization": `token ${GITHUB_TOKEN}` }
+        });
+        if (checkRes.ok) {
+          const checkData = await checkRes.json();
+          sha = checkData.sha;
+        }
+
+        // 2. Subir o actualizar el JSON
+        const putRes = await fetch(url, {
+          method: "PUT",
+          headers: {
+            "Authorization": `token ${GITHUB_TOKEN}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            message: `Formulario: Actualizado CV en idioma [${l.toUpperCase()}]`,
+            content: btoa(unescape(encodeURIComponent(JSON.stringify(resumeJson, null, 2)))),
+            sha: sha || undefined
+          })
         });
 
-        const result = await response.json();
-
-        if (!response.ok) {
-          throw new Error(result.error || 'Error al comunicarse con el backend');
+        if (!putRes.ok) {
+          const errData = await putRes.json();
+          throw new Error(errData.message || 'Error al escribir en GitHub');
         }
-        
+
         savedCount++;
       } catch (err) {
-        showToast(`❌ Error al guardar (${l.toUpperCase()}): ${err.message}`, true);
-        return; // Rompemos el bucle si ocurre un error para alertar al usuario
+        showToast(`❌ Error en idioma (${l.toUpperCase()}): ${err.message}`, true);
+        return;
       }
     }
   }
 
-  showToast(`✓ ¡Éxito! Sincronizados ${savedCount} idiomas en GitHub. Tu web se actualizará en breve.`);
+  showToast(`✓ ¡Éxito! Sincronizados ${savedCount} idiomas en tu repositorio.`);
+}
+
+function buildResumeJson(lang) {
+  const d = data[lang];
+  return {
+    $schema: "https://raw.githubusercontent.com/jsonresume/resume-schema/v1.0.0/schema.json",
+    basics: {
+      name:    global.name,
+      label:   d.label,
+      image:   global.image,
+      email:   global.email,
+      phone:   global.phone,
+      url:     global.url,
+      summary: d.summary,
+      location: { city: global.city, countryCode: lang==='es'?'ES':lang==='it'?'IT':'GB', region:'' },
+      profiles: [
+        global.linkedin ? { network:'LinkedIn', username:'', url: global.linkedin } : null,
+        global.github   ? { network:'GitHub',   username:'', url: global.github }   : null,
+      ].filter(Boolean)
+    },
+    work:      d.work.map(j => ({...j, highlights:[]})),
+    education: d.education,
+    skills:    d.skills.map(s => ({
+      name: s.name,
+      level: "",
+      keywords: s.keywords ? s.keywords.split(',').map(k => k.trim()) : []
+    })),
+    projects:  d.projects,
+    languages: lang==='es' ? [{language:'Español',fluency:'Nativo'}]
+             : lang==='it' ? [{language:'Italiano',fluency:'Madrelingua'}]
+             :               [{language:'English', fluency:'Native'}],
+    meta: {
+      canonical: "https://raw.githubusercontent.com/jsonresume/resume-schema/master/resume.json",
+      version:   "v1.0.0",
+      lastModified: new Date().toISOString(),
+      template: selectedTemplate
+    }
+  };
 }
 
 function buildResumeJson(lang) {
