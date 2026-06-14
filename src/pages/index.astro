@@ -1,35 +1,38 @@
 ---
 // src/pages/index.astro
-// Detecta el idioma del navegador y redirige al CV correcto
-import { languages, defaultLang, getAvailableLangs } from '../i18n/ui';
+import SetupWizard from '../components/SetupWizard.astro';
 import resumeEs from '../data/resume.es.json';
 import resumeIt from '../data/resume.it.json';
 import resumeEn from '../data/resume.en.json';
 
-const resumes = { es: resumeEs, it: resumeIt, en: resumeEn };
-const available = getAvailableLangs(resumes);
-
-// Si solo hay un idioma con datos, redirigir directamente
-const target = available.length === 1
-  ? available[0]
-  : defaultLang;
+// Comprobamos si el proyecto está completamente vacío en todos los idiomas
+const isBrandNew = !resumeEs.basics?.name && !resumeIt.basics?.name && !resumeEn.basics?.name;
 ---
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8" />
-  <title>Redirigiendo…</title>
-  <script define:vars={{ available, defaultLang: target }}>
-    // Detección de idioma en el cliente
-    const preferred = navigator.languages
-      .map(l => l.split('-')[0])
-      .find(l => available.includes(l));
-    const lang = preferred ?? defaultLang;
-    window.location.replace(`/${lang}/`);
-  </script>
-  <noscript>
-    <meta http-equiv="refresh" content={`0; url=/${target}/`} />
-  </noscript>
-</head>
-<body></body>
-</html>
+
+{isBrandNew ? (
+  /* Si la web es totalmente nueva y no tiene datos, le forzamos a configurarla en español de entrada */
+  <SetupWizard availableLangs={['es', 'it', 'en']} defaultLang="es" />
+) : (
+  /* Si ya hay datos, detectamos el idioma del sistema operativo del usuario en el navegador */
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Redirecting…</title>
+    <script>
+      const available = ['es', 'it', 'en'];
+      
+      const preferred = navigator.languages
+        .map(l => l.split('-')[0])
+        .find(l => available.includes(l));
+      
+      // Si el SO está en español o italiano va allí. Cualquier otra cosa va a inglés (/en/)
+      const targetLang = preferred ?? 'en';
+      window.location.replace(`/${targetLang}/`);
+    </script>
+    <noscript>
+      <meta http-equiv="refresh" content="0; url=/en/" />
+    </noscript>
+  </head>
+  <body class="bg-white"></body>
+  </html>
+)}

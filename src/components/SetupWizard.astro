@@ -1,133 +1,68 @@
 ---
 // src/components/SetupWizard.astro
-// Se muestra cuando los archivos JSON están vacíos (primer uso)
+import MinimalistLayout from '../layouts/MinimalistLayout.astro';
+import { useTranslations, type Lang, languages, type UIKeys } from '../i18n/ui';
+
 interface Props {
-  lang: string;
-  t:    (key: string) => string;
+  availableLangs: string[];
+  defaultLang: string;
 }
-const { t } = Astro.props;
+
+const { defaultLang } = Astro.props;
+const lang = defaultLang as Lang;
+
+const strictT = useTranslations(lang);
+const t = (key: string) => strictT(key as UIKeys);
 ---
 
-<!DOCTYPE html>
-<html translate="no">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CV Para Todos — Configuración inicial</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
-    rel="stylesheet"
-  />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; }
-    body {
-      font-family: 'Inter', system-ui, sans-serif;
-      background: #f8fafc;
-      color: #1e293b;
-      margin: 0;
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-      padding: 2rem 1rem;
-    }
-    .card {
-      background: #fff;
-      border: 1px solid #e2e8f0;
-      border-radius: 16px;
-      padding: 2.5rem 2rem;
-      max-width: 520px;
-      width: 100%;
-      text-align: center;
-    }
-    .badge {
-      display: inline-block;
-      background: #f0f9ff;
-      color: #0369a1;
-      font-size: 0.75rem;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      padding: 0.25rem 0.75rem;
-      border-radius: 999px;
-      margin-bottom: 1rem;
-    }
-    h1 { font-size: 1.5rem; font-weight: 600; margin: 0 0 0.5rem; }
-    p  { color: #64748b; font-size: 0.9rem; line-height: 1.6; margin: 0 0 1.5rem; }
-    .steps {
-      text-align: left;
-      background: #f8fafc;
-      border-radius: 12px;
-      padding: 1.25rem 1.5rem;
-      margin-bottom: 1.75rem;
-      list-style: none;
-      counter-reset: step;
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-    .steps li {
-      counter-increment: step;
-      display: grid;
-      grid-template-columns: 1.75rem 1fr;
-      gap: 0.5rem;
-      align-items: start;
-      font-size: 0.875rem;
-      color: #334155;
-    }
-    .steps li::before {
-      content: counter(step);
-      background: #1e293b;
-      color: #fff;
-      width: 1.5rem;
-      height: 1.5rem;
-      border-radius: 50%;
-      display: grid;
-      place-items: center;
-      font-size: 0.75rem;
-      font-weight: 600;
-      flex-shrink: 0;
-    }
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: #1e293b;
-      color: #fff;
-      text-decoration: none;
-      font-size: 0.9rem;
-      font-weight: 500;
-      padding: 0.65rem 1.4rem;
-      border-radius: 10px;
-      transition: background 0.15s;
-    }
-    .btn:hover { background: #0f172a; }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <span class="badge">Setup</span>
-    <h1>CV Para Todos</h1>
-    <p>Tu CV está casi listo. Solo necesitas completar dos pasos para publicarlo en internet de forma gratuita.</p>
+<MinimalistLayout
+  title={t('wizard.welcome')}
+  description={t('wizard.subtitle')}
+  lang={lang}
+  currentLang={lang}
+  availableLangs={['es', 'it', 'en']}
+  resume={{}}
+  t={t}
+>
+  <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans">
+    <div class="max-w-md w-full mx-auto bg-white rounded-2xl shadow-xl border border-gray-100 p-8 text-center space-y-6">
+      
+      <div class="flex justify-center gap-2 bg-gray-100 p-1 rounded-lg w-fit mx-auto text-xs">
+        {Object.entries(languages).map(([code, label]) => (
+          <a 
+            href={`/${code}/`}
+            class={`px-3 py-1 rounded transition-colors ${code === lang ? 'bg-blue-600 text-white shadow' : 'text-gray-500 hover:text-gray-900'}`}
+          >
+            {label} {/* <--- AQUÍ FALTABA POR CERRAR LA LLAVE DEL RECUADRO */}
+          </a>
+        ))}
+      </div>
 
-    <ol class="steps">
-      <li>{t('setup.step1')}</li>
-      <li>{t('setup.step2')}</li>
-    </ol>
+      <div class="space-y-2">
+        <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight sm:text-3xl">
+          {t('wizard.welcome')}
+        </h1>
+        <p class="text-sm text-gray-500">
+          {t('wizard.subtitle')}
+        </p>
+      </div>
 
-    <a
-      href="https://github.com/settings/pages"
-      target="_blank"
-      rel="noopener noreferrer"
-      class="btn"
-    >
-      {t('setup.cta')}
-      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
-           fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-        <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
-      </svg>
-    </a>
+      <div class="flex flex-col gap-3 pt-4">
+        <a 
+          href={`/${lang}/edit`}
+          class="w-full inline-flex justify-center items-center py-3 px-4 border border-transparent text-sm font-medium rounded-xl text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-md"
+        >
+          ✨ {t('wizard.create')}
+        </a>
+        
+        <button 
+          id=\"oauth-trigger-btn\"
+          class="w-full inline-flex justify-center items-center py-3 px-4 border border-gray-300 text-sm font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-colors shadow-sm"
+        >
+          🔑 {t('wizard.import')}
+        </button>
+      </div>
+
+    </div>
   </div>
-</body>
-</html>
+</MinimalistLayout>

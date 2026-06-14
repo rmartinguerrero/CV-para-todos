@@ -1,65 +1,36 @@
-# CV Para Todos
+# 📄 CV Para Todos
 
-> Currículum web multiidioma, estático, gratuito y sin conocimientos técnicos.
+Un currículum web multiidioma, ultra rápido, privado y diseñado para ser **fácil de usar y gestionar**. 
 
-## Stack
+La filosofía de este proyecto es la **simplicidad y la autonomía (No-Code / Low-Code)**: cualquier persona debe poder tener su portafolio profesional online y gestionarlo de forma visual y cómoda, sin complicaciones técnicas de backend, sin bases de datos pesadas y con total respeto a la privacidad.
 
-- [Astro 5](https://astro.build) — generación estática
-- [Tailwind CSS 3](https://tailwindcss.com) — estilos
-- [JSON Resume](https://jsonresume.org) — esquema de datos estándar
-- GitHub Pages — hosting gratuito
-- GitHub Actions — despliegue automático
+---
 
-## Idiomas soportados
+## ✨ Características Principales
 
-| Archivo                  | Idioma   |
-|--------------------------|----------|
-| `src/data/resume.es.json`| Español  |
-| `src/data/resume.it.json`| Italiano |
-| `src/data/resume.en.json`| English  |
+* 🌍 **Multiidioma Dinámico y Nativo:** Gestión inteligente de idiomas (Español, Inglés, Italiano...) estructurada de forma limpia en la carpeta `src/pages/[lang]/`. Cambia de idioma manteniendo la posición y la velocidad.
+* ✍️ **Datos Centralizados y Limpios:** Toda la información de tu experiencia, estudios y proyectos se guarda en archivos de texto estructurados en `src/data/`, siguiendo estándares limpios y legibles.
+* 🛠️ **Panel de Administración Visual:** ¡Olvídate de tocar código para actualizar tu CV! Incluye un formulario de administración muy amigable e intuitivo para modificar tus datos de forma visual en segundos.
+* 🔒 **Privacidad Absoluta (FOSS):** Cero cookies, cero telemetría y sin rastreadores externos. Tu web es tuya, el código es abierto y tus datos se quedan contigo.
+* ⚡ **Rendimiento de Infarto:** Construido sobre Astro y Tailwind CSS para garantizar que la web cargue instantáneamente en cualquier dispositivo, con un SEO impecable.
 
-Las pestañas vacías **no se publican** en internet.
+---
 
-## Estructura del proyecto
+## ⚙️ Estructura del Proyecto
 
-```
-cv-para-todos/
-├── .github/workflows/deploy.yml   ← Robot de despliegue
-├── .vscode/
-│   ├── tasks.json                 ← Abre el panel al pulsar "."
-│   └── extensions.json
-├── src/
-│   ├── components/
-│   │   ├── Header.astro
-│   │   ├── Experience.astro
-│   │   ├── Education.astro
-│   │   ├── Skills.astro
-│   │   ├── Projects.astro
-│   │   └── SetupWizard.astro      ← Guía para nuevos usuarios
-│   ├── layouts/
-│   │   └── MinimalistLayout.astro
-│   ├── pages/
-│   │   ├── [lang]/index.astro     ← Genera /es, /it, /en
-│   │   └── index.astro            ← Redirige según idioma del navegador
-│   ├── data/
-│   │   ├── resume.es.json
-│   │   ├── resume.it.json
-│   │   └── resume.en.json
-│   └── i18n/
-│       └── ui.ts                  ← Cadenas de interfaz
-├── package.json
-├── astro.config.mjs
-└── tailwind.config.mjs
-```
+Para mantener las cosas organizadas y sencillas, el proyecto se divide así:
 
-## Desarrollo local
+* `src/pages/[lang]/` ➔ Las páginas dinámicas de la web para cada idioma de forma automática.
+* `src/data/` ➔ Los archivos de texto donde reside la información de tu currículum.
+* `src/netlify/functions/` ➔ La lógica simple encargada de procesar el formulario visual de administración y guardar los cambios.
 
+---
+
+## 💻 Desarrollo Local
+
+Poner la web en marcha en tu ordenador es sumamente sencillo. Solo abre tu terminal y sigue estos dos pasos:
+
+### 1. Instalar las dependencias
+Instala los paquetes necesarios de forma ultra rápida usando `pnpm`:
 ```bash
-npm install
-npm run dev
-```
-
-## Despliegue
-
-El despliegue es automático al hacer `push` a `main` via GitHub Actions.
-Asegúrate de tener GitHub Pages activado en: **Settings → Pages → Source: GitHub Actions**
+pnpm install

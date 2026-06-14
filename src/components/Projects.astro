@@ -20,17 +20,29 @@ const { resume, t } = Astro.props;
       <li>
         <div class="flex flex-wrap items-baseline gap-x-2">
           <h3 class="font-semibold text-gray-900">{project.name}</h3>
-          {project.url && (
-            <a
-              href={project.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="text-sm text-gray-500 hover:text-gray-900 transition-colors"
-              aria-label={`${t('label.viewProject')}: ${project.name}`}
-            >
-              {new URL(project.url).hostname} ↗
-            </a>
-          )}
+          {project.url && (() => {
+            try {
+              // Si la URL no es absoluta, new URL() lanzará un error que ahora capturamos
+              const parsedUrl = new URL(project.url);
+              return (
+                <a 
+                  href={project.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  class="text-sm text-gray-500 hover:text-brand-600 transition-colors inline-flex items-center gap-1"
+                >
+                  {parsedUrl.hostname} ↗
+                </a>
+              );
+            } catch (e) {
+              // Si la URL es inválida o texto plano, se renderiza de forma segura sin romper el Build
+              return (
+                <span class="text-sm text-gray-400 italic">
+                  {project.url}
+                </span>
+              );
+            }
+          })()}
         </div>
         {project.description && (
           <p class="mt-1 text-sm text-gray-600 leading-relaxed">{project.description}</p>
