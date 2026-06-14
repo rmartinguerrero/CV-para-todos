@@ -1,0 +1,603 @@
+---
+// src/pages/[lang]/edit.astro
+import { useTranslations, type Lang, type UIKeys } from '../../i18n/ui';
+import resumeEs from '../../data/resume.es.json';
+import resumeIt from '../../data/resume.it.json';
+import resumeEn from '../../data/resume.en.json';
+
+export function getStaticPaths() {
+  return [
+    { params: { lang: 'es' } },
+    { params: { lang: 'it' } },
+    { params: { lang: 'en' } },
+  ];
+}
+
+const { lang } = Astro.params as { lang: Lang };
+const resumes = { es: resumeEs, it: resumeIt, en: resumeEn };
+const initialData = resumes[lang] || resumeEs;
+
+const t = useTranslations(lang);
+
+// DETECCIÓN DINÁMICA DE PLANTILLAS EN LA CARPETA LAYOUTS
+const layoutFiles = await Astro.glob('../../layouts/*.astro');
+
+const templates = layoutFiles.map((file) => {
+  // Sacamos el identificador partiendo del nombre del archivo por si templateId fallase
+  const fileId = file.file.split('/').pop()?.replace('.astro', '').toLowerCase() || 'default';
+  
+  const rawKey = file.templateName; 
+  let translatedName = fileId.toUpperCase();
+
+  // Si la directiva exportada contiene un punto o empieza por templates, la pasamos por la función t() de UIKeys
+  if (rawKey && typeof rawKey === 'string') {
+    translatedName = t(rawKey as UIKeys);
+  }
+
+  return {
+    id: file.templateId || fileId,
+    name: translatedName,
+    svg: file.templateSvg || `<svg viewBox="0 0 100 120" class="w-full h-full text-gray-400"><rect width="100" height="120" rx="8" fill="#f3f4f6" stroke="currentColor" stroke-width="2"/><line x1="15" y1="25" x2="85" y2="25" stroke="currentColor" stroke-width="2"/></svg>`
+  };
+});
+---
+
+<!DOCTYPE html>
+<html lang={lang}>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{t('edit.title')} — Proyecto CV</title>
+</head>
+<body class="bg-gray-50 min-h-screen text-gray-800 antialiased">
+
+  <div class="w-full bg-white border-b border-gray-200 py-3 px-4 sm:px-6 sticky top-0 z-50 print:hidden shadow-sm flex flex-wrap gap-3 items-center justify-between">
+    <div class="flex items-center gap-2">
+      <span class="text-xs font-bold text-gray-400 uppercase tracking-wider mr-2">Idioma del CV:</span>
+      <div class="inline-flex rounded-xl bg-gray-100 p-1 border border-gray-200">
+        <button onclick="window.location.href='/es/edit'" class={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${lang === 'es' ? 'bg-white text-gray-900 shadow-sm border border-gray-200/50' : 'text-gray-500 hover:text-gray-900'}`}>
+          🇪🇸 Español
+        </button>
+        <button onclick="window.location.href='/it/edit'" class={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${lang === 'it' ? 'bg-white text-gray-900 shadow-sm border border-gray-200/50' : 'text-gray-500 hover:text-gray-900'}`}>
+          🇮🇹 Italiano
+        </button>
+        <button onclick="window.location.href='/en/edit'" class={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${lang === 'en' ? 'bg-white text-gray-900 shadow-sm border border-gray-200/50' : 'text-gray-500 hover:text-gray-900'}`}>
+          🇺🇸 English
+        </button>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button id="btn-download-json" class="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+        {t('edit.downloadJson')}
+      </button>
+      <button id="btn-print" class="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-sm">
+        🖨️ {t('edit.downloadPdf')}
+      </button>
+    </div>
+  </div>
+
+  <div class="grid lg:grid-cols-2 gap-8 items-start min-h-[calc(100vh-4rem)] p-4 sm:p-6 print:block print:p-0">
+    
+    <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-6 print:hidden sticky top-20 max-h-[82vh] overflow-y-auto">
+      
+      <div class="flex items-center justify-between border-b border-gray-100 pb-2">
+        <h1 class="text-lg font-bold text-gray-900 tracking-tight">{t('edit.title')}</h1>
+      </div>
+
+      <nav class="flex border-b border-gray-200 text-xs sm:text-sm overflow-x-auto whitespace-nowrap" aria-label="Tabs">
+        <button class="tab-btn px-4 py-2 border-b-2 border-blue-600 font-medium text-blue-600" data-tab="basics">{t('nav.contact')}</button>
+        <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="work">Experiencia</button>
+        <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="education">Formación</button>
+        <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="skills">Habilidades</button>
+        <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="templates">{t('templates.title')}</button>
+      </nav>
+
+      <div id="cv-form" class="space-y-6">
+        
+        <div id="tab-basics" class="tab-content space-y-4">
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">{t('form.name')}</label>
+              <input type="text" data-path="basics.name" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-blue-500" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">{t('form.label')}</label>
+              <input type="text" data-path="basics.label" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-blue-500" />
+            </div>
+          </div>
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Email</label>
+              <input type="email" data-path="basics.email" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-blue-500" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Teléfono</label>
+              <input type="tel" data-path="basics.phone" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-blue-500" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Fotografía de Perfil</label>
+            <div class="flex items-center gap-3 bg-gray-50 p-3 rounded-xl border border-dashed border-gray-300">
+              <input type="file" id="photo-file" accept="image/*" class="hidden" />
+              <button type="button" onclick="document.getElementById('photo-file').click()" class="px-3 py-1.5 bg-white border border-gray-200 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-50 shadow-sm">
+                Seleccionar del ordenador
+              </button>
+              <button type="button" id="btn-remove-photo" class="text-xs text-red-500 font-medium hidden hover:underline">Eliminar</button>
+              <span id="photo-status" class="text-xs text-gray-400 truncate max-w-[180px]">Sin archivo seleccionado</span>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Extracto Profesional</label>
+            <textarea data-path="basics.summary" rows="4" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-blue-500"></textarea>
+          </div>
+        </div>
+
+        <div id="tab-work" class="tab-content space-y-4 hidden">
+          <div id="work-container" class="space-y-4"></div>
+          <button type="button" id="btn-add-work" class="w-full py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-semibold rounded-xl border border-dashed border-blue-200 transition-colors">
+            + Añadir Nueva Experiencia Laboral
+          </button>
+        </div>
+
+        <div id="tab-education" class="tab-content space-y-4 hidden">
+          <div id="education-container" class="space-y-4"></div>
+          <button type="button" id="btn-add-edu" class="w-full py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-semibold rounded-xl border border-dashed border-blue-200 transition-colors">
+            + Añadir Nueva Formación Académica
+          </button>
+        </div>
+
+        <div id="tab-skills" class="tab-content space-y-4 hidden">
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Habilidades y Tecnologías</label>
+            <div id="skills-tag-container" class="flex flex-wrap gap-2 p-2.5 border border-gray-200 rounded-xl bg-white focus-within:ring-2 focus-within:ring-blue-500 min-h-[44px]">
+              <input type="text" id="skills-input" placeholder="Escribe y pulsa Enter..." class="flex-1 min-w-[120px] text-sm focus:outline-none bg-transparent" />
+            </div>
+          </div>
+        </div>
+
+        <div id="tab-templates" class="tab-content hidden">
+          <label class="block text-xs font-semibold text-gray-500 uppercase mb-3">
+            {t('templates.subtitle')}
+          </label>
+          <div class="grid grid-cols-2 gap-4">
+            {templates.map((tpl, i) => (
+              <div 
+                data-template-id={tpl.id} 
+                class={`template-card border-2 p-3 rounded-xl bg-white shadow-sm cursor-pointer hover:border-blue-300 transition-all group relative ${i === 0 ? 'border-blue-600 ring-2 ring-blue-100' : 'border-gray-200'}`}
+              >
+                <div class="aspect-[4/5] w-full bg-gray-50 rounded-lg p-2 mb-2 border border-gray-100 group-hover:scale-[1.02] transition-transform">
+                  <Fragment set:html={tpl.svg} />
+                </div>
+                <div class="text-xs font-bold text-gray-800 text-center group-hover:text-blue-600 truncate">
+                  {tpl.name}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <button id="btn-publish" class="w-full py-2.5 bg-gray-900 text-white font-semibold rounded-xl hover:bg-gray-800 transition-colors text-xs uppercase tracking-wider shadow-md">
+          🚀 {t('edit.publish')}
+        </button>
+      </div>
+    </div>
+
+    <div id="preview-section" data-template={templates[0]?.id || 'minimal'} class="bg-white p-8 rounded-2xl border border-gray-200 shadow-lg min-h-[297mm] transition-all duration-300 print:shadow-none print:border-0 print:p-0 print:block">
+      <header id="preview-header" class="flex gap-6 items-start pb-6 border-b">
+        <div class="flex-1">
+          <h2 id="view-name" class="font-bold tracking-tight text-gray-900"></h2>
+          <p id="view-label" class="mt-1 font-medium"></p>
+          <div id="view-contact" class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500"></div>
+        </div>
+        <img id="view-image" class="w-24 h-24 rounded-xl object-cover border border-gray-200 hidden" alt="Foto CV" />
+      </header>
+      <section class="mt-6 section-block">
+        <h3 class="section-title text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Perfil</h3>
+        <p id="view-summary" class="text-sm text-gray-600 leading-relaxed whitespace-pre-line"></p>
+      </section>
+      <section class="mt-6 section-block">
+        <h3 class="section-title text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Experiencia</h3>
+        <div id="view-experience" class="space-y-4"></div>
+      </section>
+      <section class="mt-6 section-block">
+        <h3 class="section-title text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Formación</h3>
+        <div id="view-education" class="space-y-4"></div>
+      </section>
+      <section class="mt-6 section-block">
+        <h3 class="section-title text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Habilidades</h3>
+        <div id="view-skills-badges" class="flex flex-wrap"></div>
+      </section>
+    </div>
+
+  </div>
+
+  <style is:global>
+    /* Estilos globales y layouts intercambiables */
+    [data-template="minimal"] { font-family: 'Inter', system-ui, sans-serif; }
+    [data-template="minimal"] #view-name { font-size: 1.75rem; font-weight: 700; color: #111827; }
+    [data-template="minimal"] #view-label { color: #4b5563; font-size: 0.95rem; }
+    [data-template="minimal"] .section-title { color: #1f2937; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.25rem; font-size: 0.75rem; }
+    [data-template="minimal"] .badge-item { background-color: #f3f4f6; color: #374151; font-size: 0.75rem; padding: 0.25rem 0.5rem; margin: 0.125rem; border-radius: 0.25rem; display: inline-block; }
+
+    [data-template="tech"] { font-family: 'Inter', system-ui, sans-serif; }
+    [data-template="tech"] #view-name { font-size: 1.875rem; font-weight: 800; letter-spacing: -0.025em; }
+    [data-template="tech"] #view-label { color: #2563eb; font-family: ui-monospace, monospace; font-size: 0.875rem; }
+    [data-template="tech"] .section-title { color: #4b5563; font-family: ui-monospace, monospace; border-left: 3px solid #2563eb; padding-left: 0.5rem; font-size: 0.75rem; }
+    [data-template="tech"] .badge-item { background-color: #f3f4f6; color: #1f2937; border-radius: 0.375rem; font-family: ui-monospace, monospace; font-size: 0.75rem; padding: 0.125rem 0.5rem; margin: 0.125rem; display: inline-block; }
+
+    [data-template="artistic"] { font-family: 'Playfair Display', Georgia, serif; }
+    [data-template="artistic"] #view-name { font-size: 2.25rem; font-weight: 700; font-style: italic; color: #1e1b4b; }
+    [data-template="artistic"] #view-label { color: #4338ca; font-size: 1.125rem; border-bottom: 1px dashed #e0e7ff; padding-bottom: 0.25rem; }
+    [data-template="artistic"] .section-title { color: #4338ca; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.15em; border-bottom: 1px solid #e0e7ff; padding-bottom: 0.25rem; }
+    [data-template="artistic"] .badge-item { background-color: #f5f3ff; color: #5b21b6; border: 1px solid #ddd6fe; border-radius: 9999px; font-size: 0.75rem; padding: 0.125rem 0.625rem; margin: 0.125rem; display: inline-block; }
+    [data-template="artistic"] #view-image { border-radius: 9999px; width: 5.5rem; height: 5.5rem; }
+
+    @media print {
+      body { background: #ffffff !important; color: #000000 !important; padding: 0 !important; }
+      .print\:hidden { display: none !important; }
+      .print\:block { display: block !important; }
+      .print\:p-0 { padding: 0 !important; }
+      #preview-section { width: 100% !important; border: 0 !important; padding: 0 !important; box-shadow: none !important; min-height: auto !important; }
+    }
+  </style>
+
+  <script define:vars={{ lang, initialData }}>
+    const STORAGE_KEY = `cv_backup_data_${lang}`;
+    
+    let state = (() => {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        return saved ? JSON.parse(saved) : initialData;
+      } catch {
+        return initialData;
+      }
+    })();
+
+    if (!state.work) state.work = [];
+    if (!state.education) state.education = [];
+    if (!state.skills) state.skills = [{ name: "Skills", keywords: [] }];
+    if (!state.skills[0].keywords) state.skills[0].keywords = [];
+
+    function setDeepValue(obj, path, value) {
+      const parts = path.split('.');
+      let current = obj;
+      for (let i = 0; i < parts.length - 1; i++) {
+        const key = parts[i];
+        if (!(key in current)) current[key] = isNaN(parts[i + 1]) ? {} : [];
+        current = current[key];
+      }
+      current[parts[parts.length - 1]] = value;
+    }
+
+    function getDeepValue(obj, path) {
+      return path.split('.').reduce((acc, part) => acc && acc[part], obj);
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      renderPreview();
+    }
+
+    // INTERCAMBIADOR DE PLANTILLAS
+    document.querySelectorAll('.template-card').forEach(card => {
+      card.addEventListener('click', () => {
+        document.querySelectorAll('.template-card').forEach(c => {
+          c.classList.remove('border-blue-600', 'ring-2', 'ring-blue-100');
+          c.classList.add('border-gray-200');
+        });
+        card.classList.remove('border-gray-200');
+        card.classList.add('border-blue-600', 'ring-2', 'ring-blue-100');
+
+        const selectedTemplate = card.dataset.templateId;
+        document.getElementById('preview-section').setAttribute('data-template', selectedTemplate);
+      });
+    });
+
+    // Gestión Fotografía
+    const fileInput = document.getElementById('photo-file');
+    const photoStatus = document.getElementById('photo-status');
+    const removePhotoBtn = document.getElementById('btn-remove-photo');
+
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      photoStatus.textContent = file.name;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        setDeepValue(state, 'basics.image', evt.target.result);
+        removePhotoBtn.classList.remove('hidden');
+        saveState();
+      };
+      reader.readAsDataURL(file);
+    });
+
+    removePhotoBtn.addEventListener('click', () => {
+      setDeepValue(state, 'basics.image', '');
+      fileInput.value = '';
+      photoStatus.textContent = 'Sin archivo seleccionado';
+      removePhotoBtn.classList.add('hidden');
+      saveState();
+    });
+
+    // Etiquetas de Habilidades
+    const tagsContainer = document.getElementById('skills-tag-container');
+    const skillsInput = document.getElementById('skills-input');
+
+    function renderTags() {
+      tagsContainer.querySelectorAll('.tag-badge').forEach(el => el.remove());
+      state.skills[0].keywords.forEach((word, index) => {
+        const span = document.createElement('span');
+        span.className = "tag-badge flex items-center gap-1 bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded-md";
+        span.innerHTML = `${word}<button type="button" class="text-blue-500 hover:text-blue-900 font-bold ml-0.5" data-index="${index}">&times;</button>`;
+        span.querySelector('button').addEventListener('click', () => removeTag(index));
+        tagsContainer.insertBefore(span, skillsInput);
+      });
+    }
+
+    function addTag(word) {
+      const cleanWord = word.trim().replace(/,/g, '');
+      if (cleanWord && !state.skills[0].keywords.includes(cleanWord)) {
+        state.skills[0].keywords.push(cleanWord);
+        saveState();
+        renderTags();
+      }
+      skillsInput.value = '';
+    }
+
+    function removeTag(index) {
+      state.skills[0].keywords.splice(index, 1);
+      saveState();
+      renderTags();
+    }
+
+    skillsInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ',') {
+        e.preventDefault();
+        addTag(skillsInput.value);
+      } else if (e.key === 'Backspace' && skillsInput.value === '') {
+        if (state.skills[0].keywords.length > 0) {
+          removeTag(state.skills[0].keywords.length - 1);
+        }
+      }
+    });
+
+    tagsContainer.addEventListener('click', () => skillsInput.focus());
+
+    // Gestión de Bloques Repetibles
+    const workContainer = document.getElementById('work-container');
+    const eduContainer = document.getElementById('education-container');
+
+    function createItemBlock(type, index, data) {
+      const card = document.createElement('div');
+      card.className = "p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-3 relative group";
+      
+      if (type === 'work') {
+        card.innerHTML = `
+          <button type="button" class="btn-del absolute top-2 right-2 text-xs text-red-500 hover:underline opacity-0 group-hover:opacity-100 transition-opacity">Eliminar</button>
+          <div class="grid sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[10px] font-bold text-gray-400 uppercase">Empresa</label>
+              <input type="text" data-field="name" value="${data.name || ''}" class="w-full px-2 py-1 border rounded text-xs focus:outline-blue-500" />
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold text-gray-400 uppercase">Puesto</label>
+              <input type="text" data-field="position" value="${data.position || ''}" class="w-full px-2 py-1 border rounded text-xs focus:outline-blue-500" />
+            </div>
+          </div>
+          <div class="grid sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[10px] font-bold text-gray-400 uppercase">Inicio</label>
+              <input type="text" data-field="startDate" value="${data.startDate || ''}" class="w-full px-2 py-1 border rounded text-xs focus:outline-blue-500" />
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold text-gray-400 uppercase">Fin</label>
+              <input type="text" data-field="endDate" value="${data.endDate || ''}" class="w-full px-2 py-1 border rounded text-xs focus:outline-blue-500" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase">Funciones</label>
+            <textarea data-field="summary" rows="2" class="w-full px-2 py-1 border rounded text-xs focus:outline-blue-500">${data.summary || ''}</textarea>
+          </div>
+        `;
+        card.querySelectorAll('input, textarea').forEach(input => {
+          input.addEventListener('input', (e) => {
+            state.work[index][e.target.dataset.field] = e.target.value;
+            saveState();
+          });
+        });
+        card.querySelector('.btn-del').addEventListener('click', () => {
+          state.work.splice(index, 1);
+          saveState();
+          renderDynamicLists();
+        });
+      } else {
+        card.innerHTML = `
+          <button type="button" class="btn-del absolute top-2 right-2 text-xs text-red-500 hover:underline opacity-0 group-hover:opacity-100 transition-opacity">Eliminar</button>
+          <div>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase">Institución</label>
+            <input type="text" data-field="institution" value="${data.institution || ''}" class="w-full px-2 py-1 border rounded text-xs focus:outline-blue-500" />
+          </div>
+          <div class="grid sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[10px] font-bold text-gray-400 uppercase">Titulación</label>
+              <input type="text" data-field="studyType" value="${data.studyType || ''}" class="w-full px-2 py-1 border rounded text-xs focus:outline-blue-500" />
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold text-gray-400 uppercase">Área</label>
+              <input type="text" data-field="area" value="${data.area || ''}" class="w-full px-2 py-1 border rounded text-xs focus:outline-blue-500" />
+            </div>
+          </div>
+          <div class="grid sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[10px] font-bold text-gray-400 uppercase">Año Inicio</label>
+              <input type="text" data-field="startDate" value="${data.startDate || ''}" class="w-full px-2 py-1 border rounded text-xs focus:outline-blue-500" />
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold text-gray-400 uppercase">Año Fin</label>
+              <input type="text" data-field="endDate" value="${data.endDate || ''}" class="w-full px-2 py-1 border rounded text-xs focus:outline-blue-500" />
+            </div>
+          </div>
+        `;
+        card.querySelectorAll('input, textarea').forEach(input => {
+          input.addEventListener('input', (e) => {
+            state.education[index][e.target.dataset.field] = e.target.value;
+            saveState();
+          });
+        });
+        card.querySelector('.btn-del').addEventListener('click', () => {
+          state.education.splice(index, 1);
+          saveState();
+          renderDynamicLists();
+        });
+      }
+      return card;
+    }
+
+    function renderDynamicLists() {
+      workContainer.innerHTML = '';
+      state.work.forEach((item, idx) => workContainer.appendChild(createItemBlock('work', idx, item)));
+      eduContainer.innerHTML = '';
+      state.education.forEach((item, idx) => eduContainer.appendChild(createItemBlock('education', idx, item)));
+    }
+
+    document.getElementById('btn-add-work').addEventListener('click', () => {
+      state.work.push({ name: "", position: "", startDate: "", endDate: "", summary: "" });
+      saveState();
+      renderDynamicLists();
+    });
+
+    document.getElementById('btn-add-edu').addEventListener('click', () => {
+      state.education.push({ institution: "", studyType: "", area: "", startDate: "", endDate: "" });
+      saveState();
+      renderDynamicLists();
+    });
+
+    function populateFormBasics() {
+      document.querySelectorAll('#tab-basics input[data-path], #tab-basics textarea[data-path]').forEach(input => {
+        input.value = getDeepValue(state, input.dataset.path) || '';
+      });
+      if (state.basics?.image) {
+        photoStatus.textContent = "Imagen cargada";
+        removePhotoBtn.classList.remove('hidden');
+      }
+    }
+
+    function renderPreview() {
+      document.getElementById('view-name').textContent = state.basics?.name || 'Nombre Completo';
+      document.getElementById('view-label').textContent = state.basics?.label || 'Especialidad Profesional';
+      
+      const contactCont = document.getElementById('view-contact');
+      contactCont.innerHTML = '';
+      if (state.basics?.email) contactCont.innerHTML += `<span>✉ ${state.basics.email}</span>`;
+      if (state.basics?.phone) contactCont.innerHTML += `<span>📞 ${state.basics.phone}</span>`;
+      
+      const imgEl = document.getElementById('view-image');
+      if (state.basics?.image) {
+        imgEl.src = state.basics.image;
+        imgEl.classList.remove('hidden');
+      } else {
+        imgEl.classList.add('hidden');
+      }
+
+      document.getElementById('view-summary').textContent = state.basics?.summary || '';
+
+      const viewWork = document.getElementById('view-experience');
+      viewWork.innerHTML = '';
+      state.work.forEach(w => {
+        const block = document.createElement('div');
+        block.className = "text-sm";
+        block.innerHTML = `
+          <div class="flex justify-between font-semibold text-gray-800">
+            <span>${w.position || 'Puesto'} — <span class="text-gray-600">${w.name || 'Empresa'}</span></span>
+            <span class="text-xs font-normal text-gray-400">${w.startDate || ''} – ${w.endDate || ''}</span>
+          </div>
+          <p class="text-xs text-gray-600 mt-1 leading-relaxed whitespace-pre-line">${w.summary || ''}</p>
+        `;
+        viewWork.appendChild(block);
+      });
+
+      const viewEdu = document.getElementById('view-education');
+      viewEdu.innerHTML = '';
+      state.education.forEach(e => {
+        const block = document.createElement('div');
+        block.className = "text-sm";
+        block.innerHTML = `
+          <div class="flex justify-between font-semibold text-gray-800">
+            <span>${e.studyType || 'Título'} en ${e.area || 'Área'}</span>
+            <span class="text-xs font-normal text-gray-400">${e.startDate || ''} – ${e.endDate || ''}</span>
+          </div>
+          <p class="text-xs text-gray-500">${e.institution || 'Institución'}</p>
+        `;
+        viewEdu.appendChild(block);
+      });
+
+      const badgesContainer = document.getElementById('view-skills-badges');
+      badgesContainer.innerHTML = '';
+      state.skills[0].keywords.forEach(kw => {
+        const b = document.createElement('span');
+        b.className = "badge-item";
+        b.textContent = kw;
+        badgesContainer.appendChild(b);
+      });
+    }
+
+    document.getElementById('tab-basics').addEventListener('input', (e) => {
+      if (e.target.dataset.path) {
+        setDeepValue(state, e.target.dataset.path, e.target.value);
+        saveState();
+      }
+    });
+
+    const tabs = document.querySelectorAll('.tab-btn');
+    const contents = document.querySelectorAll('.tab-content');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('border-blue-600', 'text-blue-600'));
+        tabs.forEach(t => t.classList.add('border-transparent', 'text-gray-500'));
+        contents.forEach(c => c.classList.add('hidden'));
+        tab.classList.remove('border-transparent', 'text-gray-500');
+        tab.classList.add('border-blue-600', 'text-blue-600');
+        document.getElementById(`tab-${tab.dataset.tab}`).classList.remove('hidden');
+      });
+    });
+
+    document.getElementById('btn-print').addEventListener('click', () => window.print());
+
+    document.getElementById('btn-download-json').addEventListener('click', () => {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
+      const anchor = document.createElement('a');
+      anchor.setAttribute("href", dataStr);
+      anchor.setAttribute("download", `resume.${lang}.json`);
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+    });
+
+    document.getElementById('btn-publish').addEventListener('click', async () => {
+      const btn = document.getElementById('btn-publish');
+      btn.disabled = true;
+      btn.textContent = 'Sincronizando...';
+      try {
+        const response = await fetch('/api/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ lang, resumeData: state })
+        });
+        if (response.ok) alert('¡Sincronizado con éxito!');
+        else alert('Error al guardar.');
+      } catch (err) {
+        alert('Fallo de red.');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '🚀 Actualizar Web';
+      }
+    });
+
+    populateFormBasics();
+    renderDynamicLists();
+    renderTags();
+    renderPreview();
+  </script>
+</body>
+</html>

@@ -1,9 +1,9 @@
 ---
 // src/pages/[lang]/index.astro
-// Genera automáticamente /es, /it y /en desde los archivos JSON
 import type { GetStaticPaths } from 'astro';
-import { languages, useTranslations, getAvailableLangs } from '../../i18n/ui';
 import MinimalistLayout from '../../layouts/MinimalistLayout.astro';
+import { useTranslations, getAvailableLangs, type Lang, type UIKeys } from '../../i18n/ui';
+
 import Header      from '../../components/Header.astro';
 import Experience  from '../../components/Experience.astro';
 import Education   from '../../components/Education.astro';
@@ -17,6 +17,7 @@ import resumeEn from '../../data/resume.en.json';
 
 const resumes = { es: resumeEs, it: resumeIt, en: resumeEn };
 
+// CORRECCIÓN AQUÍ: Añadimos 'es' para que Astro sepa generar la página /es/
 export const getStaticPaths = (() => {
   return [
     { params: { lang: 'es' } },
@@ -25,23 +26,23 @@ export const getStaticPaths = (() => {
   ];
 }) satisfies GetStaticPaths;
 
-const { lang } = Astro.params as { lang: keyof typeof languages };
+// Forzamos el tipado correcto de la desestructuración para evitar el error del "index signature" de string
+const { lang } = Astro.params as { lang: 'es' | 'it' | 'en' };
 const resume = resumes[lang];
-const t = useTranslations(lang);
 
-// Si el JSON está vacío, mostrar asistente de instalación
+const strictT = useTranslations(lang);
+const t = (key: string) => strictT(key as UIKeys);
+
 const isEmpty = !resume?.basics?.name?.trim();
-
-// Idiomas disponibles para el selector
 const availableLangs = getAvailableLangs(resumes);
 ---
 
 {isEmpty ? (
-  <SetupWizard lang={lang} t={t} />
+  <SetupWizard availableLangs={['es', 'it', 'en']} defaultLang={lang} />
 ) : (
   <MinimalistLayout
     title={`${resume.basics.name} — ${resume.basics.label}`}
-    description={`${t('meta.description')} ${resume.basics.name}`}
+    description={`CV of ${resume.basics.name}`}
     lang={lang}
     currentLang={lang}
     availableLangs={availableLangs}
@@ -49,9 +50,9 @@ const availableLangs = getAvailableLangs(resumes);
     t={t}
   >
     <Header      resume={resume} lang={lang} t={t} availableLangs={availableLangs} />
-    {resume.work?.length     > 0 && <Experience resume={resume} t={t} />}
+    {resume.work?.length      > 0 && <Experience resume={resume} t={t} />}
     {resume.education?.length > 0 && <Education  resume={resume} t={t} />}
-    {resume.skills?.length   > 0 && <Skills     resume={resume} t={t} />}
-    {resume.projects?.length > 0 && <Projects   resume={resume} t={t} />}
+    {resume.skills?.length    > 0 && <Skills     resume={resume} t={t} />}
+    {resume.projects?.length  > 0 && <Projects   resume={resume} t={t} />}
   </MinimalistLayout>
 )}

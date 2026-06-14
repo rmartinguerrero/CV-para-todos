@@ -1,0 +1,932 @@
+=== FILE: ./src/pages/index.astro ===
+---
+// src/pages/index.astro
+import SetupWizard from '../components/SetupWizard.astro';
+import { defaultLang, getAvailableLangs } from '../i18n/ui';
+import resumeEs from '../data/resume.es.json';
+import resumeIt from '../data/resume.it.json';
+import resumeEn from '../data/resume.en.json';
+
+const resumes = { es: resumeEs, it: resumeIt, en: resumeEn };
+
+// Comprobamos si el proyecto está completamente vacío
+const isBrandNew = !resumeEs.basics?.name && !resumeIt.basics?.name && !resumeEn.basics?.name;
+
+const available = getAvailableLangs(resumes);
+const target = available.length === 1 ? available[0] : defaultLang;
+---
+
+{isBrandNew ? (
+  <SetupWizard availableLangs={['es', 'it', 'en']} defaultLang={defaultLang} />
+) : (
+  <html lang={target}>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Redirigiendo…</title>
+    <script define:vars={{ available, defaultLang: target }}>
+      // Detección de idioma del navegador en el cliente
+      const preferred = navigator.languages
+        .map(l => l.split('-')[0])
+        .find(l => available.includes(l));
+      
+      const lang = preferred ?? defaultLang;
+      window.location.replace(`/${lang}/`);
+    </script>
+    <noscript>
+      <meta http-equiv="refresh" content={`0; url=/${target}/`} />
+    </noscript>
+  </head>
+  <body>
+    <p style="font-family: sans-serif; text-align: center; margin-top: 2rem; color: #666;">
+      Redirigiendo a tu currículum...
+    </p>
+  </body>
+  </html>
+)}
+
+=== FILE: ./src/i18n/ui.ts ===
+// src/i18n/ui.ts
+// Cadenas de interfaz para los 3 idiomas soportados
+
+export const languages = {
+  es: 'Español',
+  it: 'Italiano',
+  en: 'English',
+} as const;
+
+export type Lang = keyof typeof languages;
+
+export const defaultLang: Lang = 'es';
+
+export const ui = {
+  es: {
+    'nav.experience':  'Experiencia',
+    'nav.education':   'Formación',
+    'nav.skills':      'Habilidades',
+    'nav.projects':    'Proyectos',
+    'nav.contact':     'Contacto',
+    'nav.print':       'Imprimir',
+    'nav.language':    'Idioma',
+    'section.experience':  'Experiencia profesional',
+    'section.education':   'Formación académica',
+    'section.skills':      'Habilidades',
+    'section.projects':    'Proyectos',
+    'section.languages':   'Idiomas',
+    'label.present':       'Actualidad',
+    'label.viewProject':   'Ver proyecto',
+    'label.viewCompany':   'Ver empresa',
+    'setup.title':         'Configuración inicial',
+    'setup.step1':         'Activa GitHub Pages en Ajustes → Pages → Source: GitHub Actions',
+    'setup.step2':         'Regresa a tu repositorio y pulsa el punto (.) para editar tu CV',
+    'setup.cta':           'Ir a Ajustes de GitHub',
+    'meta.description':    'Currículum de',
+  },
+  it: {
+    'nav.experience':  'Esperienza',
+    'nav.education':   'Formazione',
+    'nav.skills':      'Competenze',
+    'nav.projects':    'Progetti',
+    'nav.contact':     'Contatti',
+    'nav.print':       'Stampa',
+    'nav.language':    'Lingua',
+    'section.experience':  'Esperienza professionale',
+    'section.education':   'Formazione accademica',
+    'section.skills':      'Competenze',
+    'section.projects':    'Progetti',
+    'section.languages':   'Lingue',
+    'label.present':       'Presente',
+    'label.viewProject':   'Vedi progetto',
+    'label.viewCompany':   'Vedi azienda',
+    'setup.title':         'Configurazione iniziale',
+    'setup.step1':         'Attiva GitHub Pages in Impostazioni → Pages → Source: GitHub Actions',
+    'setup.step2':         'Torna al tuo repository e premi il punto (.) per modificare il tuo CV',
+    'setup.cta':           'Vai alle Impostazioni di GitHub',
+    'meta.description':    'Curriculum di',
+  },
+  en: {
+    'nav.experience':  'Experience',
+    'nav.education':   'Education',
+    'nav.skills':      'Skills',
+    'nav.projects':    'Projects',
+    'nav.contact':     'Contact',
+    'nav.print':       'Print',
+    'nav.language':    'Language',
+    'section.experience':  'Work experience',
+    'section.education':   'Education',
+    'section.skills':      'Skills',
+    'section.projects':    'Projects',
+    'section.languages':   'Languages',
+    'label.present':       'Present',
+    'label.viewProject':   'View project',
+    'label.viewCompany':   'View company',
+    'setup.title':         'Initial setup',
+    'setup.step1':         'Enable GitHub Pages in Settings → Pages → Source: GitHub Actions',
+    'setup.step2':         'Return to your repository and press the dot (.) to edit your CV',
+    'setup.cta':           'Go to GitHub Settings',
+    'meta.description':    'Resume of',
+  },
+} as const;
+
+export function useTranslations(lang: Lang) {
+  return function t(key: keyof typeof ui[typeof defaultLang]): string {
+    return ui[lang][key] ?? ui[defaultLang][key] ?? key;
+  };
+}
+
+// Devuelve el idioma a partir de la URL (p.ej. /it/... → 'it')
+export function getLangFromUrl(url: URL): Lang {
+  const [, lang] = url.pathname.split('/');
+  if (lang in languages) return lang as Lang;
+  return defaultLang;
+}
+
+// Lista de idiomas con datos del JSON (para no publicar pestañas vacías)
+export function getAvailableLangs(resumes: Record<string, any>): Lang[] {
+  return (Object.keys(languages) as Lang[]).filter(
+    (lang) => resumes[lang]?.basics?.name?.trim()
+  );
+}
+
+
+=== FILE: ./src/components/Skills.astro ===
+---
+// src/components/Skills.astro
+interface Props {
+  resume: any;
+  t:      (key: string) => string;
+}
+const { resume, t } = Astro.props;
+---
+
+<section class="mb-10 print:mb-6" aria-labelledby="skills-heading">
+  <h2
+    id="skills-heading"
+    class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-5 pb-2 border-b border-gray-100"
+  >
+    {t('section.skills')}
+  </h2>
+
+  <dl class="grid sm:grid-cols-2 gap-x-8 gap-y-4">
+    {resume.skills.filter((s: any) => s.name).map((skill: any) => (
+      <div>
+        <dt class="text-sm font-medium text-gray-800">
+          {skill.name}
+          {skill.level && (
+            <span class="ml-1.5 text-xs font-normal text-gray-400">· {skill.level}</span>
+          )}
+        </dt>
+        {skill.keywords?.length > 0 && (
+          <dd class="mt-1.5 flex flex-wrap gap-1.5">
+            {skill.keywords.filter(Boolean).map((kw: string) => (
+              <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                {kw}
+              </span>
+            ))}
+          </dd>
+        )}
+      </div>
+    ))}
+  </dl>
+
+  <!-- Idiomas -->
+  {resume.languages?.length > 0 && (
+    <div class="mt-6">
+      <h3 class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">
+        {t('section.languages')}
+      </h3>
+      <ul class="flex flex-wrap gap-2">
+        {resume.languages.filter((l: any) => l.language).map((lang: any) => (
+          <li class="text-sm text-gray-700">
+            <span class="font-medium">{lang.language}</span>
+            {lang.fluency && <span class="text-gray-400"> · {lang.fluency}</span>}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )}
+</section>
+
+
+=== FILE: ./src/components/Header.astro ===
+---
+// src/components/Header.astro
+interface Props {
+  resume:         any;
+  lang:           string;
+  t:              (key: string) => string;
+  availableLangs: string[];
+}
+
+const { resume, lang, t, availableLangs } = Astro.props;
+const { basics } = resume;
+---
+
+<header class="mb-10 print:mb-6">
+  <!-- Barra superior: selector de idioma + botón imprimir -->
+  <div class="flex justify-between items-center mb-6 no-print">
+    <!-- Selector de idioma -->
+    <nav aria-label={t('nav.language')} class="flex gap-2">
+      {availableLangs.map((l) => (
+        <a
+          href={`/${l}/`}
+          aria-current={l === lang ? 'page' : undefined}
+          class:list={[
+            'px-3 py-1 rounded-full text-sm font-medium transition-colors',
+            l === lang
+              ? 'bg-gray-900 text-white'
+              : 'bg-white border border-gray-200 text-gray-600 hover:border-gray-400',
+          ]}
+        >
+          {l.toUpperCase()}
+        </a>
+      ))}
+    </nav>
+
+    <!-- Botón imprimir -->
+    <button
+      onclick="window.print()"
+      class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200
+             text-sm text-gray-600 hover:border-gray-400 transition-colors bg-white"
+      aria-label={t('nav.print')}
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+           fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <polyline points="6 9 6 2 18 2 18 9"/>
+        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+        <rect x="6" y="14" width="12" height="8"/>
+      </svg>
+      {t('nav.print')}
+    </button>
+  </div>
+
+  <!-- Perfil: foto + nombre + datos de contacto -->
+  <div class="flex flex-col sm:flex-row gap-6 items-start">
+    {basics.image && (
+      <img
+        src={basics.image}
+        alt={basics.name}
+        width="96"
+        height="96"
+        class="w-24 h-24 rounded-full object-cover border-2 border-white shadow-md flex-shrink-0"
+      />
+    )}
+
+    <div class="flex-1 min-w-0">
+      <h1 class="text-3xl font-bold tracking-tight text-gray-900 print:text-2xl">
+        {basics.name}
+      </h1>
+      {basics.label && (
+        <p class="mt-1 text-lg text-gray-500">{basics.label}</p>
+      )}
+      {basics.summary && (
+        <p class="mt-3 text-sm text-gray-600 leading-relaxed max-w-2xl">
+          {basics.summary}
+        </p>
+      )}
+
+      <!-- Datos de contacto -->
+      <ul class="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-gray-600">
+        {basics.email && (
+          <li>
+            <a href={`mailto:${basics.email}`} target="_blank" rel="noopener"
+               class="hover:text-gray-900 transition-colors">
+              {basics.email}
+            </a>
+          </li>
+        )}
+        {basics.phone && (
+          <li>
+            <a href={`tel:${basics.phone}`} class="hover:text-gray-900 transition-colors">
+              {basics.phone}
+            </a>
+          </li>
+        )}
+        {basics.url && (
+          <li>
+            <a href={basics.url} target="_blank" rel="noopener noreferrer"
+               class="hover:text-gray-900 transition-colors">
+              {basics.url.replace(/^https?:\/\//, '')}
+            </a>
+          </li>
+        )}
+        {basics.location?.city && (
+          <li class="text-gray-400">
+            {[basics.location.city, basics.location.region].filter(Boolean).join(', ')}
+          </li>
+        )}
+      </ul>
+
+      <!-- Redes sociales -->
+      {basics.profiles?.length > 0 && (
+        <ul class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+          {basics.profiles.filter((p: any) => p.url).map((profile: any) => (
+            <li>
+              <a
+                href={profile.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-gray-500 hover:text-gray-900 transition-colors"
+              >
+                {profile.network}
+                {profile.username && <span class="text-gray-400"> @{profile.username}</span>}
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  </div>
+</header>
+
+
+=== FILE: ./src/components/SetupWizard.astro ===
+---
+// src/components/SetupWizard.astro
+interface Props {
+  availableLangs: string[];
+  defaultLang: string;
+}
+const { availableLangs, defaultLang } = Astro.props;
+---
+<!DOCTYPE html>
+<html translate="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CV Para Todos</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Inter', system-ui, sans-serif; }
+  </style>
+</head>
+<body class="bg-[#0e0f14] text-[#d4d6e0] min-h-screen flex items-center justify-center p-4">
+  <div class="bg-[#16181f] border border-[#2a2d3a] rounded-2xl p-8 max-w-md w-full text-center shadow-2xl">
+    
+    <div class="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center mx-auto mb-5 shadow-[0_0_15px_rgba(79,126,247,0.3)]">
+      <div class="w-3 h-3 rounded-full bg-[#4f7ef7]"></div>
+    </div>
+    
+    <h1 id="wizard-title" class="text-2xl font-bold text-white mb-3 tracking-tight">...</h1>
+    <p id="wizard-desc" class="text-[#666b80] text-[13px] leading-relaxed mb-6">...</p>
+
+    <a
+      href="/admin"
+      id="wizard-btn"
+      class="w-full py-3 px-4 bg-[#4f7ef7] hover:opacity-90 text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-all shadow-md text-xs tracking-wide"
+    >
+      ...
+    </a>
+    
+    <div class="mt-6 pt-4 border-t border-[#2a2d3a]/60 grid grid-cols-3 gap-2 text-[10px] text-[#666b80]" id="wizard-features">
+    </div>
+  </div>
+
+  <script define:vars={{ availableLangs, defaultLang }}>
+    const i18n = {
+      es: {
+        title: "¡Bienvenido a CV Para Todos!",
+        desc: "Tu plantilla web multiidioma está lista. Olvídate de modificar código; hemos preparado un entorno visual para gestionar tu currículum.",
+        btn: "Comenzar Configuración Visual →",
+        f1: "🔒 100% Privado", f2: "⚡ Ultra Rápido", f3: "🛠️ No-Code"
+      },
+      it: {
+        title: "Benvenuto su CV Para Todos!",
+        desc: "Il tuo modello web multilingua è pronto. Dimentica la modifica del codice; abbiamo preparato un ambiente visuale per gestire il tuo CV.",
+        btn: "Inizia la Configurazione Visuale →",
+        f1: "🔒 100% Privato", f2: "⚡ Ultra Rapido", f3: "🛠️ No-Code"
+      },
+      en: {
+        title: "Welcome to CV Para Todos!",
+        desc: "Your multi-language web template is ready. Forget about editing code; we have prepared a visual environment to manage your resume.",
+        btn: "Start Visual Setup →",
+        f1: "🔒 100% Private", f2: "⚡ Ultra Fast", f3: "🛠️ No-Code"
+      }
+    };
+
+    const preferred = navigator.languages
+      .map(l => l.split('-')[0])
+      .find(l => availableLangs.includes(l));
+    
+    const lang = preferred ?? defaultLang;
+    const t = i18n[lang];
+
+    document.getElementById('wizard-title').textContent = t.title;
+    document.getElementById('wizard-desc').textContent = t.desc;
+    document.getElementById('wizard-btn').textContent = t.btn;
+    document.getElementById('wizard-features').innerHTML = `
+      <div>${t.f1}</div>
+      <div>${t.f2}</div>
+      <div>${t.f3}</div>
+    `;
+    document.documentElement.lang = lang;
+  </script>
+</body>
+</html>
+
+=== FILE: ./src/components/Education.astro ===
+---
+// src/components/Education.astro
+interface Props {
+  resume: any;
+  t:      (key: string) => string;
+}
+const { resume, t } = Astro.props;
+---
+
+<section class="mb-10 print:mb-6" aria-labelledby="education-heading">
+  <h2
+    id="education-heading"
+    class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-5 pb-2 border-b border-gray-100"
+  >
+    {t('section.education')}
+  </h2>
+
+  <ol class="space-y-5">
+    {resume.education.filter((edu: any) => edu.institution).map((edu: any) => (
+      <li class="grid sm:grid-cols-[1fr_auto] gap-x-6">
+        <div>
+          <div class="flex flex-wrap items-baseline gap-x-2">
+            <h3 class="font-semibold text-gray-900">
+              {[edu.studyType, edu.area].filter(Boolean).join(' — ')}
+            </h3>
+            {edu.url ? (
+              <a
+                href={edu.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-sm text-gray-500 hover:text-gray-900 transition-colors"
+              >
+                {edu.institution} ↗
+              </a>
+            ) : (
+              <span class="text-sm text-gray-500">{edu.institution}</span>
+            )}
+          </div>
+          {edu.score && (
+            <p class="text-sm text-gray-500 mt-0.5">{edu.score}</p>
+          )}
+          {edu.courses?.length > 0 && (
+            <ul class="mt-2 flex flex-wrap gap-1.5">
+              {edu.courses.filter(Boolean).map((course: string) => (
+                <li class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                  {course}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+        <time class="text-xs text-gray-400 whitespace-nowrap sm:text-right mt-0.5">
+          {edu.startDate}
+          {edu.startDate && edu.endDate && ' — '}
+          {edu.endDate}
+        </time>
+      </li>
+    ))}
+  </ol>
+</section>
+
+
+=== FILE: ./src/components/Projects.astro ===
+---
+// src/components/Projects.astro
+interface Props {
+  resume: any;
+  t:      (key: string) => string;
+}
+const { resume, t } = Astro.props;
+---
+
+<section class="mb-10 print:mb-6" aria-labelledby="projects-heading">
+  <h2
+    id="projects-heading"
+    class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-5 pb-2 border-b border-gray-100"
+  >
+    {t('section.projects')}
+  </h2>
+
+  <ul class="space-y-5">
+    {resume.projects.filter((p: any) => p.name).map((project: any) => (
+      <li>
+        <div class="flex flex-wrap items-baseline gap-x-2">
+          <h3 class="font-semibold text-gray-900">{project.name}</h3>
+          {project.url && (
+            <a
+              href={project.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-sm text-gray-500 hover:text-gray-900 transition-colors"
+              aria-label={`${t('label.viewProject')}: ${project.name}`}
+            >
+              {new URL(project.url).hostname} ↗
+            </a>
+          )}
+        </div>
+        {project.description && (
+          <p class="mt-1 text-sm text-gray-600 leading-relaxed">{project.description}</p>
+        )}
+        {project.keywords?.length > 0 && (
+          <ul class="mt-2 flex flex-wrap gap-1.5" aria-label="Tecnologías">
+            {project.keywords.filter(Boolean).map((kw: string) => (
+              <li class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                {kw}
+              </li>
+            ))}
+          </ul>
+        )}
+      </li>
+    ))}
+  </ul>
+</section>
+
+
+=== FILE: ./src/components/Experience.astro ===
+---
+// src/components/Experience.astro
+interface Props {
+  resume: any;
+  t:      (key: string) => string;
+}
+const { resume, t } = Astro.props;
+---
+
+<section class="mb-10 print:mb-6" aria-labelledby="experience-heading">
+  <h2
+    id="experience-heading"
+    class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-5 pb-2 border-b border-gray-100"
+  >
+    {t('section.experience')}
+  </h2>
+
+  <ol class="space-y-6">
+    {resume.work.filter((job: any) => job.name).map((job: any) => (
+      <li class="grid sm:grid-cols-[1fr_auto] gap-x-6">
+        <div>
+          <div class="flex flex-wrap items-baseline gap-x-2">
+            <h3 class="font-semibold text-gray-900">{job.position}</h3>
+            {job.url ? (
+              <a
+                href={job.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-sm text-gray-500 hover:text-gray-900 transition-colors"
+                aria-label={`${t('label.viewCompany')} ${job.name}`}
+              >
+                {job.name} ↗
+              </a>
+            ) : (
+              <span class="text-sm text-gray-500">{job.name}</span>
+            )}
+          </div>
+          {job.summary && (
+            <p class="mt-1.5 text-sm text-gray-600 leading-relaxed">{job.summary}</p>
+          )}
+          {job.highlights?.length > 0 && (
+            <ul class="mt-2 space-y-0.5 text-sm text-gray-600 list-disc list-inside">
+              {job.highlights.filter(Boolean).map((h: string) => (
+                <li>{h}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+        <time class="text-xs text-gray-400 whitespace-nowrap sm:text-right mt-0.5">
+          {job.startDate}
+          {job.startDate && ' — '}
+          {job.endDate || (job.startDate ? t('label.present') : '')}
+        </time>
+      </li>
+    ))}
+  </ol>
+</section>
+
+
+=== FILE: ./src/layouts/MinimalistLayout.astro ===
+---
+// src/layouts/MinimalistLayout.astro
+// Layout base que comparten todas las plantillas
+interface Props {
+  title:          string;
+  description:    string;
+  lang:           string;
+  currentLang:    string;
+  availableLangs: string[];
+  resume:         any;
+  t:              (key: string) => string;
+}
+
+const { title, description, lang, resume } = Astro.props;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const ogImage = resume?.basics?.image || '';
+---
+<!DOCTYPE html>
+<html lang={lang} translate="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <link rel="canonical" href={canonicalURL} />
+
+  <!-- Open Graph / LinkedIn / WhatsApp -->
+  <meta property="og:type"        content="profile" />
+  <meta property="og:title"       content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:url"         content={canonicalURL} />
+  {ogImage && <meta property="og:image" content={ogImage} />}
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary" />
+  <meta name="twitter:title"       content={title} />
+  <meta name="twitter:description" content={description} />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    @media print {
+      nav, .no-print      { display: none !important; }
+      a::after            { content: " (" attr(href) ")"; font-size: 0.75rem; color: #555; }
+      body                { background: white; color: black; }
+      .print\:shadow-none { box-shadow: none !important; }
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900 font-sans antialiased min-h-screen">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+    <slot />
+  </div>
+</body>
+</html>
+
+
+=== FILE: ./src/data/resume.es.json ===
+{
+  "$schema": "https://raw.githubusercontent.com/jsonresume/resume-schema/v1.0.0/schema.json",
+  "basics": {
+    "name": "",
+    "label": "",
+    "image": "",
+    "email": "",
+    "phone": "",
+    "url": "",
+    "summary": "",
+    "location": {
+      "city": "",
+      "countryCode": "GB",
+      "region": ""
+    },
+    "profiles": [
+      { "network": "LinkedIn", "username": "", "url": "" },
+      { "network": "GitHub",   "username": "", "url": "" }
+    ]
+  },
+  "work": [
+    {
+      "name": "",
+      "position": "",
+      "url": "",
+      "startDate": "",
+      "endDate": "",
+      "summary": "",
+      "highlights": []
+    }
+  ],
+  "education": [
+    {
+      "institution": "",
+      "url": "",
+      "area": "",
+      "studyType": "",
+      "startDate": "",
+      "endDate": "",
+      "score": "",
+      "courses": []
+    }
+  ],
+  "skills": [
+    { "name": "", "level": "", "keywords": [] }
+  ],
+  "languages": [
+    { "language": "English", "fluency": "Native" }
+  ],
+  "projects": [
+    {
+      "name": "",
+      "description": "",
+      "highlights": [],
+      "keywords": [],
+      "url": ""
+    }
+  ],
+  "meta": {
+    "canonical": "https://raw.githubusercontent.com/jsonresume/resume-schema/master/resume.json",
+    "version": "v1.0.0",
+    "lastModified": ""
+  }
+}
+
+
+=== FILE: ./src/data/resume.it.json ===
+{
+  "$schema": "https://raw.githubusercontent.com/jsonresume/resume-schema/v1.0.0/schema.json",
+  "basics": {
+    "name": "",
+    "label": "",
+    "image": "",
+    "email": "",
+    "phone": "",
+    "url": "",
+    "summary": "",
+    "location": {
+      "city": "",
+      "countryCode": "GB",
+      "region": ""
+    },
+    "profiles": [
+      { "network": "LinkedIn", "username": "", "url": "" },
+      { "network": "GitHub",   "username": "", "url": "" }
+    ]
+  },
+  "work": [
+    {
+      "name": "",
+      "position": "",
+      "url": "",
+      "startDate": "",
+      "endDate": "",
+      "summary": "",
+      "highlights": []
+    }
+  ],
+  "education": [
+    {
+      "institution": "",
+      "url": "",
+      "area": "",
+      "studyType": "",
+      "startDate": "",
+      "endDate": "",
+      "score": "",
+      "courses": []
+    }
+  ],
+  "skills": [
+    { "name": "", "level": "", "keywords": [] }
+  ],
+  "languages": [
+    { "language": "English", "fluency": "Native" }
+  ],
+  "projects": [
+    {
+      "name": "",
+      "description": "",
+      "highlights": [],
+      "keywords": [],
+      "url": ""
+    }
+  ],
+  "meta": {
+    "canonical": "https://raw.githubusercontent.com/jsonresume/resume-schema/master/resume.json",
+    "version": "v1.0.0",
+    "lastModified": ""
+  }
+}
+
+
+=== FILE: ./src/data/resume.en.json ===
+{
+  "$schema": "https://raw.githubusercontent.com/jsonresume/resume-schema/v1.0.0/schema.json",
+  "basics": {
+    "name": "",
+    "label": "",
+    "image": "",
+    "email": "",
+    "phone": "",
+    "url": "",
+    "summary": "",
+    "location": {
+      "city": "",
+      "countryCode": "GB",
+      "region": ""
+    },
+    "profiles": [
+      { "network": "LinkedIn", "username": "", "url": "" },
+      { "network": "GitHub",   "username": "", "url": "" }
+    ]
+  },
+  "work": [
+    {
+      "name": "",
+      "position": "",
+      "url": "",
+      "startDate": "",
+      "endDate": "",
+      "summary": "",
+      "highlights": []
+    }
+  ],
+  "education": [
+    {
+      "institution": "",
+      "url": "",
+      "area": "",
+      "studyType": "",
+      "startDate": "",
+      "endDate": "",
+      "score": "",
+      "courses": []
+    }
+  ],
+  "skills": [
+    { "name": "", "level": "", "keywords": [] }
+  ],
+  "languages": [
+    { "language": "English", "fluency": "Native" }
+  ],
+  "projects": [
+    {
+      "name": "",
+      "description": "",
+      "highlights": [],
+      "keywords": [],
+      "url": ""
+    }
+  ],
+  "meta": {
+    "canonical": "https://raw.githubusercontent.com/jsonresume/resume-schema/master/resume.json",
+    "version": "v1.0.0",
+    "lastModified": ""
+  }
+}
+
+
+=== FILE: ./package.json ===
+{
+  "name": "cv-para-todos",
+  "type": "module",
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "astro": "^5.0.0",
+    "@astrojs/tailwind": "^5.0.0",
+    "tailwindcss": "^3.4.0"
+  }
+}
+
+
+=== FILE: ./tailwind.config.mjs ===
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: ['./src/**/*.{astro,html,js,jsx,ts,tsx}'],
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        serif: ['Playfair Display', 'Georgia', 'serif'],
+        mono: ['JetBrains Mono', 'monospace'],
+      },
+      colors: {
+        brand: {
+          50:  '#f0f4ff',
+          100: '#dce6ff',
+          500: '#4f6ef7',
+          600: '#3b56e8',
+          700: '#2d44c9',
+          900: '#1a2a7a',
+        },
+      },
+    },
+  },
+  plugins: [],
+};
+
+
+=== FILE: ./astro.config.mjs ===
+import { defineConfig } from 'astro/config';
+import tailwind from '@astrojs/tailwind';
+
+export default defineConfig({
+  integrations: [tailwind()],
+  i18n: {
+    defaultLocale: 'es',
+    locales: ['es', 'it', 'en'],
+    routing: {
+      prefixDefaultLocale: false,
+    },
+  },
+  output: 'static',
+
+  site: 'https://cvparatodos.com',
+});
+
+
