@@ -26,7 +26,9 @@ const templates = layoutFiles.map((file) => {
   // Sacamos el identificador partiendo del nombre del archivo por si templateId fallase
   const fileId = file.file.split('/').pop()?.replace('.astro', '').toLowerCase() || 'default';
   
-  const rawKey = file.templateName; 
+  // Accedemos de forma segura a través de frontmatter o haciendo casting a any para evitar fallos en compilación de TS
+  const anyFile = file as any;
+  const rawKey = anyFile.frontmatter?.templateName || anyFile.templateName; 
   let translatedName = fileId.toUpperCase();
 
   // Si la directiva exportada contiene un punto o empieza por templates, la pasamos por la función t() de UIKeys
@@ -35,9 +37,9 @@ const templates = layoutFiles.map((file) => {
   }
 
   return {
-    id: file.templateId || fileId,
+    id: anyFile.frontmatter?.templateId || anyFile.templateId || fileId,
     name: translatedName,
-    svg: file.templateSvg || `<svg viewBox="0 0 100 120" class="w-full h-full text-gray-400"><rect width="100" height="120" rx="8" fill="#f3f4f6" stroke="currentColor" stroke-width="2"/><line x1="15" y1="25" x2="85" y2="25" stroke="currentColor" stroke-width="2"/></svg>`
+    svg: anyFile.frontmatter?.templateSvg || anyFile.templateSvg || `<svg viewBox="0 0 100 120" class="w-full h-full text-gray-400"><rect width="100" height="120" rx="8" fill="#f3f4f6" stroke="currentColor" stroke-width="2"/><line x1="15" y1="25" x2="85" y2="25" stroke="currentColor" stroke-width="2"/></svg>`
   };
 });
 ---
@@ -184,7 +186,7 @@ const templates = layoutFiles.map((file) => {
     </div>
 
     <div id="preview-section" data-template={templates[0]?.id || 'minimal'} class="bg-white p-8 rounded-2xl border border-gray-200 shadow-lg min-h-[297mm] transition-all duration-300 print:shadow-none print:border-0 print:p-0 print:block">
-      <header id="preview-header" class="flex gap-6 items-start pb-6 border-b">
+      <header id="preview-header" class="flex gap-6 items-start pb-6 border-b flex-row-reverse">
         <div class="flex-1">
           <h2 id="view-name" class="font-bold tracking-tight text-gray-900"></h2>
           <p id="view-label" class="mt-1 font-medium"></p>
