@@ -24,45 +24,127 @@ const t = (key: string) => strictT(key as UIKeys);
   resume={{}}
   t={t}
 >
-  <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans">
-    <div class="max-w-md w-full mx-auto bg-white rounded-2xl shadow-xl border border-gray-100 p-8 text-center space-y-6">
+  <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col justify-center py-6 px-4 sm:px-6 lg:px-8 font-sans overflow-hidden">
+    <div class="max-w-md w-full mx-auto bg-white rounded-2xl shadow-xl border border-gray-100 p-6 text-center space-y-4 my-auto">
       
-      <div class="flex justify-center gap-2 bg-gray-100 p-1 rounded-lg w-fit mx-auto text-xs">
-        {Object.entries(languages).map(([code, label]) => (
-          <a 
-            href={`/${code}/`}
-            class={`px-3 py-1 rounded transition-colors ${code === lang ? 'bg-blue-600 text-white shadow' : 'text-gray-500 hover:text-gray-900'}`}
-          >
-            {label} {/* <--- AQUÍ FALTABA POR CERRAR LA LLAVE DEL RECUADRO */}
+      <div class="flex flex-col items-center gap-1.5">
+        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Idioma del CV</span>
+        <div class="inline-flex rounded-xl bg-gray-100 p-1 border border-gray-200">
+          <a href="/es/" class={`px-3 py-1 rounded-lg text-xs font-semibold transition-all no-underline ${lang === 'es' ? 'bg-white text-gray-900 shadow-sm border border-gray-200/50' : 'text-gray-500 hover:text-gray-900'}`}>
+            🇪🇸 Español
           </a>
-        ))}
+          <a href="/it/" class={`px-3 py-1 rounded-lg text-xs font-semibold transition-all no-underline ${lang === 'it' ? 'bg-white text-gray-900 shadow-sm border border-gray-200/50' : 'text-gray-500 hover:text-gray-900'}`}>
+            🇮🇹 Italiano
+          </a>
+          <a href="/en/" class={`px-3 py-1 rounded-lg text-xs font-semibold transition-all no-underline ${lang === 'en' ? 'bg-white text-gray-900 shadow-sm border border-gray-200/50' : 'text-gray-500 hover:text-gray-900'}`}>
+            🇺🇸 English
+          </a>
+        </div>
       </div>
 
-      <div class="space-y-2">
-        <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight sm:text-3xl">
+      <div class="space-y-1">
+        <h1 class="text-xl font-extrabold text-gray-900 tracking-tight sm:text-2xl">
           {t('wizard.welcome')}
         </h1>
-        <p class="text-sm text-gray-500">
+        <p class="text-xs text-gray-500 max-w-xs mx-auto">
           {t('wizard.subtitle')}
         </p>
       </div>
 
-      <div class="flex flex-col gap-3 pt-4">
+      <div class="flex flex-col gap-2.5 pt-2">
         <a 
           href={`/${lang}/edit`}
-          class="w-full inline-flex justify-center items-center py-3 px-4 border border-transparent text-sm font-medium rounded-xl text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-md"
+          class="w-full inline-flex justify-center items-center py-2.5 px-4 border border-transparent text-xs font-medium rounded-xl text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-md no-underline"
         >
           ✨ {t('wizard.create')}
         </a>
         
-        <button 
-          id=\"oauth-trigger-btn\"
-          class="w-full inline-flex justify-center items-center py-3 px-4 border border-gray-300 text-sm font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-colors shadow-sm"
-        >
-          🔑 {t('wizard.import')}
-        </button>
+        <input type="file" id="wizard-file-input" accept=".json" class="hidden" />
+        
+        <div class="space-y-1">
+          <button 
+            type="button"
+            id="wizard-import-btn"
+            class="w-full inline-flex justify-center items-center py-2.5 px-4 border border-gray-300 text-xs font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-colors shadow-sm cursor-pointer"
+          >
+            📥 {t('wizard.import')}
+          </button>
+          <p class="text-[10px] text-gray-400 font-medium">
+            Archivo recomendado: <span class="text-blue-600 font-mono">resume.{lang}.json</span>
+          </p>
+        </div>
       </div>
 
     </div>
   </div>
 </MinimalistLayout>
+
+<script define:vars={{ lang }}>
+  const alerts = {
+    es: { 
+      success: "¡JSON importado con éxito para Español!", 
+      error: "El archivo no contiene un JSON válido.",
+      warning: "¡Cuidado! El nombre del archivo parece ser de otro idioma. Asegúrate de estar subiendo los datos correctos para Español."
+    },
+    it: { 
+      success: "JSON importato con successo per l'Italiano!", 
+      error: "Il file non contiene un JSON valido.",
+      warning: "Attenzione! Il nome del file sembra appartenere a un'altra lingua. Assicurati di caricare i dati corretti per l'Italiano."
+    },
+    en: { 
+      success: "JSON successfully imported for English!", 
+      error: "Invalid JSON file.",
+      warning: "Warning! The file name seems to be for another language. Make sure you are uploading the correct data for English."
+    }
+  };
+
+  const currentAlerts = alerts[lang] || alerts.es;
+
+  const importBtn = document.getElementById('wizard-import-btn');
+  const fileInput = document.getElementById('wizard-file-input');
+
+  importBtn?.addEventListener('click', () => fileInput?.click());
+
+  fileInput?.addEventListener('change', (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const fileName = file.name.toLowerCase();
+    const otherLangs = ['es', 'it', 'en'].filter(l => l !== lang);
+    
+    const detectsWrongLang = otherLangs.some(l => fileName.includes(`.${l}.json`) || fileName.includes(`-${l}.json`));
+    
+    if (detectsWrongLang) {
+      const proceed = confirm(currentAlerts.warning);
+      if (!proceed) {
+        fileInput.value = ''; 
+        return;
+      }
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      try {
+        const parsedJson = JSON.parse(evt.target.result);
+
+        if (!parsedJson.skills || !Array.isArray(parsedJson.skills)) {
+          parsedJson.skills = [{ name: "Skills", keywords: [] }];
+        } else if (parsedJson.skills.length === 0) {
+          parsedJson.skills = [{ name: "Skills", keywords: [] }];
+        } else {
+          if (!parsedJson.skills[0].keywords || !Array.isArray(parsedJson.skills[0].keywords)) {
+            parsedJson.skills[0].keywords = [];
+          }
+        }
+
+        localStorage.setItem(`cv_backup_data_${lang}`, JSON.stringify(parsedJson));
+        
+        alert(currentAlerts.success);
+        window.location.href = `/${lang}/edit`;
+      } catch (err) {
+        alert(currentAlerts.error);
+      }
+    };
+    reader.readAsText(file);
+  });
+</script>
