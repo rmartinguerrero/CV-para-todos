@@ -11,6 +11,9 @@ importers:
       '@astrojs/tailwind':
         specifier: ^5.0.0
         version: 5.1.5(astro@5.18.2(jiti@1.21.7)(rollup@4.61.1)(typescript@5.9.3)(yaml@2.9.0))(tailwindcss@3.4.19(yaml@2.9.0))
+      '@octokit/core':
+        specifier: ^7.0.6
+        version: 7.0.6
       '@octokit/rest':
         specifier: ^22.0.1
         version: 22.0.1
