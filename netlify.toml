@@ -3,10 +3,4 @@
   command = "pnpm build"
 
 [functions]
-  [functions.node_bundle]
-    external_node_modules = []
-
-# Tu Edge Function exclusiva para OAuth
-[[edge_functions]]
-  path = "/api/auth/callback"
-  function = "auth"
+  node_bundle = true
