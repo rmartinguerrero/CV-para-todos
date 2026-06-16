@@ -2,5 +2,11 @@
   publish = "dist"
   command = "pnpm build"
 
-[functions]
-  node_bundle = true
+# Estructura de objeto estricta requerida por el validador de Netlify
+[functions.node_bundle]
+  external_node_modules = []
+
+# Mantenemos el callback dinámico de autenticación OAuth
+[[edge_functions]]
+  path = "/api/auth/callback"
+  function = "auth"
