@@ -1,9 +1,23 @@
 ---
 // src/pages/index.astro
-// Este archivo actúa como respaldo absoluto. Netlify redirige antes en el servidor.
+// Forzamos un documento en blanco absoluto. Las cabeceras hacen el resto.
 ---
-<meta http-to-equiv="refresh" content="0;url=/en/" />
-<script>
-  // Respaldito rápido por si las moscas en el cliente
-  window.location.replace('/en/');
-</script>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="refresh" content="0;url=/es" />
+  <title>Loading</title>
+  
+  {/* En Astro, para dejar un script tal cual en el HTML sin procesar, se usa 'is:inline' */}
+  <script is:inline>
+    const available = ['es', 'it', 'en'];
+    const preferred = navigator.languages
+      .map(l => l.split('-')[0])
+      .find(l => available.includes(l)) || 'en';
+    window.location.replace('/' + preferred);
+  </script>
+</head>
+<body class="bg-white dark:bg-slate-900">
+  </body>
+</html>
