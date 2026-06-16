@@ -2,11 +2,11 @@
   publish = "dist"
   command = "pnpm build"
 
-# Forzamos a Netlify a compilar las funciones de Node usando esbuild (adiós errores de Octokit)
+# Sintaxis correcta y moderna para activar esbuild en Netlify Functions
 [functions]
-  node_bundle = "esbuild"
+  node_bundle = true
 
-# Mantienes la Edge Function únicamente para el callback de autenticación si es necesario
+# Tu Edge Function exclusiva para el inicio de sesión OAuth
 [[edge_functions]]
   path = "/api/auth/callback"
   function = "auth"
