@@ -16,15 +16,24 @@ export function getStaticPaths() {
 const { lang } = Astro.params as { lang: Lang };
 const resumes = { es: resumeEs, it: resumeIt, en: resumeEn };
 const initialData = resumes[lang] || resumeEs;
-
 const t = useTranslations(lang);
 
-// LISTADO MAESTRO DE PLANTILLAS REALES DISPONIBLES
+// 🎯 LISTADO MAESTRO DE PLANTILLAS - ¡Añade aquí y aparecerán solas en el menú!
 const templates = [
   {
-    id: 'minimalist',
-    name: 'MINIMALISTA',
+    id: 'minimal',
+    name: lang === 'es' ? 'MINIMALISTA' : lang === 'it' ? 'MINIMALISTA' : 'MINIMALIST',
     svg: `<svg viewBox="0 0 100 120" class="w-full h-full text-gray-500"><rect width="100" height="120" rx="8" fill="#f8fafc" stroke="currentColor" stroke-width="2"/><line x1="15" y1="20" x2="60" y2="20" stroke="currentColor" stroke-width="3"/><line x1="15" y1="35" x2="85" y2="35" stroke="#e2e8f0" stroke-width="2"/><line x1="15" y1="45" x2="75" y2="45" stroke="#e2e8f0" stroke-width="2"/></svg>`
+  },
+  {
+    id: 'tech',
+    name: lang === 'es' ? 'TECNOLÓGICO' : lang === 'it' ? 'TECNOLOGICO' : 'TECHNOLOGICAL',
+    svg: `<svg viewBox="0 0 100 120" class="w-full h-full text-blue-500"><rect width="100" height="120" rx="8" fill="#0f172a" stroke="currentColor" stroke-width="2"/><line x1="15" y1="20" x2="50" y2="20" stroke="currentColor" stroke-width="3"/><line x1="15" y1="35" x2="40" y2="35" stroke="#334155" stroke-width="2"/><rect x="15" y="50" width="10" height="10" fill="currentColor" rx="2"/></svg>`
+  },
+  {
+    id: 'artistic',
+    name: lang === 'es' ? 'ARTÍSTICO' : lang === 'it' ? 'ARTISTICO' : 'ARTISTIC',
+    svg: `<svg viewBox="0 0 100 120" class="w-full h-full text-purple-500"><rect width="100" height="120" rx="8" fill="#fffbeb" stroke="currentColor" stroke-width="2"/><circle cx="50" cy="30" r="12" stroke="currentColor" stroke-width="2" fill="none"/><line x1="25" y1="60" x2="75" y2="60" stroke="currentColor" stroke-width="2"/></svg>`
   }
 ];
 ---
@@ -34,13 +43,15 @@ const templates = [
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{t('edit.title')} — Proyecto CV</title>
+  <title>{t('edit.title') || (lang === 'es' ? 'Editor de CV' : lang === 'it' ? 'Editore di CV' : 'CV Editor')} — Proyecto CV</title>
 </head>
 <body class="bg-gray-50 min-h-screen text-gray-800 antialiased">
 
   <div class="w-full bg-white border-b border-gray-200 py-3 px-4 sm:px-6 sticky top-0 z-50 print:hidden shadow-sm flex flex-wrap gap-3 items-center justify-between">
     <div class="flex items-center gap-2">
-      <span class="text-xs font-bold text-gray-400 uppercase tracking-wider mr-2">Idioma del CV:</span>
+      <span class="text-xs font-bold text-gray-400 uppercase tracking-wider mr-2">
+        {lang === 'es' ? 'Idioma del CV:' : lang === 'it' ? 'Lingua del CV:' : 'CV Language:'}
+      </span>
       <div class="inline-flex rounded-xl bg-gray-100 p-1 border border-gray-200">
         <button onclick="window.location.href='/es/edit'" class={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${lang === 'es' ? 'bg-white text-gray-900 shadow-sm border border-gray-200/50' : 'text-gray-500 hover:text-gray-900'}`}>
           🇪🇸 Español
@@ -56,10 +67,10 @@ const templates = [
 
     <div class="flex items-center gap-2">
       <button id="btn-download-json" class="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
-        {t('edit.downloadJson')}
+        {t('edit.downloadJson') || 'JSON'}
       </button>
       <button id="btn-print" class="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-sm">
-        🖨️ {t('edit.downloadPdf')}
+        🖨️ {t('edit.downloadPdf') || 'PDF'}
       </button>
     </div>
   </div>
@@ -69,15 +80,27 @@ const templates = [
     <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-6 print:hidden sticky top-20 max-h-[82vh] overflow-y-auto">
       
       <div class="flex items-center justify-between border-b border-gray-100 pb-2">
-        <h1 class="text-lg font-bold text-gray-900 tracking-tight">{t('edit.title')}</h1>
+        <h1 class="text-lg font-bold text-gray-900 tracking-tight">
+          {t('edit.title') || (lang === 'es' ? 'Editor de Currículum Libre' : lang === 'it' ? 'Editore di Curriculum Libero' : 'No-Code Resume Editor')}
+        </h1>
       </div>
 
       <nav class="flex border-b border-gray-200 text-xs sm:text-sm overflow-x-auto whitespace-nowrap" aria-label="Tabs">
-        <button class="tab-btn px-4 py-2 border-b-2 border-blue-600 font-medium text-blue-600" data-tab="basics">{t('nav.contact')}</button>
-        <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="work">Experiencia</button>
-        <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="education">Formación</button>
-        <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="skills">Habilidades</button>
-        <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="templates">{t('templates.title')}</button>
+        <button class="tab-btn px-4 py-2 border-b-2 border-blue-600 font-medium text-blue-600" data-tab="basics">
+          {t('nav.contact') || (lang === 'es' ? 'Contacto' : lang === 'it' ? 'Contatto' : 'Contact')}
+        </button>
+        <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="work">
+          {lang === 'es' ? 'Experiencia' : lang === 'it' ? 'Esperienza' : 'Experience'}
+        </button>
+        <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="education">
+          {lang === 'es' ? 'Formación' : lang === 'it' ? 'Formazione' : 'Education'}
+        </button>
+        <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="skills">
+          {lang === 'es' ? 'Habilidades' : lang === 'it' ? 'Competenze' : 'Skills'}
+        </button>
+        <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="templates">
+          {t('templates.title') || (lang === 'es' ? 'Plantillas' : lang === 'it' ? 'Modelli' : 'Templates')}
+        </button>
       </nav>
 
       <div id="cv-form" class="space-y-6">
@@ -85,11 +108,15 @@ const templates = [
         <div id="tab-basics" class="tab-content space-y-4">
           <div class="grid sm:grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">{t('form.name')}</label>
+              <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">
+                {t('form.name') || (lang === 'es' ? 'Nombre Completo' : lang === 'it' ? 'Nome Completo' : 'Full Name')}
+              </label>
               <input type="text" data-path="basics.name" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-blue-500" />
             </div>
             <div>
-              <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">{t('form.label')}</label>
+              <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">
+                {t('form.label') || (lang === 'es' ? 'Profesión / Título' : lang === 'it' ? 'Professione / Titolo' : 'Profession / Title')}
+              </label>
               <input type="text" data-path="basics.label" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-blue-500" />
             </div>
           </div>
@@ -99,23 +126,33 @@ const templates = [
               <input type="email" data-path="basics.email" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-blue-500" />
             </div>
             <div>
-              <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Teléfono</label>
+              <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">
+                {lang === 'es' ? 'Teléfono' : lang === 'it' ? 'Telefono' : 'Phone'}
+              </label>
               <input type="tel" data-path="basics.phone" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-blue-500" />
             </div>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Fotografía de Perfil</label>
+            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">
+              {lang === 'es' ? 'Fotografía de Perfil' : lang === 'it' ? 'Foto del Profilo' : 'Profile Photo'}
+            </label>
             <div class="flex items-center gap-3 bg-gray-50 p-3 rounded-xl border border-dashed border-gray-300">
               <input type="file" id="photo-file" accept="image/*" class="hidden" />
               <button type="button" onclick="document.getElementById('photo-file').click()" class="px-3 py-1.5 bg-white border border-gray-200 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-50 shadow-sm">
-                Seleccionar del ordenador
+                {lang === 'es' ? 'Seleccionar del ordenador' : lang === 'it' ? 'Seleziona dal computer' : 'Select from computer'}
               </button>
-              <button type="button" id="btn-remove-photo" class="text-xs text-red-500 font-medium hidden hover:underline">Eliminar</button>
-              <span id="photo-status" class="text-xs text-gray-400 truncate max-w-[180px]">Sin archivo seleccionado</span>
+              <button type="button" id="btn-remove-photo" class="text-xs text-red-500 font-medium hidden hover:underline">
+                {lang === 'es' ? 'Eliminar' : lang === 'it' ? 'Elimina' : 'Remove'}
+              </button>
+              <span id="photo-status" class="text-xs text-gray-400 truncate max-w-[180px]">
+                {lang === 'es' ? 'Sin archivo seleccionado' : lang === 'it' ? 'Nessun file selezionato' : 'No file selected'}
+              </span>
             </div>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Extracto Profesional</label>
+            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">
+              {lang === 'es' ? 'Extracto Profesional' : lang === 'it' ? 'Estratto Professionale' : 'Professional Summary'}
+            </label>
             <textarea data-path="basics.summary" rows="4" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-blue-500"></textarea>
           </div>
         </div>
@@ -123,29 +160,31 @@ const templates = [
         <div id="tab-work" class="tab-content space-y-4 hidden">
           <div id="work-container" class="space-y-4"></div>
           <button type="button" id="btn-add-work" class="w-full py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-semibold rounded-xl border border-dashed border-blue-200 transition-colors">
-            + Añadir Nueva Experiencia Laboral
+            {lang === 'es' ? '+ Añadir Nueva Experiencia Laboral' : lang === 'it' ? '+ Aggiungi Nuova Esperienza' : '+ Add New Work Experience'}
           </button>
         </div>
 
         <div id="tab-education" class="tab-content space-y-4 hidden">
           <div id="education-container" class="space-y-4"></div>
           <button type="button" id="btn-add-edu" class="w-full py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-semibold rounded-xl border border-dashed border-blue-200 transition-colors">
-            + Añadir Nueva Formación Académica
+            {lang === 'es' ? '+ Añadir Nueva Formación Académica' : lang === 'it' ? '+ Aggiungi Nuova Formazione' : '+ Add New Education'}
           </button>
         </div>
 
         <div id="tab-skills" class="tab-content space-y-4 hidden">
           <div>
-            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Habilidades y Tecnologías</label>
+            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">
+              {lang === 'es' ? 'Habilidades y Tecnologías' : lang === 'it' ? 'Competenze e Tecnologie' : 'Skills & Technologies'}
+            </label>
             <div id="skills-tag-container" class="flex flex-wrap gap-2 p-2.5 border border-gray-200 rounded-xl bg-white focus-within:ring-2 focus-within:ring-blue-500 min-h-[44px]">
-              <input type="text" id="skills-input" placeholder="Escribe y pulsa Enter..." class="flex-1 min-w-[120px] text-sm focus:outline-none bg-transparent" />
+              <input type="text" id="skills-input" placeholder={lang === 'es' ? 'Escribe y pulsa Enter...' : lang === 'it' ? 'Scrivi e premi Invio...' : 'Type and press Enter...'} class="flex-1 min-w-[120px] text-sm focus:outline-none bg-transparent" />
             </div>
           </div>
         </div>
 
         <div id="tab-templates" class="tab-content hidden">
           <label class="block text-xs font-semibold text-gray-500 uppercase mb-3">
-            {t('templates.subtitle')}
+            {t('templates.subtitle') || (lang === 'es' ? 'Elige el aspecto visual de tu CV' : lang === 'it' ? 'Scegli l\'aspetto visivo del tuo CV' : 'Choose the visual style of your resume')}
           </label>
           <div class="grid grid-cols-2 gap-4">
             {templates.map((tpl, i) => (
@@ -165,34 +204,42 @@ const templates = [
         </div>
 
         <button id="btn-publish" class="w-full py-2.5 bg-gray-900 text-white font-semibold rounded-xl hover:bg-gray-800 transition-colors text-xs uppercase tracking-wider shadow-md">
-          🚀 {t('edit.publish')}
+          🚀 {t('edit.publish') || (lang === 'es' ? 'Actualizar Web' : lang === 'it' ? 'Aggiorna Sito' : 'Update Website')}
         </button>
       </div>
     </div>
 
     <div id="preview-section" data-template={templates[0]?.id || 'minimal'} class="bg-white p-8 rounded-2xl border border-gray-200 shadow-lg min-h-[297mm] transition-all duration-300 print:shadow-none print:border-0 print:p-0 print:block">
-      <header id="preview-header" class="flex gap-6 items-start pb-6 border-b flex-row-reverse">
+      <header id="preview-header" class="flex gap-6 items-start pb-6 border-b">
         <div class="flex-1">
-          <h2 id="view-name" class="font-bold tracking-tight text-gray-900"></h2>
+          <h2 id="view-name" class="font-bold tracking-tight"></h2>
           <p id="view-label" class="mt-1 font-medium"></p>
-          <div id="view-contact" class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500"></div>
+          <div id="view-contact" class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs"></div>
         </div>
         <img id="view-image" class="w-24 h-24 rounded-xl object-cover border border-gray-200 hidden" alt="Foto CV" />
       </header>
       <section class="mt-6 section-block">
-        <h3 class="section-title text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Perfil</h3>
-        <p id="view-summary" class="text-sm text-gray-600 leading-relaxed whitespace-pre-line"></p>
+        <h3 class="section-title text-xs font-bold uppercase tracking-widest mb-2">
+          {lang === 'es' ? 'Perfil' : lang === 'it' ? 'Profilo' : 'Profile'}
+        </h3>
+        <p id="view-summary" class="text-sm leading-relaxed whitespace-pre-line"></p>
       </section>
       <section class="mt-6 section-block">
-        <h3 class="section-title text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Experiencia</h3>
+        <h3 class="section-title text-xs font-bold uppercase tracking-widest mb-3">
+          {lang === 'es' ? 'Experiencia' : lang === 'it' ? 'Esperienza' : 'Experience'}
+        </h3>
         <div id="view-experience" class="space-y-4"></div>
       </section>
       <section class="mt-6 section-block">
-        <h3 class="section-title text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Formación</h3>
+        <h3 class="section-title text-xs font-bold uppercase tracking-widest mb-3">
+          {lang === 'es' ? 'Formación' : lang === 'it' ? 'Formazione' : 'Education'}
+        </h3>
         <div id="view-education" class="space-y-4"></div>
       </section>
       <section class="mt-6 section-block">
-        <h3 class="section-title text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Habilidades</h3>
+        <h3 class="section-title text-xs font-bold uppercase tracking-widest mb-2">
+          {lang === 'es' ? 'Habilidades' : lang === 'it' ? 'Competenze' : 'Skills'}
+        </h3>
         <div id="view-skills-badges" class="flex flex-wrap"></div>
       </section>
     </div>
@@ -200,28 +247,42 @@ const templates = [
   </div>
 
   <style is:global>
-    /* Estilos globales y layouts intercambiables */
-    [data-template="minimal"] { font-family: 'Inter', system-ui, sans-serif; }
+    /* 1. PLANTILLA MINIMALISTA */
+    [data-template="minimal"] { font-family: 'Inter', system-ui, sans-serif; color: #111827; }
+    [data-template="minimal"] #preview-header { flex-direction: row-reverse; }
     [data-template="minimal"] #view-name { font-size: 1.75rem; font-weight: 700; color: #111827; }
     [data-template="minimal"] #view-label { color: #4b5563; font-size: 0.95rem; }
+    [data-template="minimal"] #view-contact { color: #6b7280; }
+    [data-template="minimal"] #view-summary { color: #4b5563; }
     [data-template="minimal"] .section-title { color: #1f2937; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.25rem; font-size: 0.75rem; }
     [data-template="minimal"] .badge-item { background-color: #f3f4f6; color: #374151; font-size: 0.75rem; padding: 0.25rem 0.5rem; margin: 0.125rem; border-radius: 0.25rem; display: inline-block; }
 
-    [data-template="tech"] { font-family: 'Inter', system-ui, sans-serif; }
-    [data-template="tech"] #view-name { font-size: 1.875rem; font-weight: 800; letter-spacing: -0.025em; }
-    [data-template="tech"] #view-label { color: #2563eb; font-family: ui-monospace, monospace; font-size: 0.875rem; }
-    [data-template="tech"] .section-title { color: #4b5563; font-family: ui-monospace, monospace; border-left: 3px solid #2563eb; padding-left: 0.5rem; font-size: 0.75rem; }
-    [data-template="tech"] .badge-item { background-color: #f3f4f6; color: #1f2937; border-radius: 0.375rem; font-family: ui-monospace, monospace; font-size: 0.75rem; padding: 0.125rem 0.5rem; margin: 0.125rem; display: inline-block; }
+    /* 2. PLANTILLA TECNOLÓGICA */
+    [data-template="tech"] { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; color: #f1f5f9; background-color: #0f172a !important; }
+    [data-template="tech"] #preview-header { border-color: #334155; }
+    [data-template="tech"] #view-name { font-size: 1.875rem; font-weight: 800; color: #60a5fa; letter-spacing: -0.025em; }
+    [data-template="tech"] #view-label { color: #94a3b8; font-size: 0.875rem; }
+    [data-template="tech"] #view-contact { color: #64748b; }
+    [data-template="tech"] #view-summary { color: #cbd5e1; }
+    [data-template="tech"] .section-title { color: #3b82f6; border-left: 3px solid #3b82f6; padding-left: 0.5rem; font-size: 0.75rem; }
+    [data-template="tech"] .badge-item { background-color: #1e293b; color: #38bdf8; border: 1px solid #334155; border-radius: 0.375rem; font-size: 0.75rem; padding: 0.125rem 0.5rem; margin: 0.125rem; display: inline-block; }
 
-    [data-template="artistic"] { font-family: 'Playfair Display', Georgia, serif; }
-    [data-template="artistic"] #view-name { font-size: 2.25rem; font-weight: 700; font-style: italic; color: #1e1b4b; }
-    [data-template="artistic"] #view-label { color: #4338ca; font-size: 1.125rem; border-bottom: 1px dashed #e0e7ff; padding-bottom: 0.25rem; }
-    [data-template="artistic"] .section-title { color: #4338ca; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.15em; border-bottom: 1px solid #e0e7ff; padding-bottom: 0.25rem; }
-    [data-template="artistic"] .badge-item { background-color: #f5f3ff; color: #5b21b6; border: 1px solid #ddd6fe; border-radius: 9999px; font-size: 0.75rem; padding: 0.125rem 0.625rem; margin: 0.125rem; display: inline-block; }
-    [data-template="artistic"] #view-image { border-radius: 9999px; width: 5.5rem; height: 5.5rem; }
+    /* 3. PLANTILLA ARTÍSTICA */
+    [data-template="artistic"] { font-family: 'Playfair Display', Georgia, serif; color: #292524; background-color: #fffbeb !important; }
+    [data-template="artistic"] #preview-header { text-align: center; flex-direction: column; align-items: center; border-bottom: 2px solid #e7e5e4; }
+    [data-template="artistic"] #view-name { font-size: 2.25rem; font-weight: 700; font-style: italic; color: #78350f; }
+    [data-template="artistic"] #view-label { color: #b45309; font-size: 1.125rem; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.25rem; }
+    [data-template="artistic"] #view-contact { color: #78716c; justify-content: center; font-family: system-ui, sans-serif; gap: 1.5rem; }
+    [data-template="artistic"] #view-summary { color: #44403c; font-size: 0.95rem; text-align: center; line-height: 1.7; }
+    [data-template="artistic"] .section-title { color: #78350f; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.15em; border-bottom: 1px dashed #d97706; padding-bottom: 0.25rem; }
+    [data-template="artistic"] .badge-item { background-color: #fef3c7; color: #92400e; border: 1px solid #f59e0b; border-radius: 9999px; font-family: system-ui, sans-serif; font-size: 0.75rem; padding: 0.125rem 0.625rem; margin: 0.125rem; display: inline-block; }
+    [data-template="artistic"] #view-image { border-radius: 9999px; width: 6rem; height: 6rem; border: 3px solid #f59e0b; }
 
     @media print {
       body { background: #ffffff !important; color: #000000 !important; padding: 0 !important; }
+      [data-template="tech"] { background-color: #ffffff !important; color: #000000 !important; }
+      [data-template="tech"] #view-name { color: #1e40af; }
+      [data-template="artistic"] { background-color: #ffffff !important; color: #000000 !important; }
       .print\:hidden { display: none !important; }
       .print\:block { display: block !important; }
       .print\:p-0 { padding: 0 !important; }
@@ -231,7 +292,8 @@ const templates = [
 
   <script define:vars={{ lang, initialData }}>
     const STORAGE_KEY = `cv_backup_data_${lang}`;
-    
+    const TEMPLATE_KEY = `cv_selected_template_${lang}`;
+
     let state = (() => {
       try {
         const saved = localStorage.getItem(STORAGE_KEY);
@@ -241,6 +303,7 @@ const templates = [
       }
     })();
 
+    if (!state.basics) state.basics = { name: "", label: "", email: "", phone: "", summary: "", image: "" };
     if (!state.work) state.work = [];
     if (!state.education) state.education = [];
     if (!state.skills) state.skills = [{ name: "Skills", keywords: [] }];
@@ -266,52 +329,63 @@ const templates = [
       renderPreview();
     }
 
-    // INTERCAMBIADOR DE PLANTILLAS
-    document.querySelectorAll('.template-card').forEach(card => {
-      card.addEventListener('click', () => {
-        document.querySelectorAll('.template-card').forEach(c => {
+    function applyTemplate(templateId) {
+      document.querySelectorAll('.template-card').forEach(c => {
+        if (c.dataset.templateId === templateId) {
+          c.classList.remove('border-gray-200');
+          c.classList.add('border-blue-600', 'ring-2', 'ring-blue-100');
+        } else {
           c.classList.remove('border-blue-600', 'ring-2', 'ring-blue-100');
           c.classList.add('border-gray-200');
-        });
-        card.classList.remove('border-gray-200');
-        card.classList.add('border-blue-600', 'ring-2', 'ring-blue-100');
+        }
+      });
+      const section = document.getElementById('preview-section');
+      if (section) section.setAttribute('data-template', templateId);
+      localStorage.setItem(TEMPLATE_KEY, templateId);
+    }
 
-        const selectedTemplate = card.dataset.templateId;
-        document.getElementById('preview-section').setAttribute('data-template', selectedTemplate);
+    document.querySelectorAll('.template-card').forEach(card => {
+      card.addEventListener('click', () => {
+        applyTemplate(card.dataset.templateId);
       });
     });
 
-    // Gestión Fotografía
+    // Foto de perfil
     const fileInput = document.getElementById('photo-file');
     const photoStatus = document.getElementById('photo-status');
     const removePhotoBtn = document.getElementById('btn-remove-photo');
 
-    fileInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      photoStatus.textContent = file.name;
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        setDeepValue(state, 'basics.image', evt.target.result);
-        removePhotoBtn.classList.remove('hidden');
+    if (fileInput) {
+      fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (photoStatus) photoStatus.textContent = file.name;
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          setDeepValue(state, 'basics.image', evt.target.result);
+          if (removePhotoBtn) removePhotoBtn.classList.remove('hidden');
+          saveState();
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    if (removePhotoBtn) {
+      removePhotoBtn.addEventListener('click', () => {
+        setDeepValue(state, 'basics.image', '');
+        if (fileInput) fileInput.value = '';
+        if (photoStatus) photoStatus.textContent = lang === 'es' ? 'Sin archivo seleccionado' : lang === 'it' ? 'Nessun file selezionato' : 'No file selected';
+        removePhotoBtn.classList.add('hidden');
         saveState();
-      };
-      reader.readAsDataURL(file);
-    });
+      });
+    }
 
-    removePhotoBtn.addEventListener('click', () => {
-      setDeepValue(state, 'basics.image', '');
-      fileInput.value = '';
-      photoStatus.textContent = 'Sin archivo seleccionado';
-      removePhotoBtn.classList.add('hidden');
-      saveState();
-    });
-
-    // Etiquetas de Habilidades
+    // Tags de Skills
     const tagsContainer = document.getElementById('skills-tag-container');
     const skillsInput = document.getElementById('skills-input');
 
     function renderTags() {
+      if (!tagsContainer) return;
       tagsContainer.querySelectorAll('.tag-badge').forEach(el => el.remove());
       state.skills[0].keywords.forEach((word, index) => {
         const span = document.createElement('span');
@@ -329,7 +403,7 @@ const templates = [
         saveState();
         renderTags();
       }
-      skillsInput.value = '';
+      if (skillsInput) skillsInput.value = '';
     }
 
     function removeTag(index) {
@@ -338,20 +412,22 @@ const templates = [
       renderTags();
     }
 
-    skillsInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ',') {
-        e.preventDefault();
-        addTag(skillsInput.value);
-      } else if (e.key === 'Backspace' && skillsInput.value === '') {
-        if (state.skills[0].keywords.length > 0) {
-          removeTag(state.skills[0].keywords.length - 1);
+    if (skillsInput) {
+      skillsInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ',') {
+          e.preventDefault();
+          addTag(skillsInput.value);
+        } else if (e.key === 'Backspace' && skillsInput.value === '') {
+          if (state.skills[0].keywords.length > 0) {
+            removeTag(state.skills[0].keywords.length - 1);
+          }
         }
-      }
-    });
+      });
+    }
 
-    tagsContainer.addEventListener('click', () => skillsInput.focus());
+    if (tagsContainer) tagsContainer.addEventListener('click', () => skillsInput?.focus());
 
-    // Gestión de Bloques Repetibles
+    // Bloques repetibles dinámicos
     const workContainer = document.getElementById('work-container');
     const eduContainer = document.getElementById('education-container');
 
@@ -359,31 +435,42 @@ const templates = [
       const card = document.createElement('div');
       card.className = "p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-3 relative group";
       
+      const labelEmpresa = lang === 'es' ? 'Empresa' : lang === 'it' ? 'Azienda' : 'Company';
+      const labelPuesto = lang === 'es' ? 'Puesto' : lang === 'it' ? 'Ruolo' : 'Position';
+      const labelInicio = lang === 'es' ? 'Inicio' : lang === 'it' ? 'Inizio' : 'Start Date';
+      const labelFin = lang === 'es' ? 'Fin' : lang === 'it' ? 'Fine' : 'End Date';
+      const labelFunciones = lang === 'es' ? 'Funciones' : lang === 'it' ? 'Compiti' : 'Summary';
+      const labelEliminar = lang === 'es' ? 'Eliminar' : lang === 'it' ? 'Elimina' : 'Delete';
+      
+      const labelInstitucion = lang === 'es' ? 'Institución' : lang === 'it' ? 'Istituto' : 'Institution';
+      const labelTitulacion = lang === 'es' ? 'Titulación' : lang === 'it' ? 'Qualifica' : 'Degree';
+      const labelArea = lang === 'es' ? 'Área' : lang === 'it' ? 'Area' : 'Field';
+
       if (type === 'work') {
         card.innerHTML = `
-          <button type="button" class="btn-del absolute top-2 right-2 text-xs text-red-500 hover:underline opacity-0 group-hover:opacity-100 transition-opacity">Eliminar</button>
+          <button type="button" class="btn-del absolute top-2 right-2 text-xs text-red-500 hover:underline opacity-0 group-hover:opacity-100 transition-opacity">${labelEliminar}</button>
           <div class="grid sm:grid-cols-2 gap-3">
             <div>
-              <label class="block text-[10px] font-bold text-gray-400 uppercase">Empresa</label>
+              <label class="block text-[10px] font-bold text-gray-400 uppercase">${labelEmpresa}</label>
               <input type="text" data-field="name" value="${data.name || ''}" class="w-full px-2 py-1 border rounded text-xs focus:outline-blue-500" />
             </div>
             <div>
-              <label class="block text-[10px] font-bold text-gray-400 uppercase">Puesto</label>
+              <label class="block text-[10px] font-bold text-gray-400 uppercase">${labelPuesto}</label>
               <input type="text" data-field="position" value="${data.position || ''}" class="w-full px-2 py-1 border rounded text-xs focus:outline-blue-500" />
             </div>
           </div>
           <div class="grid sm:grid-cols-2 gap-3">
             <div>
-              <label class="block text-[10px] font-bold text-gray-400 uppercase">Inicio</label>
+              <label class="block text-[10px] font-bold text-gray-400 uppercase">${labelInicio}</label>
               <input type="text" data-field="startDate" value="${data.startDate || ''}" class="w-full px-2 py-1 border rounded text-xs focus:outline-blue-500" />
             </div>
             <div>
-              <label class="block text-[10px] font-bold text-gray-400 uppercase">Fin</label>
+              <label class="block text-[10px] font-bold text-gray-400 uppercase">${labelFin}</label>
               <input type="text" data-field="endDate" value="${data.endDate || ''}" class="w-full px-2 py-1 border rounded text-xs focus:outline-blue-500" />
             </div>
           </div>
           <div>
-            <label class="block text-[10px] font-bold text-gray-400 uppercase">Funciones</label>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase">${labelFunciones}</label>
             <textarea data-field="summary" rows="2" class="w-full px-2 py-1 border rounded text-xs focus:outline-blue-500">${data.summary || ''}</textarea>
           </div>
         `;
@@ -400,28 +487,28 @@ const templates = [
         });
       } else {
         card.innerHTML = `
-          <button type="button" class="btn-del absolute top-2 right-2 text-xs text-red-500 hover:underline opacity-0 group-hover:opacity-100 transition-opacity">Eliminar</button>
+          <button type="button" class="btn-del absolute top-2 right-2 text-xs text-red-500 hover:underline opacity-0 group-hover:opacity-100 transition-opacity">${labelEliminar}</button>
           <div>
-            <label class="block text-[10px] font-bold text-gray-400 uppercase">Institución</label>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase">${labelInstitucion}</label>
             <input type="text" data-field="institution" value="${data.institution || ''}" class="w-full px-2 py-1 border rounded text-xs focus:outline-blue-500" />
           </div>
           <div class="grid sm:grid-cols-2 gap-3">
             <div>
-              <label class="block text-[10px] font-bold text-gray-400 uppercase">Titulación</label>
+              <label class="block text-[10px] font-bold text-gray-400 uppercase">${labelTitulacion}</label>
               <input type="text" data-field="studyType" value="${data.studyType || ''}" class="w-full px-2 py-1 border rounded text-xs focus:outline-blue-500" />
             </div>
             <div>
-              <label class="block text-[10px] font-bold text-gray-400 uppercase">Área</label>
+              <label class="block text-[10px] font-bold text-gray-400 uppercase">${labelArea}</label>
               <input type="text" data-field="area" value="${data.area || ''}" class="w-full px-2 py-1 border rounded text-xs focus:outline-blue-500" />
             </div>
           </div>
           <div class="grid sm:grid-cols-2 gap-3">
             <div>
-              <label class="block text-[10px] font-bold text-gray-400 uppercase">Año Inicio</label>
+              <label class="block text-[10px] font-bold text-gray-400 uppercase">${labelInicio}</label>
               <input type="text" data-field="startDate" value="${data.startDate || ''}" class="w-full px-2 py-1 border rounded text-xs focus:outline-blue-500" />
             </div>
             <div>
-              <label class="block text-[10px] font-bold text-gray-400 uppercase">Año Fin</label>
+              <label class="block text-[10px] font-bold text-gray-400 uppercase">${labelFin}</label>
               <input type="text" data-field="endDate" value="${data.endDate || ''}" class="w-full px-2 py-1 border rounded text-xs focus:outline-blue-500" />
             </div>
           </div>
@@ -442,19 +529,23 @@ const templates = [
     }
 
     function renderDynamicLists() {
-      workContainer.innerHTML = '';
-      state.work.forEach((item, idx) => workContainer.appendChild(createItemBlock('work', idx, item)));
-      eduContainer.innerHTML = '';
-      state.education.forEach((item, idx) => eduContainer.appendChild(createItemBlock('education', idx, item)));
+      if (workContainer) {
+        workContainer.innerHTML = '';
+        state.work.forEach((item, idx) => workContainer.appendChild(createItemBlock('work', idx, item)));
+      }
+      if (eduContainer) {
+        eduContainer.innerHTML = '';
+        state.education.forEach((item, idx) => eduContainer.appendChild(createItemBlock('education', idx, item)));
+      }
     }
 
-    document.getElementById('btn-add-work').addEventListener('click', () => {
+    document.getElementById('btn-add-work')?.addEventListener('click', () => {
       state.work.push({ name: "", position: "", startDate: "", endDate: "", summary: "" });
       saveState();
       renderDynamicLists();
     });
 
-    document.getElementById('btn-add-edu').addEventListener('click', () => {
+    document.getElementById('btn-add-edu')?.addEventListener('click', () => {
       state.education.push({ institution: "", studyType: "", area: "", startDate: "", endDate: "" });
       saveState();
       renderDynamicLists();
@@ -464,72 +555,85 @@ const templates = [
       document.querySelectorAll('#tab-basics input[data-path], #tab-basics textarea[data-path]').forEach(input => {
         input.value = getDeepValue(state, input.dataset.path) || '';
       });
-      if (state.basics?.image) {
-        photoStatus.textContent = "Imagen cargada";
+      if (state.basics?.image && photoStatus && removePhotoBtn) {
+        photoStatus.textContent = lang === 'es' ? 'Imagen cargada' : lang === 'it' ? 'Immagine caricata' : 'Image loaded';
         removePhotoBtn.classList.remove('hidden');
       }
     }
 
     function renderPreview() {
-      document.getElementById('view-name').textContent = state.basics?.name || 'Nombre Completo';
-      document.getElementById('view-label').textContent = state.basics?.label || 'Especialidad Profesional';
+      const nameEl = document.getElementById('view-name');
+      const labelEl = document.getElementById('view-label');
+      const summaryEl = document.getElementById('view-summary');
+      
+      if (nameEl) nameEl.textContent = state.basics?.name || (lang === 'es' ? 'Nombre Completo' : lang === 'it' ? 'Nome Completo' : 'Full Name');
+      if (labelEl) labelEl.textContent = state.basics?.label || (lang === 'es' ? 'Especialidad Profesional' : lang === 'it' ? 'Specializzazione' : 'Professional Specialty');
+      if (summaryEl) summaryEl.textContent = state.basics?.summary || '';
       
       const contactCont = document.getElementById('view-contact');
-      contactCont.innerHTML = '';
-      if (state.basics?.email) contactCont.innerHTML += `<span>✉ ${state.basics.email}</span>`;
-      if (state.basics?.phone) contactCont.innerHTML += `<span>📞 ${state.basics.phone}</span>`;
+      if (contactCont) {
+        contactCont.innerHTML = '';
+        if (state.basics?.email) contactCont.innerHTML += `<span>✉ ${state.basics.email}</span>`;
+        if (state.basics?.phone) contactCont.innerHTML += `<span>📞 ${state.basics.phone}</span>`;
+      }
       
       const imgEl = document.getElementById('view-image');
-      if (state.basics?.image) {
-        imgEl.src = state.basics.image;
-        imgEl.classList.remove('hidden');
-      } else {
-        imgEl.classList.add('hidden');
+      if (imgEl) {
+        if (state.basics?.image) {
+          imgEl.src = state.basics.image;
+          imgEl.classList.remove('hidden');
+        } else {
+          imgEl.classList.add('hidden');
+        }
       }
 
-      document.getElementById('view-summary').textContent = state.basics?.summary || '';
-
       const viewWork = document.getElementById('view-experience');
-      viewWork.innerHTML = '';
-      state.work.forEach(w => {
-        const block = document.createElement('div');
-        block.className = "text-sm";
-        block.innerHTML = `
-          <div class="flex justify-between font-semibold text-gray-800">
-            <span>${w.position || 'Puesto'} — <span class="text-gray-600">${w.name || 'Empresa'}</span></span>
-            <span class="text-xs font-normal text-gray-400">${w.startDate || ''} – ${w.endDate || ''}</span>
-          </div>
-          <p class="text-xs text-gray-600 mt-1 leading-relaxed whitespace-pre-line">${w.summary || ''}</p>
-        `;
-        viewWork.appendChild(block);
-      });
+      if (viewWork) {
+        viewWork.innerHTML = '';
+        state.work.forEach(w => {
+          const block = document.createElement('div');
+          block.className = "text-sm mt-3";
+          block.innerHTML = `
+            <div class="flex justify-between font-semibold">
+              <span class="item-header">${w.position || 'Ruolo'} — <span class="item-company">${w.name || 'Azienda'}</span></span>
+              <span class="text-xs font-normal text-gray-400">${w.startDate || ''} – ${w.endDate || ''}</span>
+            </div>
+            <p class="text-xs mt-1 leading-relaxed whitespace-pre-line item-summary">${w.summary || ''}</p>
+          `;
+          viewWork.appendChild(block);
+        });
+      }
 
       const viewEdu = document.getElementById('view-education');
-      viewEdu.innerHTML = '';
-      state.education.forEach(e => {
-        const block = document.createElement('div');
-        block.className = "text-sm";
-        block.innerHTML = `
-          <div class="flex justify-between font-semibold text-gray-800">
-            <span>${e.studyType || 'Título'} en ${e.area || 'Área'}</span>
-            <span class="text-xs font-normal text-gray-400">${e.startDate || ''} – ${e.endDate || ''}</span>
-          </div>
-          <p class="text-xs text-gray-500">${e.institution || 'Institución'}</p>
-        `;
-        viewEdu.appendChild(block);
-      });
+      if (viewEdu) {
+        viewEdu.innerHTML = '';
+        state.education.forEach(e => {
+          const block = document.createElement('div');
+          block.className = "text-sm mt-3";
+          block.innerHTML = `
+            <div class="flex justify-between font-semibold">
+              <span class="item-header">${e.studyType || 'Titolo'} in ${e.area || 'Area'}</span>
+              <span class="text-xs font-normal text-gray-400">${e.startDate || ''} – ${e.endDate || ''}</span>
+            </div>
+            <p class="text-xs item-institution">${e.institution || 'Istituto'}</p>
+          `;
+          viewEdu.appendChild(block);
+        });
+      }
 
       const badgesContainer = document.getElementById('view-skills-badges');
-      badgesContainer.innerHTML = '';
-      state.skills[0].keywords.forEach(kw => {
-        const b = document.createElement('span');
-        b.className = "badge-item";
-        b.textContent = kw;
-        badgesContainer.appendChild(b);
-      });
+      if (badgesContainer) {
+        badgesContainer.innerHTML = '';
+        state.skills[0].keywords.forEach(kw => {
+          const b = document.createElement('span');
+          b.className = "badge-item";
+          b.textContent = kw;
+          badgesContainer.appendChild(b);
+        });
+      }
     }
 
-    document.getElementById('tab-basics').addEventListener('input', (e) => {
+    document.getElementById('tab-basics')?.addEventListener('input', (e) => {
       if (e.target.dataset.path) {
         setDeepValue(state, e.target.dataset.path, e.target.value);
         saveState();
@@ -549,9 +653,9 @@ const templates = [
       });
     });
 
-    document.getElementById('btn-print').addEventListener('click', () => window.print());
+    document.getElementById('btn-print')?.addEventListener('click', () => window.print());
 
-    document.getElementById('btn-download-json').addEventListener('click', () => {
+    document.getElementById('btn-download-json')?.addEventListener('click', () => {
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
       const anchor = document.createElement('a');
       anchor.setAttribute("href", dataStr);
@@ -561,30 +665,36 @@ const templates = [
       anchor.remove();
     });
 
-    document.getElementById('btn-publish').addEventListener('click', async () => {
+    document.getElementById('btn-publish')?.addEventListener('click', async () => {
       const btn = document.getElementById('btn-publish');
+      if (!btn) return;
       btn.disabled = true;
-      btn.textContent = 'Sincronizando...';
+      btn.textContent = lang === 'es' ? 'Sincronizando...' : lang === 'it' ? 'Sincronizzazione...' : 'Syncing...';
       try {
+        state.selectedTemplate = localStorage.getItem(TEMPLATE_KEY) || 'minimal';
         const response = await fetch('/api/save', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ lang, resumeData: state })
         });
-        if (response.ok) alert('¡Sincronizado con éxito!');
-        else alert('Error al guardar.');
+        if (response.ok) alert(lang === 'es' ? '¡Sincronizado con éxito!' : lang === 'it' ? 'Sincronizzato con successo!' : 'Successfully synced!');
+        else alert('Error.');
       } catch (err) {
-        alert('Fallo de red.');
+        alert('Error.');
       } finally {
         btn.disabled = false;
-        btn.textContent = '🚀 Actualizar Web';
+        btn.textContent = '🚀 ' + (lang === 'es' ? 'Actualizar Web' : lang === 'it' ? 'Aggiorna Sito' : 'Update Website');
       }
     });
 
+    // 🚀 Inicialización al arrancar
+    const savedTemplate = localStorage.getItem(TEMPLATE_KEY) || 'minimal';
+    
     populateFormBasics();
     renderDynamicLists();
     renderTags();
     renderPreview();
+    applyTemplate(savedTemplate);
   </script>
 </body>
 </html>

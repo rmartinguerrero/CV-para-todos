@@ -1,0 +1,49 @@
+---
+// src/components/TechLayout.astro
+interface Props {
+  resumeData: any;
+}
+const { resumeData } = Astro.props;
+const { basics, education, work, projects, skills } = resumeData || {};
+---
+<div class="p-6 max-w-4xl mx-auto bg-slate-900 text-slate-100 font-mono shadow-2xl rounded-xl border border-slate-800">
+  <header class="border-b border-slate-800 pb-4 mb-6">
+    <h1 class="text-3xl font-extrabold tracking-tight text-blue-400">{basics?.name}</h1>
+    <p class="text-sm text-slate-400 mt-1">{basics?.label}</p>
+    <div class="flex flex-wrap gap-3 mt-3 text-xs text-slate-500">
+      {basics?.email && <span>{basics.email}</span>}
+      {basics?.phone && <span>• {basics.phone}</span>}
+      {basics?.url && <a href={basics.url} target="_blank" class="text-blue-400 hover:underline">• Website</a>}
+    </div>
+  </header>
+
+  {work && work.length > 0 && (
+    <section class="mb-6">
+      <h2 class="text-xs font-bold uppercase tracking-widest text-blue-500 mb-3">// Experiencia</h2>
+      <div class="space-y-4">
+        {work.map((w: any) => (
+          <div class="border-l border-slate-800 pl-4">
+            <div class="flex justify-between text-sm font-semibold">
+              <span class="text-slate-200">{w.position} @ <span class="text-blue-400">{w.name}</span></span>
+              <span class="text-slate-500">{w.startDate} - {w.endDate || 'Actualidad'}</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-1">{w.summary}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  )}
+
+  {skills && skills.length > 0 && (
+    <section class="mb-6">
+      <h2 class="text-xs font-bold uppercase tracking-widest text-blue-500 mb-3">// Core_Skills</h2>
+      <div class="flex flex-wrap gap-2">
+        {skills.flatMap((s: any) => s.keywords || []).map((k: string) => (
+          <span class="px-2 py-1 bg-slate-800 text-slate-300 rounded text-xs border border-slate-700/50">
+            {k}
+          </span>
+        ))}
+      </div>
+    </section>
+  )}
+</div>
