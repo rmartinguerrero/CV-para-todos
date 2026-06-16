@@ -1,6 +1,25 @@
-# Local Netlify folder
-.netlify
-"node_modules/" 
-".netlify/" 
-".astro/" 
-"dist/" 
+# Dependencias
+node_modules/
+.pnpm-store/
+
+# Builds y salidas de producción
+dist/
+.astro/
+
+# Netlify local
+.netlify/
+
+# Archivos de entorno y credenciales SECRETAS
+.env
+.env.local
+.env.*.local
+
+# Logs y bloqueos del sistema
+*.log
+npm-debug.log*
+pnpm-debug.log*
+deno.lock
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
