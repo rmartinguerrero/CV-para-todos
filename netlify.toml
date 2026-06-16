@@ -1,14 +1,12 @@
 [build]
   publish = "dist"
   command = "pnpm build"
-  edge_functions = "netlify/edge-functions"
 
-# FUNCIÓN 1: Captura el código de GitHub al iniciar sesión
+# Forzamos a Netlify a compilar las funciones de Node usando esbuild (adiós errores de Octokit)
+[functions]
+  node_bundle = "esbuild"
+
+# Mantienes la Edge Function únicamente para el callback de autenticación si es necesario
 [[edge_functions]]
   path = "/api/auth/callback"
   function = "auth"
-
-# FUNCIÓN 2: Procesa el formulario y hace los commits directos
-[[edge_functions]]
-  path = "/api/save"
-  function = "save"
