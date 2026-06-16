@@ -19,29 +19,14 @@ const initialData = resumes[lang] || resumeEs;
 
 const t = useTranslations(lang);
 
-// DETECCIÓN DINÁMICA DE PLANTILLAS EN LA CARPETA LAYOUTS
-const layoutFiles = await Astro.glob('../../layouts/*.astro');
-
-const templates = layoutFiles.map((file) => {
-  // Sacamos el identificador partiendo del nombre del archivo por si templateId fallase
-  const fileId = file.file.split('/').pop()?.replace('.astro', '').toLowerCase() || 'default';
-  
-  // Accedemos de forma segura a través de frontmatter o haciendo casting a any para evitar fallos en compilación de TS
-  const anyFile = file as any;
-  const rawKey = anyFile.frontmatter?.templateName || anyFile.templateName; 
-  let translatedName = fileId.toUpperCase();
-
-  // Si la directiva exportada contiene un punto o empieza por templates, la pasamos por la función t() de UIKeys
-  if (rawKey && typeof rawKey === 'string') {
-    translatedName = t(rawKey as UIKeys);
+// LISTADO MAESTRO DE PLANTILLAS REALES DISPONIBLES
+const templates = [
+  {
+    id: 'minimalist',
+    name: 'MINIMALISTA',
+    svg: `<svg viewBox="0 0 100 120" class="w-full h-full text-gray-500"><rect width="100" height="120" rx="8" fill="#f8fafc" stroke="currentColor" stroke-width="2"/><line x1="15" y1="20" x2="60" y2="20" stroke="currentColor" stroke-width="3"/><line x1="15" y1="35" x2="85" y2="35" stroke="#e2e8f0" stroke-width="2"/><line x1="15" y1="45" x2="75" y2="45" stroke="#e2e8f0" stroke-width="2"/></svg>`
   }
-
-  return {
-    id: anyFile.frontmatter?.templateId || anyFile.templateId || fileId,
-    name: translatedName,
-    svg: anyFile.frontmatter?.templateSvg || anyFile.templateSvg || `<svg viewBox="0 0 100 120" class="w-full h-full text-gray-400"><rect width="100" height="120" rx="8" fill="#f3f4f6" stroke="currentColor" stroke-width="2"/><line x1="15" y1="25" x2="85" y2="25" stroke="currentColor" stroke-width="2"/></svg>`
-  };
-});
+];
 ---
 
 <!DOCTYPE html>

@@ -1,9 +1,19 @@
 ---
 // src/pages/[lang]/index.astro
-import type { GetStaticPaths } from 'astro';
-import MinimalistLayout from '../../layouts/MinimalistLayout.astro';
 import { useTranslations, getAvailableLangs, type Lang, type UIKeys } from '../../i18n/ui';
 
+// Importación de tu layout real actual
+import MinimalistLayout from '../../layouts/MinimalistLayout.astro';
+
+// Diccionario indexado para mapear de forma automática y escalable en el futuro
+const LAYOUTS_MAP: Record<string, any> = {
+  minimalist: MinimalistLayout,
+  // Si en el futuro creas más layouts, solo añades una línea aquí:
+  // tech: TechLayout,
+  // artistic: ArtisticLayout
+};
+
+// Componentes del currículum estructurado
 import Header      from '../../components/Header.astro';
 import Experience  from '../../components/Experience.astro';
 import Education   from '../../components/Education.astro';
@@ -17,16 +27,14 @@ import resumeEn from '../../data/resume.en.json';
 
 const resumes = { es: resumeEs, it: resumeIt, en: resumeEn };
 
-// CORRECCIÓN AQUÍ: Añadimos 'es' para que Astro sepa generar la página /es/
-export const getStaticPaths = (() => {
+export function getStaticPaths() {
   return [
     { params: { lang: 'es' } },
     { params: { lang: 'it' } },
     { params: { lang: 'en' } }
   ];
-}) satisfies GetStaticPaths;
+}
 
-// Forzamos el tipado correcto de la desestructuración para evitar el error del "index signature" de string
 const { lang } = Astro.params as { lang: 'es' | 'it' | 'en' };
 const resume = resumes[lang];
 
@@ -35,12 +43,18 @@ const t = (key: string) => strictT(key as UIKeys);
 
 const isEmpty = !resume?.basics?.name?.trim();
 const availableLangs = getAvailableLangs(resumes);
+
+// Determina la plantilla activa del JSON. Por defecto: 'minimalist'
+const templateKey = (resume as any)?.meta?.template?.toLowerCase() || 'minimalist';
+
+// Asignación dinámica 100% segura. Si no encuentra la clave, usa tu MinimalistLayout base.
+const DynamicLayout = LAYOUTS_MAP[templateKey] || MinimalistLayout;
 ---
 
 {isEmpty ? (
   <SetupWizard availableLangs={['es', 'it', 'en']} defaultLang={lang} />
 ) : (
-  <MinimalistLayout
+  <DynamicLayout
     title={`${resume.basics.name} — ${resume.basics.label}`}
     description={`CV of ${resume.basics.name}`}
     lang={lang}
@@ -54,5 +68,5 @@ const availableLangs = getAvailableLangs(resumes);
     {resume.education?.length > 0 && <Education  resume={resume} t={t} />}
     {resume.skills?.length    > 0 && <Skills     resume={resume} t={t} />}
     {resume.projects?.length  > 0 && <Projects   resume={resume} t={t} />}
-  </MinimalistLayout>
+  </DynamicLayout>
 )}
