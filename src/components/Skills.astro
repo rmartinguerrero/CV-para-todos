@@ -4,7 +4,16 @@ interface Props {
   resume: any;
   t:      (key: string) => string;
 }
-const { resume, t } = Astro.props;
+const { resume } = Astro.props;
+
+// Detectamos el idioma actual desde la URL de forma robusta
+const urlLang = Astro.url.pathname.split('/').filter(Boolean)[0] || 'es';
+
+const labels = {
+  es: { skills: 'Habilidades', languages: 'Idiomas' },
+  it: { skills: 'Competenze', languages: 'Lingue' },
+  en: { skills: 'Skills', languages: 'Languages' }
+}[urlLang as 'es' | 'it' | 'en'] || { skills: 'Habilidades', languages: 'Idiomas' };
 ---
 
 <section class="mb-10 print:mb-6" aria-labelledby="skills-heading">
@@ -12,42 +21,27 @@ const { resume, t } = Astro.props;
     id="skills-heading"
     class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-5 pb-2 border-b border-gray-100"
   >
-    {t('section.skills')}
+    {labels.skills}
   </h2>
 
-  <dl class="grid sm:grid-cols-2 gap-x-8 gap-y-4">
-    {resume.skills.filter((s: any) => s.name).map((skill: any) => (
-      <div>
-        <dt class="text-sm font-medium text-gray-800">
-          {skill.name}
-          {skill.level && (
-            <span class="ml-1.5 text-xs font-normal text-gray-400">· {skill.level}</span>
-          )}
-        </dt>
-        {skill.keywords?.length > 0 && (
-          <dd class="mt-1.5 flex flex-wrap gap-1.5">
-            {skill.keywords.filter(Boolean).map((kw: string) => (
-              <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-                {kw}
-              </span>
-            ))}
-          </dd>
-        )}
-      </div>
+  <div class="flex flex-wrap gap-2">
+    {resume.skills && resume.skills.filter((s: any) => s.name).map((skill: any) => (
+      <span class="text-xs font-medium bg-gray-100 text-gray-700 px-3 py-1 rounded-full border border-gray-200/60 shadow-xs">
+        {skill.name}
+      </span>
     ))}
-  </dl>
+  </div>
 
-  <!-- Idiomas -->
   {resume.languages?.length > 0 && (
     <div class="mt-6">
       <h3 class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">
-        {t('section.languages')}
+        {labels.languages}
       </h3>
-      <ul class="flex flex-wrap gap-2">
-        {resume.languages.filter((l: any) => l.language).map((lang: any) => (
+      <ul class="flex flex-wrap gap-x-4 gap-y-1">
+        {resume.languages.filter((l: any) => l.language).map((langObj: any) => (
           <li class="text-sm text-gray-700">
-            <span class="font-medium">{lang.language}</span>
-            {lang.fluency && <span class="text-gray-400"> · {lang.fluency}</span>}
+            <span class="font-medium">{langObj.language}</span>
+            {langObj.fluency && <span class="text-gray-400"> · {langObj.fluency}</span>}
           </li>
         ))}
       </ul>
