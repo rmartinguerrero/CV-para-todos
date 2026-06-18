@@ -1,0 +1,102 @@
+---
+// src/layouts/TechyLayout.astro
+export const templateMeta = {
+  id: 'techy',
+  name: 'Tecnológico',
+  svg: `<svg viewBox="0 0 100 125" class="w-full h-full select-none" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100" height="125" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+    <circle cx="15" cy="15" r="0.5" fill="#cbd5e1"/><circle cx="35" cy="15" r="0.5" fill="#cbd5e1"/><circle cx="55" cy="15" r="0.5" fill="#cbd5e1"/><circle cx="75" cy="15" r="0.5" fill="#cbd5e1"/><circle cx="95" cy="15" r="0.5" fill="#cbd5e1"/>
+    <circle cx="15" cy="45" r="0.5" fill="#cbd5e1"/><circle cx="35" cy="45" r="0.5" fill="#cbd5e1"/><circle cx="55" cy="45" r="0.5" fill="#cbd5e1"/><circle cx="75" cy="45" r="0.5" fill="#cbd5e1"/><circle cx="95" cy="45" r="0.5" fill="#cbd5e1"/>
+    <circle cx="15" cy="75" r="0.5" fill="#cbd5e1"/><circle cx="35" cy="75" r="0.5" fill="#cbd5e1"/><circle cx="55" cy="75" r="0.5" fill="#cbd5e1"/><circle cx="75" cy="75" r="0.5" fill="#cbd5e1"/><circle cx="95" cy="75" r="0.5" fill="#cbd5e1"/>
+    <rect x="8" y="10" width="16" height="16" rx="2" fill="#e0e7ff" stroke="#6366f1" stroke-width="1"/>
+    <rect x="28" y="12" width="40" height="4" rx="1" fill="#1e1b4b"/>
+    <rect x="28" y="20" width="25" height="2.5" rx="0.5" fill="#4f46e5"/>
+    <rect x="8" y="38" width="25" height="3" rx="0.5" fill="#4338ca"/>
+    <rect x="8" y="45" width="84" height="2" rx="0.5" fill="#94a3b8"/>
+    <rect x="8" y="58" width="30" height="3" rx="0.5" fill="#4338ca"/>
+    <rect x="8" y="66" width="45" height="2.5" rx="0.5" fill="#1e1b4b"/>
+    <rect x="8" y="72" width="84" height="2" rx="0.5" fill="#cbd5e1"/>
+    <rect x="8" y="86" width="25" height="3" rx="0.5" fill="#4338ca"/>
+    <rect x="8" y="94" width="18" height="4" rx="1" fill="#e0e7ff" stroke="#c7d2fe" stroke-width="0.5"/>
+    <rect x="30" y="94" width="22" height="4" rx="1" fill="#e0e7ff" stroke="#c7d2fe" stroke-width="0.5"/>
+    <rect x="56" y="94" width="15" height="4" rx="1" fill="#e0e7ff" stroke="#c7d2fe" stroke-width="0.5"/>
+  </svg>`
+};
+
+interface Props {
+  title: string;
+  description: string;
+  lang: string;
+  resume: any;
+  t: (key: string) => string;
+}
+
+const { title, description, lang, resume, t } = Astro.props;
+---
+<!DOCTYPE html>
+<html lang={lang}>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="description" content={description} />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title}</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+</head>
+<body class="bg-[#f1f5f9] techy-layout min-h-screen text-slate-900 antialiased font-sans">
+  <main class="max-w-3xl mx-auto px-6 py-12 sm:py-16 print:p-0">
+    <slot />
+  </main>
+</body>
+</html>
+
+<style is:global>
+  body.techy-layout, [data-template="techy"] {
+    background-color: #f1f5f9 !important;
+    background-image: radial-gradient(#cbd5e1 1px, transparent 1px) !important;
+    background-size: 16px 16px !important;
+    color: #0f172a !important;
+  }
+
+  body.techy-layout header, [data-template="techy"] #preview-header {
+    display: flex !important;
+    align-items: start !important;
+    justify-content: flex-start !important;
+    gap: 1.5rem !important;
+  }
+  body.techy-layout header img, [data-template="techy"] #preview-header img {
+    order: -1 !important;
+    border-radius: 8px !important;
+    border: 2px solid #6366f1 !important;
+  }
+
+  body.techy-layout h2, [data-template="techy"] #view-name {
+    font-family: 'JetBrains Mono', monospace !important;
+    color: #1e1b4b !important;
+    font-weight: 700 !important;
+  }
+
+  body.techy-layout h3::before, [data-template="techy"] h3::before {
+    content: "</> " !important;
+    color: #6366f1 !important;
+    font-family: 'JetBrains Mono', monospace !important;
+  }
+
+  body.techy-layout h3, [data-template="techy"] h3 {
+    font-family: 'JetBrains Mono', monospace !important;
+    color: #4338ca !important;
+    border-bottom: 1px dashed #cbd5e1 !important;
+  }
+
+  body.techy-layout .badge-item-live, [data-template="techy"] .badge-item-live {
+    background-color: #e0e7ff !important;
+    color: #4338ca !important;
+    border: 1px solid #c7d2fe !important;
+    font-family: 'JetBrains Mono', monospace !important;
+    border-radius: 4px !important;
+    font-size: 0.7rem !important;
+  }
+
+  body.techy-layout .text-blue-600, [data-template="techy"] .text-blue-600 {
+    color: #4f46e5 !important;
+  }
+</style>

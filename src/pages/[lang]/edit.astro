@@ -16,26 +16,27 @@ export function getStaticPaths() {
 const { lang } = Astro.params as { lang: Lang };
 const resumes = { es: resumeEs, it: resumeIt, en: resumeEn };
 const initialData = resumes[lang] || resumeEs;
-const t = useTranslations(lang);
 
-// 🎯 LISTADO MAESTRO DE PLANTILLAS - ¡Añade aquí y aparecerán solas en el menú!
-const templates = [
-  {
-    id: 'minimal',
-    name: lang === 'es' ? 'MINIMALISTA' : lang === 'it' ? 'MINIMALISTA' : 'MINIMALIST',
-    svg: `<svg viewBox="0 0 100 120" class="w-full h-full text-gray-500"><rect width="100" height="120" rx="8" fill="#f8fafc" stroke="currentColor" stroke-width="2"/><line x1="15" y1="20" x2="60" y2="20" stroke="currentColor" stroke-width="3"/><line x1="15" y1="35" x2="85" y2="35" stroke="#e2e8f0" stroke-width="2"/><line x1="15" y1="45" x2="75" y2="45" stroke="#e2e8f0" stroke-width="2"/></svg>`
-  },
-  {
-    id: 'tech',
-    name: lang === 'es' ? 'TECNOLÓGICO' : lang === 'it' ? 'TECNOLOGICO' : 'TECHNOLOGICAL',
-    svg: `<svg viewBox="0 0 100 120" class="w-full h-full text-blue-500"><rect width="100" height="120" rx="8" fill="#0f172a" stroke="currentColor" stroke-width="2"/><line x1="15" y1="20" x2="50" y2="20" stroke="currentColor" stroke-width="3"/><line x1="15" y1="35" x2="40" y2="35" stroke="#334155" stroke-width="2"/><rect x="15" y="50" width="10" height="10" fill="currentColor" rx="2"/></svg>`
-  },
-  {
-    id: 'artistic',
-    name: lang === 'es' ? 'ARTÍSTICO' : lang === 'it' ? 'ARTISTICO' : 'ARTISTIC',
-    svg: `<svg viewBox="0 0 100 120" class="w-full h-full text-purple-500"><rect width="100" height="120" rx="8" fill="#fffbeb" stroke="currentColor" stroke-width="2"/><circle cx="50" cy="30" r="12" stroke="currentColor" stroke-width="2" fill="none"/><line x1="25" y1="60" x2="75" y2="60" stroke="currentColor" stroke-width="2"/></svg>`
-  }
-];
+// 🎯 Traducciones estrictas desde tu ui.ts
+const strictT = useTranslations(lang);
+const t = (key: string) => strictT(key as UIKeys);
+
+// 📂 DETECCIÓN AUTOMÁTICA REAL DE PLANTILLAS (Eager Loading desde Vite/Astro)
+// Importamos los archivos cargando su contenido interior en tiempo de compilación
+const layoutModules = import.meta.glob('../../layouts/*.astro', { eager: true });
+
+const templates = Object.entries(layoutModules)
+  .map(([path, mod]: [string, any]) => {
+    // Si el layout no exporta metadatos explícitos para el sistema de CVs, lo descartamos elegantemente
+    if (!mod.templateMeta) return null;
+
+    return {
+      id: mod.templateMeta.id,
+      displayName: mod.templateMeta.name,
+      svg: mod.templateMeta.svg
+    };
+  })
+  .filter(Boolean) as { id: string; displayName: string; svg: string }[];
 ---
 
 <!DOCTYPE html>
@@ -43,34 +44,40 @@ const templates = [
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{t('edit.title') || (lang === 'es' ? 'Editor de CV' : lang === 'it' ? 'Editore di CV' : 'CV Editor')} — Proyecto CV</title>
+  <title>{t('edit.title')} — Proyecto CV</title>
 </head>
 <body class="bg-gray-50 min-h-screen text-gray-800 antialiased">
 
-  <div class="w-full bg-white border-b border-gray-200 py-3 px-4 sm:px-6 sticky top-0 z-50 print:hidden shadow-sm flex flex-wrap gap-3 items-center justify-between">
+  <div class="w-full bg-white border-b border-gray-200 py-2.5 px-4 sm:px-6 sticky top-0 z-50 print:hidden shadow-sm flex items-center justify-between gap-4">
     <div class="flex items-center gap-2">
-      <span class="text-xs font-bold text-gray-400 uppercase tracking-wider mr-2">
-        {lang === 'es' ? 'Idioma del CV:' : lang === 'it' ? 'Lingua del CV:' : 'CV Language:'}
-      </span>
-      <div class="inline-flex rounded-xl bg-gray-100 p-1 border border-gray-200">
-        <button onclick="window.location.href='/es/edit'" class={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${lang === 'es' ? 'bg-white text-gray-900 shadow-sm border border-gray-200/50' : 'text-gray-500 hover:text-gray-900'}`}>
-          🇪🇸 Español
-        </button>
-        <button onclick="window.location.href='/it/edit'" class={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${lang === 'it' ? 'bg-white text-gray-900 shadow-sm border border-gray-200/50' : 'text-gray-500 hover:text-gray-900'}`}>
-          🇮🇹 Italiano
-        </button>
-        <button onclick="window.location.href='/en/edit'" class={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${lang === 'en' ? 'bg-white text-gray-900 shadow-sm border border-gray-200/50' : 'text-gray-500 hover:text-gray-900'}`}>
-          🇺🇸 English
-        </button>
+      <div class="bg-blue-600 text-white p-1.5 rounded-lg flex items-center justify-center shadow-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      </div>
+      <div class="flex flex-col">
+        <span class="text-xs font-black tracking-tight text-gray-900 leading-none">CV para Todos</span>
+        <span class="text-[9px] font-bold text-blue-600 tracking-wider uppercase leading-none mt-0.5 bg-blue-50 px-1.5 py-0.5 rounded w-max flex-shrink-0">no code</span>
       </div>
     </div>
 
-    <div class="flex items-center gap-2">
-      <button id="btn-download-json" class="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
-        {t('edit.downloadJson') || 'JSON'}
+    <div class="flex items-center justify-center">
+      <div class="inline-flex rounded-xl bg-gray-100 p-0.5 border border-gray-200 shadow-inner">
+        <button onclick="window.location.href='/es/edit'" class={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all ${lang === 'es' ? 'bg-white text-gray-900 shadow-xs border border-gray-200/60' : 'text-gray-500 hover:text-gray-900'}`}>🇪🇸 ES</button>
+        <button onclick="window.location.href='/it/edit'" class={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all ${lang === 'it' ? 'bg-white text-gray-900 shadow-xs border border-gray-200/60' : 'text-gray-500 hover:text-gray-900'}`}>🇮🇹 IT</button>
+        <button onclick="window.location.href='/en/edit'" class={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all ${lang === 'en' ? 'bg-white text-gray-900 shadow-xs border border-gray-200/60' : 'text-gray-500 hover:text-gray-900'}`}>🇺🇸 EN</button>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-1.5">
+      <button id="btn-download-json" class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg border border-gray-200">
+        <span>{t('edit.downloadJson')}</span>
       </button>
-      <button id="btn-print" class="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-sm">
-        🖨️ {t('edit.downloadPdf') || 'PDF'}
+      <button id="btn-print" class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg border border-gray-200 shadow-xs">
+        <span>{t('edit.downloadPdf')}</span>
+      </button>
+      <button id="btn-publish" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-white bg-gray-900 hover:bg-gray-800 rounded-lg transition-all shadow-sm">
+        <span>🚀 {t('edit.publish')}</span>
       </button>
     </div>
   </div>
@@ -80,43 +87,26 @@ const templates = [
     <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-6 print:hidden sticky top-20 max-h-[82vh] overflow-y-auto">
       
       <div class="flex items-center justify-between border-b border-gray-100 pb-2">
-        <h1 class="text-lg font-bold text-gray-900 tracking-tight">
-          {t('edit.title') || (lang === 'es' ? 'Editor de Currículum Libre' : lang === 'it' ? 'Editore di Curriculum Libero' : 'No-Code Resume Editor')}
-        </h1>
+        <h1 class="text-lg font-bold text-gray-900 tracking-tight">{t('edit.title')}</h1>
       </div>
 
       <nav class="flex border-b border-gray-200 text-xs sm:text-sm overflow-x-auto whitespace-nowrap" aria-label="Tabs">
-        <button class="tab-btn px-4 py-2 border-b-2 border-blue-600 font-medium text-blue-600" data-tab="basics">
-          {t('nav.contact') || (lang === 'es' ? 'Contacto' : lang === 'it' ? 'Contatto' : 'Contact')}
-        </button>
-        <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="work">
-          {lang === 'es' ? 'Experiencia' : lang === 'it' ? 'Esperienza' : 'Experience'}
-        </button>
-        <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="education">
-          {lang === 'es' ? 'Formación' : lang === 'it' ? 'Formazione' : 'Education'}
-        </button>
-        <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="skills">
-          {lang === 'es' ? 'Habilidades' : lang === 'it' ? 'Competenze' : 'Skills'}
-        </button>
-        <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="templates">
-          {t('templates.title') || (lang === 'es' ? 'Plantillas' : lang === 'it' ? 'Modelli' : 'Templates')}
-        </button>
+        <button class="tab-btn px-4 py-2 border-b-2 border-blue-600 font-medium text-blue-600" data-tab="basics">{t('nav.contact')}</button>
+        <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="work">{lang === 'es' ? 'Experiencia' : lang === 'it' ? 'Esperienza' : 'Experience'}</button>
+        <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="education">{lang === 'es' ? 'Formación' : lang === 'it' ? 'Formazione' : 'Education'}</button>
+        <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="skills">{lang === 'es' ? 'Habilidades' : lang === 'it' ? 'Competenze' : 'Skills'}</button>
+        <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="templates">{t('templates.title')}</button>
       </nav>
 
       <div id="cv-form" class="space-y-6">
-        
         <div id="tab-basics" class="tab-content space-y-4">
           <div class="grid sm:grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">
-                {t('form.name') || (lang === 'es' ? 'Nombre Completo' : lang === 'it' ? 'Nome Completo' : 'Full Name')}
-              </label>
+              <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">{t('form.name')}</label>
               <input type="text" data-path="basics.name" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-blue-500" />
             </div>
             <div>
-              <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">
-                {t('form.label') || (lang === 'es' ? 'Profesión / Título' : lang === 'it' ? 'Professione / Titolo' : 'Profession / Title')}
-              </label>
+              <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">{t('form.label')}</label>
               <input type="text" data-path="basics.label" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-blue-500" />
             </div>
           </div>
@@ -126,68 +116,67 @@ const templates = [
               <input type="email" data-path="basics.email" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-blue-500" />
             </div>
             <div>
-              <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">
-                {lang === 'es' ? 'Teléfono' : lang === 'it' ? 'Telefono' : 'Phone'}
-              </label>
+              <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">{lang === 'es' ? 'Teléfono' : lang === 'it' ? 'Telefono' : 'Phone'}</label>
               <input type="tel" data-path="basics.phone" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-blue-500" />
             </div>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">
-              {lang === 'es' ? 'Fotografía de Perfil' : lang === 'it' ? 'Foto del Profilo' : 'Profile Photo'}
-            </label>
+            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">{lang === 'es' ? 'Fotografía' : lang === 'it' ? 'Fotografia' : 'Photo'}</label>
             <div class="flex items-center gap-3 bg-gray-50 p-3 rounded-xl border border-dashed border-gray-300">
               <input type="file" id="photo-file" accept="image/*" class="hidden" />
               <button type="button" onclick="document.getElementById('photo-file').click()" class="px-3 py-1.5 bg-white border border-gray-200 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-50 shadow-sm">
-                {lang === 'es' ? 'Seleccionar del ordenador' : lang === 'it' ? 'Seleziona dal computer' : 'Select from computer'}
+                {lang === 'es' ? 'Seleccionar archivo' : lang === 'it' ? 'Seleziona file' : 'Choose file'}
               </button>
-              <button type="button" id="btn-remove-photo" class="text-xs text-red-500 font-medium hidden hover:underline">
-                {lang === 'es' ? 'Eliminar' : lang === 'it' ? 'Elimina' : 'Remove'}
-              </button>
-              <span id="photo-status" class="text-xs text-gray-400 truncate max-w-[180px]">
-                {lang === 'es' ? 'Sin archivo seleccionado' : lang === 'it' ? 'Nessun file selezionato' : 'No file selected'}
-              </span>
+              <button type="button" id="btn-remove-photo" class="text-xs text-red-500 font-medium hidden hover:underline">{lang === 'es' ? 'Eliminar' : lang === 'it' ? 'Elimina' : 'Remove'}</button>
+              <span id="photo-status" class="text-xs text-gray-400 truncate max-w-[180px]">{lang === 'es' ? 'Sin archivo' : lang === 'it' ? 'Nessun file' : 'No file'}</span>
             </div>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">
-              {lang === 'es' ? 'Extracto Profesional' : lang === 'it' ? 'Estratto Professionale' : 'Professional Summary'}
-            </label>
+            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">{lang === 'es' ? 'Extracto Profesional' : lang === 'it' ? 'Profilo Professionale' : 'Professional Summary'}</label>
             <textarea data-path="basics.summary" rows="4" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-blue-500"></textarea>
           </div>
         </div>
 
         <div id="tab-work" class="tab-content space-y-4 hidden">
           <div id="work-container" class="space-y-4"></div>
-          <button type="button" id="btn-add-work" class="w-full py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-semibold rounded-xl border border-dashed border-blue-200 transition-colors">
-            {lang === 'es' ? '+ Añadir Nueva Experiencia Laboral' : lang === 'it' ? '+ Aggiungi Nuova Esperienza' : '+ Add New Work Experience'}
+          <button type="button" id="btn-add-work" class="w-full py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-semibold rounded-xl border border-dashed border-blue-200">
+            {lang === 'es' ? '+ Añadir Experiencia' : lang === 'it' ? '+ Aggiungi Esperienza' : '+ Add Experience'}
           </button>
         </div>
 
         <div id="tab-education" class="tab-content space-y-4 hidden">
           <div id="education-container" class="space-y-4"></div>
-          <button type="button" id="btn-add-edu" class="w-full py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-semibold rounded-xl border border-dashed border-blue-200 transition-colors">
-            {lang === 'es' ? '+ Añadir Nueva Formación Académica' : lang === 'it' ? '+ Aggiungi Nuova Formazione' : '+ Add New Education'}
+          <button type="button" id="btn-add-edu" class="w-full py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-semibold rounded-xl border border-dashed border-blue-200">
+            {lang === 'es' ? '+ Añadir Formación' : lang === 'it' ? '+ Aggiungi Formazione' : '+ Add Education'}
           </button>
         </div>
 
         <div id="tab-skills" class="tab-content space-y-4 hidden">
-          <div>
-            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">
-              {lang === 'es' ? 'Habilidades y Tecnologías' : lang === 'it' ? 'Competenze e Tecnologie' : 'Skills & Technologies'}
-            </label>
-            <div id="skills-tag-container" class="flex flex-wrap gap-2 p-2.5 border border-gray-200 rounded-xl bg-white focus-within:ring-2 focus-within:ring-blue-500 min-h-[44px]">
-              <input type="text" id="skills-input" placeholder={lang === 'es' ? 'Escribe y pulsa Enter...' : lang === 'it' ? 'Scrivi e premi Invio...' : 'Type and press Enter...'} class="flex-1 min-w-[120px] text-sm focus:outline-none bg-transparent" />
-            </div>
+          <div class="bg-blue-50/60 p-3.5 rounded-xl border border-blue-100 text-xs text-blue-800">
+            💡 <strong>{lang === 'es' ? 'Instrucciones:' : lang === 'it' ? 'Istruzioni:' : 'Instructions:'}</strong> {lang === 'es' ? 'Escribe una habilidad y pulsa Enter o coma (,).' : lang === 'it' ? 'Scrivi una competenza e premi Invio o virgola (,).' : 'Type a skill and press Enter or comma (,).'}
           </div>
+          <div>
+            <input type="text" id="skills-input" placeholder="Ej: JavaScript..." class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none" />
+          </div>
+          <div id="skills-tag-container" class="flex flex-wrap gap-1.5 p-3 border border-gray-200 rounded-xl bg-gray-50/50 min-h-[60px]"></div>
         </div>
 
         <div id="tab-templates" class="tab-content hidden">
-          <label class="block text-xs font-semibold text-gray-500 uppercase mb-3">
-            {t('templates.subtitle') || (lang === 'es' ? 'Elige el aspecto visual de tu CV' : lang === 'it' ? 'Scegli l\'aspetto visivo del tuo CV' : 'Choose the visual style of your resume')}
-          </label>
-          <div class="grid grid-cols-2 gap-4">
-            {templates.map((tpl, i) => (
+            <label class="block text-xs font-semibold text-gray-500 uppercase mb-3">
+              {t('templates.subtitle') || (lang === 'es' ? 'Elige el aspecto visual de tu CV' : lang === 'it' ? "Scegli l'aspetto visivo del tuo CV" : 'Choose the visual style of your resume')}
+            </label>
+            
+            {/* Agregamos sm:grid-cols-3 para que si en pantallas grandes hay 3 plantillas, se vean alineadas */}
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              {templates.map((tpl, i) => {
+            // 1. Calculamos la clave de traducción
+            const key = `templates.${tpl.id}` as UIKeys;
+            const translated = t(key);
+            
+            // 2. Determinamos qué mostrar: si la traducción es igual a la clave, usamos el displayName, si no, la traducción
+            const displayName = translated !== key ? translated : tpl.displayName;
+
+            return (
               <div 
                 data-template-id={tpl.id} 
                 class={`template-card border-2 p-3 rounded-xl bg-white shadow-sm cursor-pointer hover:border-blue-300 transition-all group relative ${i === 0 ? 'border-blue-600 ring-2 ring-blue-100' : 'border-gray-200'}`}
@@ -195,104 +184,77 @@ const templates = [
                 <div class="aspect-[4/5] w-full bg-gray-50 rounded-lg p-2 mb-2 border border-gray-100 group-hover:scale-[1.02] transition-transform">
                   <Fragment set:html={tpl.svg} />
                 </div>
-                <div class="text-xs font-bold text-gray-800 text-center group-hover:text-blue-600 truncate">
-                  {tpl.name}
+                
+                {/* Aquí ya no usamos name, usamos displayName y la lógica de traducción corregida */}
+                <div class="text-sm font-bold text-gray-900 text-center group-hover:text-blue-600 truncate tracking-wide mt-1.5">
+                  {displayName}
                 </div>
               </div>
-            ))}
-          </div>
+            );
+          })}
         </div>
+      </div>
 
-        <button id="btn-publish" class="w-full py-2.5 bg-gray-900 text-white font-semibold rounded-xl hover:bg-gray-800 transition-colors text-xs uppercase tracking-wider shadow-md">
-          🚀 {t('edit.publish') || (lang === 'es' ? 'Actualizar Web' : lang === 'it' ? 'Aggiorna Sito' : 'Update Website')}
-        </button>
       </div>
     </div>
 
-    <div id="preview-section" data-template={templates[0]?.id || 'minimal'} class="bg-white p-8 rounded-2xl border border-gray-200 shadow-lg min-h-[297mm] transition-all duration-300 print:shadow-none print:border-0 print:p-0 print:block">
-      <header id="preview-header" class="flex gap-6 items-start pb-6 border-b">
+    <div id="preview-section" data-template="minimalist" class="bg-white p-8 rounded-2xl border border-gray-200 shadow-lg min-h-[297mm] print:shadow-none print:border-0 print:p-0">
+      
+      <header id="preview-header" class="flex justify-between items-start pb-6 border-b border-gray-100">
         <div class="flex-1">
-          <h2 id="view-name" class="font-bold tracking-tight"></h2>
-          <p id="view-label" class="mt-1 font-medium"></p>
-          <div id="view-contact" class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs"></div>
+          <h2 id="view-name" class="text-3xl font-bold tracking-tight text-gray-900"></h2>
+          <p id="view-label" class="mt-1 text-base text-gray-600 font-medium"></p>
+          <div id="view-contact" class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500"></div>
         </div>
-        <img id="view-image" class="w-24 h-24 rounded-xl object-cover border border-gray-200 hidden" alt="Foto CV" />
+        <img id="view-image" class="w-24 h-24 rounded-xl object-cover border border-gray-200 hidden" alt="Foto" />
       </header>
-      <section class="mt-6 section-block">
-        <h3 class="section-title text-xs font-bold uppercase tracking-widest mb-2">
+      
+      <section class="mt-6">
+        <h3 class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2 pb-1 border-b border-gray-100">
           {lang === 'es' ? 'Perfil' : lang === 'it' ? 'Profilo' : 'Profile'}
         </h3>
-        <p id="view-summary" class="text-sm leading-relaxed whitespace-pre-line"></p>
+        <p id="view-summary" class="text-sm text-gray-600 leading-relaxed whitespace-pre-line"></p>
       </section>
-      <section class="mt-6 section-block">
-        <h3 class="section-title text-xs font-bold uppercase tracking-widest mb-3">
+      
+      <section class="mt-6">
+        <h3 class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3 pb-1 border-b border-gray-100">
           {lang === 'es' ? 'Experiencia' : lang === 'it' ? 'Esperienza' : 'Experience'}
         </h3>
         <div id="view-experience" class="space-y-4"></div>
       </section>
-      <section class="mt-6 section-block">
-        <h3 class="section-title text-xs font-bold uppercase tracking-widest mb-3">
+      
+      <section class="mt-6">
+        <h3 class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3 pb-1 border-b border-gray-100">
           {lang === 'es' ? 'Formación' : lang === 'it' ? 'Formazione' : 'Education'}
         </h3>
         <div id="view-education" class="space-y-4"></div>
       </section>
-      <section class="mt-6 section-block">
-        <h3 class="section-title text-xs font-bold uppercase tracking-widest mb-2">
+      
+      <section class="mt-6">
+        <h3 class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2 pb-1 border-b border-gray-100">
           {lang === 'es' ? 'Habilidades' : lang === 'it' ? 'Competenze' : 'Skills'}
         </h3>
-        <div id="view-skills-badges" class="flex flex-wrap"></div>
+        <div id="view-skills-badges" class="flex flex-wrap gap-1.5"></div>
       </section>
     </div>
 
   </div>
 
   <style is:global>
-    /* 1. PLANTILLA MINIMALISTA */
-    [data-template="minimal"] { font-family: 'Inter', system-ui, sans-serif; color: #111827; }
-    [data-template="minimal"] #preview-header { flex-direction: row-reverse; }
-    [data-template="minimal"] #view-name { font-size: 1.75rem; font-weight: 700; color: #111827; }
-    [data-template="minimal"] #view-label { color: #4b5563; font-size: 0.95rem; }
-    [data-template="minimal"] #view-contact { color: #6b7280; }
-    [data-template="minimal"] #view-summary { color: #4b5563; }
-    [data-template="minimal"] .section-title { color: #1f2937; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.25rem; font-size: 0.75rem; }
-    [data-template="minimal"] .badge-item { background-color: #f3f4f6; color: #374151; font-size: 0.75rem; padding: 0.25rem 0.5rem; margin: 0.125rem; border-radius: 0.25rem; display: inline-block; }
-
-    /* 2. PLANTILLA TECNOLÓGICA */
-    [data-template="tech"] { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; color: #f1f5f9; background-color: #0f172a !important; }
-    [data-template="tech"] #preview-header { border-color: #334155; }
-    [data-template="tech"] #view-name { font-size: 1.875rem; font-weight: 800; color: #60a5fa; letter-spacing: -0.025em; }
-    [data-template="tech"] #view-label { color: #94a3b8; font-size: 0.875rem; }
-    [data-template="tech"] #view-contact { color: #64748b; }
-    [data-template="tech"] #view-summary { color: #cbd5e1; }
-    [data-template="tech"] .section-title { color: #3b82f6; border-left: 3px solid #3b82f6; padding-left: 0.5rem; font-size: 0.75rem; }
-    [data-template="tech"] .badge-item { background-color: #1e293b; color: #38bdf8; border: 1px solid #334155; border-radius: 0.375rem; font-size: 0.75rem; padding: 0.125rem 0.5rem; margin: 0.125rem; display: inline-block; }
-
-    /* 3. PLANTILLA ARTÍSTICA */
-    [data-template="artistic"] { font-family: 'Playfair Display', Georgia, serif; color: #292524; background-color: #fffbeb !important; }
-    [data-template="artistic"] #preview-header { text-align: center; flex-direction: column; align-items: center; border-bottom: 2px solid #e7e5e4; }
-    [data-template="artistic"] #view-name { font-size: 2.25rem; font-weight: 700; font-style: italic; color: #78350f; }
-    [data-template="artistic"] #view-label { color: #b45309; font-size: 1.125rem; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.25rem; }
-    [data-template="artistic"] #view-contact { color: #78716c; justify-content: center; font-family: system-ui, sans-serif; gap: 1.5rem; }
-    [data-template="artistic"] #view-summary { color: #44403c; font-size: 0.95rem; text-align: center; line-height: 1.7; }
-    [data-template="artistic"] .section-title { color: #78350f; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.15em; border-bottom: 1px dashed #d97706; padding-bottom: 0.25rem; }
-    [data-template="artistic"] .badge-item { background-color: #fef3c7; color: #92400e; border: 1px solid #f59e0b; border-radius: 9999px; font-family: system-ui, sans-serif; font-size: 0.75rem; padding: 0.125rem 0.625rem; margin: 0.125rem; display: inline-block; }
-    [data-template="artistic"] #view-image { border-radius: 9999px; width: 6rem; height: 6rem; border: 3px solid #f59e0b; }
-
-    @media print {
-      body { background: #ffffff !important; color: #000000 !important; padding: 0 !important; }
-      [data-template="tech"] { background-color: #ffffff !important; color: #000000 !important; }
-      [data-template="tech"] #view-name { color: #1e40af; }
-      [data-template="artistic"] { background-color: #ffffff !important; color: #000000 !important; }
-      .print\:hidden { display: none !important; }
-      .print\:block { display: block !important; }
-      .print\:p-0 { padding: 0 !important; }
-      #preview-section { width: 100% !important; border: 0 !important; padding: 0 !important; box-shadow: none !important; min-height: auto !important; }
-    }
+    #preview-section { font-family: 'Inter', system-ui, sans-serif; color: #111827; }
+    .badge-item-live { background-color: #f3f4f6; color: #374151; font-size: 0.75rem; padding: 0.25rem 0.625rem; border-radius: 9999px; display: inline-block; font-weight: 500; }
   </style>
 
   <script define:vars={{ lang, initialData }}>
     const STORAGE_KEY = `cv_backup_data_${lang}`;
     const TEMPLATE_KEY = `cv_selected_template_${lang}`;
+
+    // Diccionario de textos de sustitución limpios según el idioma del cliente
+    const translationsUI = {
+      es: { defaultName: "Tu Nombre", defaultLabel: "Tu Profesión u Oficio" },
+      it: { defaultName: "Il Tuo Nome", defaultLabel: "La Tua Professione" },
+      en: { defaultName: "Your Name", defaultLabel: "Your Profession" }
+    }[lang] || { defaultName: "Tu Nombre", defaultLabel: "Tu Profesión" };
 
     let state = (() => {
       try {
@@ -306,8 +268,14 @@ const templates = [
     if (!state.basics) state.basics = { name: "", label: "", email: "", phone: "", summary: "", image: "" };
     if (!state.work) state.work = [];
     if (!state.education) state.education = [];
-    if (!state.skills) state.skills = [{ name: "Skills", keywords: [] }];
-    if (!state.skills[0].keywords) state.skills[0].keywords = [];
+    if (!state.meta) state.meta = {};
+    if (!state.skills) state.skills = [];
+
+    const labels = {
+      es: { company: 'Empresa', position: 'Puesto', start: 'Inicio', end: 'Fin', desc: 'Descripción', inst: 'Institución', area: 'Titulación', remove: 'Eliminar' },
+      it: { company: 'Azienda', position: 'Ruolo', start: 'Inizio', end: 'Fine', desc: 'Descrizione', inst: 'Istituto', area: 'Titolo', remove: 'Elimina' },
+      en: { company: 'Company', position: 'Position', start: 'Start Date', end: 'End Date', desc: 'Description', inst: 'Institution', area: 'Area of Study', remove: 'Remove' }
+    }[lang];
 
     function setDeepValue(obj, path, value) {
       const parts = path.split('.');
@@ -330,256 +298,240 @@ const templates = [
     }
 
     function applyTemplate(templateId) {
-      document.querySelectorAll('.template-card').forEach(c => {
-        if (c.dataset.templateId === templateId) {
-          c.classList.remove('border-gray-200');
-          c.classList.add('border-blue-600', 'ring-2', 'ring-blue-100');
-        } else {
-          c.classList.remove('border-blue-600', 'ring-2', 'ring-blue-100');
-          c.classList.add('border-gray-200');
-        }
-      });
-      const section = document.getElementById('preview-section');
-      if (section) section.setAttribute('data-template', templateId);
-      localStorage.setItem(TEMPLATE_KEY, templateId);
+  // 1. Resaltar visualmente la tarjeta seleccionada en el formulario
+  document.querySelectorAll('.template-card').forEach(c => {
+    if (c.dataset.templateId === templateId.toLowerCase()) {
+      c.classList.remove('border-gray-200');
+      c.classList.add('border-blue-600', 'ring-2', 'ring-blue-100');
+    } else {
+      c.classList.remove('border-blue-600', 'ring-2', 'ring-blue-100');
+      c.classList.add('border-gray-200');
     }
+  });
+
+  // 2. Guardar la selección en el estado local
+  state.meta.template = templateId;
+  localStorage.setItem(TEMPLATE_KEY, templateId);
+
+  // 💥 EL DISPARADOR MÁGICO: Cambiamos el atributo data-template de la preview
+  // Esto activará instantáneamente los estilos globales del Layout cargado sin tocar el formulario
+  const preview = document.getElementById('preview-section');
+  if (preview) {
+    preview.setAttribute('data-template', templateId.toLowerCase());
+  }
+}
 
     document.querySelectorAll('.template-card').forEach(card => {
-      card.addEventListener('click', () => {
-        applyTemplate(card.dataset.templateId);
-      });
+      card.addEventListener('click', () => { applyTemplate(card.dataset.templateId); saveState(); });
     });
 
-    // Foto de perfil
     const fileInput = document.getElementById('photo-file');
     const photoStatus = document.getElementById('photo-status');
     const removePhotoBtn = document.getElementById('btn-remove-photo');
 
-    if (fileInput) {
-      fileInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        if (photoStatus) photoStatus.textContent = file.name;
-        const reader = new FileReader();
-        reader.onload = function(evt) {
-          setDeepValue(state, 'basics.image', evt.target.result);
-          if (removePhotoBtn) removePhotoBtn.classList.remove('hidden');
+    fileInput?.addEventListener('change', (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      if (photoStatus) photoStatus.textContent = file.name;
+      removePhotoBtn?.classList.remove('hidden');
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          state.basics.image = event.target.result;
           saveState();
-        };
-        reader.readAsDataURL(file);
-      });
-    }
-
-    if (removePhotoBtn) {
-      removePhotoBtn.addEventListener('click', () => {
-        setDeepValue(state, 'basics.image', '');
-        if (fileInput) fileInput.value = '';
-        if (photoStatus) photoStatus.textContent = lang === 'es' ? 'Sin archivo seleccionado' : lang === 'it' ? 'Nessun file selezionato' : 'No file selected';
-        removePhotoBtn.classList.add('hidden');
-        saveState();
-      });
-    }
-
-    // Tags de Skills
-    const tagsContainer = document.getElementById('skills-tag-container');
-    const skillsInput = document.getElementById('skills-input');
-
-    function renderTags() {
-      if (!tagsContainer) return;
-      tagsContainer.querySelectorAll('.tag-badge').forEach(el => el.remove());
-      state.skills[0].keywords.forEach((word, index) => {
-        const span = document.createElement('span');
-        span.className = "tag-badge flex items-center gap-1 bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded-md";
-        span.innerHTML = `${word}<button type="button" class="text-blue-500 hover:text-blue-900 font-bold ml-0.5" data-index="${index}">&times;</button>`;
-        span.querySelector('button').addEventListener('click', () => removeTag(index));
-        tagsContainer.insertBefore(span, skillsInput);
-      });
-    }
-
-    function addTag(word) {
-      const cleanWord = word.trim().replace(/,/g, '');
-      if (cleanWord && !state.skills[0].keywords.includes(cleanWord)) {
-        state.skills[0].keywords.push(cleanWord);
-        saveState();
-        renderTags();
-      }
-      if (skillsInput) skillsInput.value = '';
-    }
-
-    function removeTag(index) {
-      state.skills[0].keywords.splice(index, 1);
-      saveState();
-      renderTags();
-    }
-
-    if (skillsInput) {
-      skillsInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ',') {
-          e.preventDefault();
-          addTag(skillsInput.value);
-        } else if (e.key === 'Backspace' && skillsInput.value === '') {
-          if (state.skills[0].keywords.length > 0) {
-            removeTag(state.skills[0].keywords.length - 1);
-          }
         }
+      };
+      reader.readAsDataURL(file);
+    });
+
+    removePhotoBtn?.addEventListener('click', () => {
+      state.basics.image = "";
+      if (fileInput) fileInput.value = "";
+      if (photoStatus) photoStatus.textContent = lang === 'es' ? 'Sin archivo' : lang === 'it' ? 'Nessun file' : 'No file';
+      removePhotoBtn.classList.add('hidden');
+      saveState();
+    });
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => {
+          b.classList.remove('border-blue-600', 'text-blue-600');
+          b.classList.add('border-transparent', 'text-gray-500');
+        });
+        btn.classList.add('border-blue-600', 'text-blue-600');
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+        document.getElementById(`tab-${btn.dataset.tab}`)?.classList.remove('hidden');
+      });
+    });
+
+    function setupInputSync() {
+      document.querySelectorAll('#cv-form input[data-path], #cv-form textarea[data-path]').forEach(input => {
+        input.replaceWith(input.cloneNode(true));
+      });
+      document.querySelectorAll('#cv-form input[data-path], #cv-form textarea[data-path]').forEach(input => {
+        input.addEventListener('input', (e) => {
+          const path = e.target.getAttribute('data-path');
+          if (path) {
+            setDeepValue(state, path, e.target.value);
+            saveState();
+          }
+        });
       });
     }
 
-    if (tagsContainer) tagsContainer.addEventListener('click', () => skillsInput?.focus());
-
-    // Bloques repetibles dinámicos
-    const workContainer = document.getElementById('work-container');
-    const eduContainer = document.getElementById('education-container');
-
-    function createItemBlock(type, index, data) {
-      const card = document.createElement('div');
-      card.className = "p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-3 relative group";
-      
-      const labelEmpresa = lang === 'es' ? 'Empresa' : lang === 'it' ? 'Azienda' : 'Company';
-      const labelPuesto = lang === 'es' ? 'Puesto' : lang === 'it' ? 'Ruolo' : 'Position';
-      const labelInicio = lang === 'es' ? 'Inicio' : lang === 'it' ? 'Inizio' : 'Start Date';
-      const labelFin = lang === 'es' ? 'Fin' : lang === 'it' ? 'Fine' : 'End Date';
-      const labelFunciones = lang === 'es' ? 'Funciones' : lang === 'it' ? 'Compiti' : 'Summary';
-      const labelEliminar = lang === 'es' ? 'Eliminar' : lang === 'it' ? 'Elimina' : 'Delete';
-      
-      const labelInstitucion = lang === 'es' ? 'Institución' : lang === 'it' ? 'Istituto' : 'Institution';
-      const labelTitulacion = lang === 'es' ? 'Titulación' : lang === 'it' ? 'Qualifica' : 'Degree';
-      const labelArea = lang === 'es' ? 'Área' : lang === 'it' ? 'Area' : 'Field';
-
-      if (type === 'work') {
-        card.innerHTML = `
-          <button type="button" class="btn-del absolute top-2 right-2 text-xs text-red-500 hover:underline opacity-0 group-hover:opacity-100 transition-opacity">${labelEliminar}</button>
-          <div class="grid sm:grid-cols-2 gap-3">
-            <div>
-              <label class="block text-[10px] font-bold text-gray-400 uppercase">${labelEmpresa}</label>
-              <input type="text" data-field="name" value="${data.name || ''}" class="w-full px-2 py-1 border rounded text-xs focus:outline-blue-500" />
-            </div>
-            <div>
-              <label class="block text-[10px] font-bold text-gray-400 uppercase">${labelPuesto}</label>
-              <input type="text" data-field="position" value="${data.position || ''}" class="w-full px-2 py-1 border rounded text-xs focus:outline-blue-500" />
-            </div>
-          </div>
-          <div class="grid sm:grid-cols-2 gap-3">
-            <div>
-              <label class="block text-[10px] font-bold text-gray-400 uppercase">${labelInicio}</label>
-              <input type="text" data-field="startDate" value="${data.startDate || ''}" class="w-full px-2 py-1 border rounded text-xs focus:outline-blue-500" />
-            </div>
-            <div>
-              <label class="block text-[10px] font-bold text-gray-400 uppercase">${labelFin}</label>
-              <input type="text" data-field="endDate" value="${data.endDate || ''}" class="w-full px-2 py-1 border rounded text-xs focus:outline-blue-500" />
-            </div>
-          </div>
-          <div>
-            <label class="block text-[10px] font-bold text-gray-400 uppercase">${labelFunciones}</label>
-            <textarea data-field="summary" rows="2" class="w-full px-2 py-1 border rounded text-xs focus:outline-blue-500">${data.summary || ''}</textarea>
-          </div>
-        `;
-        card.querySelectorAll('input, textarea').forEach(input => {
-          input.addEventListener('input', (e) => {
-            state.work[index][e.target.dataset.field] = e.target.value;
-            saveState();
-          });
-        });
-        card.querySelector('.btn-del').addEventListener('click', () => {
-          state.work.splice(index, 1);
-          saveState();
-          renderDynamicLists();
-        });
-      } else {
-        card.innerHTML = `
-          <button type="button" class="btn-del absolute top-2 right-2 text-xs text-red-500 hover:underline opacity-0 group-hover:opacity-100 transition-opacity">${labelEliminar}</button>
-          <div>
-            <label class="block text-[10px] font-bold text-gray-400 uppercase">${labelInstitucion}</label>
-            <input type="text" data-field="institution" value="${data.institution || ''}" class="w-full px-2 py-1 border rounded text-xs focus:outline-blue-500" />
-          </div>
-          <div class="grid sm:grid-cols-2 gap-3">
-            <div>
-              <label class="block text-[10px] font-bold text-gray-400 uppercase">${labelTitulacion}</label>
-              <input type="text" data-field="studyType" value="${data.studyType || ''}" class="w-full px-2 py-1 border rounded text-xs focus:outline-blue-500" />
-            </div>
-            <div>
-              <label class="block text-[10px] font-bold text-gray-400 uppercase">${labelArea}</label>
-              <input type="text" data-field="area" value="${data.area || ''}" class="w-full px-2 py-1 border rounded text-xs focus:outline-blue-500" />
-            </div>
-          </div>
-          <div class="grid sm:grid-cols-2 gap-3">
-            <div>
-              <label class="block text-[10px] font-bold text-gray-400 uppercase">${labelInicio}</label>
-              <input type="text" data-field="startDate" value="${data.startDate || ''}" class="w-full px-2 py-1 border rounded text-xs focus:outline-blue-500" />
-            </div>
-            <div>
-              <label class="block text-[10px] font-bold text-gray-400 uppercase">${labelFin}</label>
-              <input type="text" data-field="endDate" value="${data.endDate || ''}" class="w-full px-2 py-1 border rounded text-xs focus:outline-blue-500" />
-            </div>
-          </div>
-        `;
-        card.querySelectorAll('input, textarea').forEach(input => {
-          input.addEventListener('input', (e) => {
-            state.education[index][e.target.dataset.field] = e.target.value;
-            saveState();
-          });
-        });
-        card.querySelector('.btn-del').addEventListener('click', () => {
-          state.education.splice(index, 1);
-          saveState();
-          renderDynamicLists();
-        });
+    function populateFormBasics() {
+      document.querySelectorAll('#cv-form input[data-path], #cv-form textarea[data-path]').forEach(input => {
+        const path = input.getAttribute('data-path');
+        if (path) input.value = getDeepValue(state, path) || "";
+      });
+      if (state.basics.image && photoStatus) {
+        photoStatus.textContent = lang === 'es' ? 'Imagen cargada' : lang === 'it' ? 'Immagine caricata' : 'Image loaded';
+        removePhotoBtn?.classList.remove('hidden');
       }
-      return card;
     }
 
-    function renderDynamicLists() {
+    function renderDynamicBlocks() {
+      const workContainer = document.getElementById('work-container');
       if (workContainer) {
         workContainer.innerHTML = '';
-        state.work.forEach((item, idx) => workContainer.appendChild(createItemBlock('work', idx, item)));
+        state.work.forEach((item, index) => { workContainer.appendChild(createWorkBlock(item, index)); });
       }
+      const eduContainer = document.getElementById('education-container');
       if (eduContainer) {
         eduContainer.innerHTML = '';
-        state.education.forEach((item, idx) => eduContainer.appendChild(createItemBlock('education', idx, item)));
+        state.education.forEach((item, index) => { eduContainer.appendChild(createEduBlock(item, index)); });
       }
+      setupInputSync();
     }
+
+    function createWorkBlock(item, index) {
+      const div = document.createElement('div');
+      div.className = "p-4 bg-gray-50 rounded-xl border border-gray-200 relative space-y-3";
+      div.innerHTML = `
+        <button type="button" class="absolute top-2 right-2 text-red-500 text-xs font-medium" onclick="removeWorkBlock(${index})">${labels.remove}</button>
+        <div class="grid sm:grid-cols-2 gap-3 pt-3">
+          <div>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${labels.company}</label>
+            <input type="text" data-path="work.${index}.name" value="${item.name || ''}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${labels.position}</label>
+            <input type="text" data-path="work.${index}.position" value="${item.position || ''}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" />
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${labels.start}</label>
+            <input type="text" placeholder="YYYY-MM" data-path="work.${index}.startDate" value="${item.startDate || ''}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${labels.end}</label>
+            <input type="text" placeholder="YYYY-MM" data-path="work.${index}.endDate" value="${item.endDate || ''}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" />
+          </div>
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${labels.desc}</label>
+          <textarea data-path="work.${index}.summary" rows="2" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm">${item.summary || ''}</textarea>
+        </div>
+      `;
+      return div;
+    }
+
+    window.removeWorkBlock = (index) => { state.work.splice(index, 1); saveState(); renderDynamicBlocks(); };
+
+    function createEduBlock(item, index) {
+      const div = document.createElement('div');
+      div.className = "p-4 bg-gray-50 rounded-xl border border-gray-200 relative space-y-3";
+      div.innerHTML = `
+        <button type="button" class="absolute top-2 right-2 text-red-500 text-xs font-medium" onclick="removeEduBlock(${index})">${labels.remove}</button>
+        <div class="grid sm:grid-cols-2 gap-3 pt-3">
+          <div>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${labels.inst}</label>
+            <input type="text" data-path="education.${index}.institution" value="${item.institution || ''}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${labels.area}</label>
+            <input type="text" data-path="education.${index}.area" value="${item.area || ''}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" />
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${labels.start}</label>
+            <input type="text" placeholder="YYYY-MM" data-path="education.${index}.startDate" value="${item.startDate || ''}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${labels.end}</label>
+            <input type="text" placeholder="YYYY-MM" data-path="education.${index}.endDate" value="${item.endDate || ''}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" />
+          </div>
+        </div>
+      `;
+      return div;
+    }
+
+    window.removeEduBlock = (index) => { state.education.splice(index, 1); saveState(); renderDynamicBlocks(); };
 
     document.getElementById('btn-add-work')?.addEventListener('click', () => {
       state.work.push({ name: "", position: "", startDate: "", endDate: "", summary: "" });
-      saveState();
-      renderDynamicLists();
+      saveState(); renderDynamicBlocks();
     });
 
     document.getElementById('btn-add-edu')?.addEventListener('click', () => {
-      state.education.push({ institution: "", studyType: "", area: "", startDate: "", endDate: "" });
-      saveState();
-      renderDynamicLists();
+      state.education.push({ institution: "", area: "", startDate: "", endDate: "" });
+      saveState(); renderDynamicBlocks();
     });
 
-    function populateFormBasics() {
-      document.querySelectorAll('#tab-basics input[data-path], #tab-basics textarea[data-path]').forEach(input => {
-        input.value = getDeepValue(state, input.dataset.path) || '';
+    const skillsInput = document.getElementById('skills-input');
+    const skillsTagContainer = document.getElementById('skills-tag-container');
+
+    function renderSkillsTags() {
+      if (!skillsTagContainer) return;
+      document.querySelectorAll('.skill-tag-item').forEach(el => el.remove());
+      state.skills.forEach((skillObj, idx) => {
+        if (!skillObj.name) return;
+        const div = document.createElement('div');
+        div.className = "skill-tag-item inline-flex items-center gap-1.5 bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded-lg";
+        div.innerHTML = `<span>${skillObj.name}</span><button type="button" class="text-blue-200 hover:text-white font-extrabold ml-0.5" onclick="removeSkillObj(${idx})">&times;</button>`;
+        skillsTagContainer.appendChild(div);
       });
-      if (state.basics?.image && photoStatus && removePhotoBtn) {
-        photoStatus.textContent = lang === 'es' ? 'Imagen cargada' : lang === 'it' ? 'Immagine caricata' : 'Image loaded';
-        removePhotoBtn.classList.remove('hidden');
-      }
+      renderPreview();
     }
+
+    window.removeSkillObj = (idx) => { state.skills.splice(idx, 1); saveState(); renderSkillsTags(); };
+
+    skillsInput?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ',') {
+        e.preventDefault();
+        let val = skillsInput.value.replace(/,/g, '').trim();
+        if (val) {
+          if (!state.skills.some(s => s.name.toLowerCase() === val.toLowerCase())) {
+            state.skills.push({ name: val });
+            saveState(); renderSkillsTags();
+          }
+        }
+        skillsInput.value = '';
+      }
+    });
 
     function renderPreview() {
       const nameEl = document.getElementById('view-name');
       const labelEl = document.getElementById('view-label');
       const summaryEl = document.getElementById('view-summary');
-      
-      if (nameEl) nameEl.textContent = state.basics?.name || (lang === 'es' ? 'Nombre Completo' : lang === 'it' ? 'Nome Completo' : 'Full Name');
-      if (labelEl) labelEl.textContent = state.basics?.label || (lang === 'es' ? 'Especialidad Profesional' : lang === 'it' ? 'Specializzazione' : 'Professional Specialty');
-      if (summaryEl) summaryEl.textContent = state.basics?.summary || '';
-      
-      const contactCont = document.getElementById('view-contact');
-      if (contactCont) {
-        contactCont.innerHTML = '';
-        if (state.basics?.email) contactCont.innerHTML += `<span>✉ ${state.basics.email}</span>`;
-        if (state.basics?.phone) contactCont.innerHTML += `<span>📞 ${state.basics.phone}</span>`;
+      const contactEl = document.getElementById('view-contact');
+
+      if (nameEl) nameEl.textContent = state.basics.name.trim() || translationsUI.defaultName;
+      if (labelEl) labelEl.textContent = state.basics.label.trim() || translationsUI.defaultLabel;
+      if (summaryEl) summaryEl.textContent = state.basics.summary || '';
+
+      if (contactEl) {
+        let html = '';
+        if (state.basics.email) html += `<span>📧 ${state.basics.email}</span>`;
+        if (state.basics.phone) html += `<span>📞 ${state.basics.phone}</span>`;
+        contactEl.innerHTML = html;
       }
-      
+
       const imgEl = document.getElementById('view-image');
       if (imgEl) {
-        if (state.basics?.image) {
+        if (state.basics.image) {
           imgEl.src = state.basics.image;
           imgEl.classList.remove('hidden');
         } else {
@@ -587,73 +539,53 @@ const templates = [
         }
       }
 
-      const viewWork = document.getElementById('view-experience');
-      if (viewWork) {
-        viewWork.innerHTML = '';
+      const expEl = document.getElementById('view-experience');
+      if (expEl) {
+        expEl.innerHTML = '';
         state.work.forEach(w => {
-          const block = document.createElement('div');
-          block.className = "text-sm mt-3";
-          block.innerHTML = `
-            <div class="flex justify-between font-semibold">
-              <span class="item-header">${w.position || 'Ruolo'} — <span class="item-company">${w.name || 'Azienda'}</span></span>
-              <span class="text-xs font-normal text-gray-400">${w.startDate || ''} – ${w.endDate || ''}</span>
+          const div = document.createElement('div');
+          div.innerHTML = `
+            <div class="flex justify-between font-semibold text-sm">
+              <span class="text-gray-900 font-bold">${w.position || ''}</span>
+              <span class="text-gray-500 text-xs">${w.startDate || ''} — ${w.endDate || ''}</span>
             </div>
-            <p class="text-xs mt-1 leading-relaxed whitespace-pre-line item-summary">${w.summary || ''}</p>
+            <div class="text-blue-600 text-xs font-medium">${w.name || ''}</div>
+            <p class="text-gray-600 text-xs mt-1 whitespace-pre-line">${w.summary || ''}</p>
           `;
-          viewWork.appendChild(block);
+          expEl.appendChild(div);
         });
       }
 
-      const viewEdu = document.getElementById('view-education');
-      if (viewEdu) {
-        viewEdu.innerHTML = '';
+      const eduEl = document.getElementById('view-education');
+      if (eduEl) {
+        eduEl.innerHTML = '';
         state.education.forEach(e => {
-          const block = document.createElement('div');
-          block.className = "text-sm mt-3";
-          block.innerHTML = `
-            <div class="flex justify-between font-semibold">
-              <span class="item-header">${e.studyType || 'Titolo'} in ${e.area || 'Area'}</span>
-              <span class="text-xs font-normal text-gray-400">${e.startDate || ''} – ${e.endDate || ''}</span>
+          const div = document.createElement('div');
+          div.innerHTML = `
+            <div class="flex justify-between font-semibold text-sm">
+              <span class="text-gray-900 font-bold">${e.area || ''}</span>
+              <span class="text-gray-500 text-xs">${e.startDate || ''} — ${e.endDate || ''}</span>
             </div>
-            <p class="text-xs item-institution">${e.institution || 'Istituto'}</p>
+            <div class="text-gray-500 text-xs font-medium">${e.institution || ''}</div>
           `;
-          viewEdu.appendChild(block);
+          eduEl.appendChild(div);
         });
       }
 
-      const badgesContainer = document.getElementById('view-skills-badges');
-      if (badgesContainer) {
-        badgesContainer.innerHTML = '';
-        state.skills[0].keywords.forEach(kw => {
-          const b = document.createElement('span');
-          b.className = "badge-item";
-          b.textContent = kw;
-          badgesContainer.appendChild(b);
+      const badgesEl = document.getElementById('view-skills-badges');
+      if (badgesEl) {
+        badgesEl.innerHTML = '';
+        state.skills.forEach(s => {
+          if (!s.name) return;
+          const span = document.createElement('span');
+          span.className = "badge-item-live border shadow-xs";
+          span.textContent = s.name;
+          badgesEl.appendChild(span);
         });
       }
     }
 
-    document.getElementById('tab-basics')?.addEventListener('input', (e) => {
-      if (e.target.dataset.path) {
-        setDeepValue(state, e.target.dataset.path, e.target.value);
-        saveState();
-      }
-    });
-
-    const tabs = document.querySelectorAll('.tab-btn');
-    const contents = document.querySelectorAll('.tab-content');
-    tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        tabs.forEach(t => t.classList.remove('border-blue-600', 'text-blue-600'));
-        tabs.forEach(t => t.classList.add('border-transparent', 'text-gray-500'));
-        contents.forEach(c => c.classList.add('hidden'));
-        tab.classList.remove('border-transparent', 'text-gray-500');
-        tab.classList.add('border-blue-600', 'text-blue-600');
-        document.getElementById(`tab-${tab.dataset.tab}`).classList.remove('hidden');
-      });
-    });
-
-    document.getElementById('btn-print')?.addEventListener('click', () => window.print());
+    document.getElementById('btn-print')?.addEventListener('click', () => { window.print(); });
 
     document.getElementById('btn-download-json')?.addEventListener('click', () => {
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
@@ -661,39 +593,35 @@ const templates = [
       anchor.setAttribute("href", dataStr);
       anchor.setAttribute("download", `resume.${lang}.json`);
       document.body.appendChild(anchor);
-      anchor.click();
-      anchor.remove();
+      anchor.click(); anchor.remove();
     });
 
     document.getElementById('btn-publish')?.addEventListener('click', async () => {
       const btn = document.getElementById('btn-publish');
       if (!btn) return;
       btn.disabled = true;
+      const originalText = btn.textContent;
       btn.textContent = lang === 'es' ? 'Sincronizando...' : lang === 'it' ? 'Sincronizzazione...' : 'Syncing...';
       try {
-        state.selectedTemplate = localStorage.getItem(TEMPLATE_KEY) || 'minimal';
         const response = await fetch('/api/save', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ lang, resumeData: state })
         });
         if (response.ok) alert(lang === 'es' ? '¡Sincronizado con éxito!' : lang === 'it' ? 'Sincronizzato con successo!' : 'Successfully synced!');
-        else alert('Error.');
+        else alert('Error al guardar.');
       } catch (err) {
         alert('Error.');
       } finally {
         btn.disabled = false;
-        btn.textContent = '🚀 ' + (lang === 'es' ? 'Actualizar Web' : lang === 'it' ? 'Aggiorna Sito' : 'Update Website');
+        btn.textContent = originalText;
       }
     });
 
-    // 🚀 Inicialización al arrancar
-    const savedTemplate = localStorage.getItem(TEMPLATE_KEY) || 'minimal';
-    
+    const savedTemplate = state.meta?.template || localStorage.getItem(TEMPLATE_KEY) || 'minimalist';
     populateFormBasics();
-    renderDynamicLists();
-    renderTags();
-    renderPreview();
+    renderDynamicBlocks();
+    renderSkillsTags();
     applyTemplate(savedTemplate);
   </script>
 </body>

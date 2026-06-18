@@ -1,17 +1,7 @@
 ---
 // src/pages/[lang]/index.astro
 import { useTranslations, getAvailableLangs, type Lang, type UIKeys } from '../../i18n/ui';
-
-// Importación de tu layout real actual
 import MinimalistLayout from '../../layouts/MinimalistLayout.astro';
-
-// Diccionario indexado para mapear de forma automática y escalable en el futuro
-const LAYOUTS_MAP: Record<string, any> = {
-  minimalist: MinimalistLayout,
-  // Si en el futuro creas más layouts, solo añades una línea aquí:
-  // tech: TechLayout,
-  // artistic: ArtisticLayout
-};
 
 // Componentes del currículum estructurado
 import Header      from '../../components/Header.astro';
@@ -37,17 +27,22 @@ export function getStaticPaths() {
 
 const { lang } = Astro.params as { lang: 'es' | 'it' | 'en' };
 const resume = resumes[lang];
-
 const strictT = useTranslations(lang);
 const t = (key: string) => strictT(key as UIKeys);
 
 const isEmpty = !resume?.basics?.name?.trim();
 const availableLangs = getAvailableLangs(resumes);
 
-// Determina la plantilla activa del JSON. Por defecto: 'minimalist'
-const templateKey = (resume as any)?.meta?.template?.toLowerCase() || 'minimalist';
+// 📂 MAPEO DINÁMICO DE LAYOUTS PÚBLICOS
+const layoutModules = import.meta.glob('../../layouts/*.astro', { eager: true });
+const LAYOUTS_MAP = Object.entries(layoutModules).reduce((acc, [path, mod]: [string, any]) => {
+  if (mod.templateMeta?.id) {
+    acc[mod.templateMeta.id.toLowerCase()] = mod.default;
+  }
+  return acc;
+}, {} as Record<string, any>);
 
-// Asignación dinámica 100% segura. Si no encuentra la clave, usa tu MinimalistLayout base.
+const templateKey = (resume as any)?.meta?.template?.toLowerCase() || 'minimalist';
 const DynamicLayout = LAYOUTS_MAP[templateKey] || MinimalistLayout;
 ---
 

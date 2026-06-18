@@ -25,9 +25,9 @@ const esDict = {
   // Traducciones de la categoría de plantillas dinámicas
   'templates.title': 'Plantilla Visual',
   'templates.subtitle': 'Selecciona el diseño del Currículum',
-  'templates.minimallayout.name': 'Minimal (Plantilla Minimalista)',
-  'templates.techlayout.name': 'Tech (Plantilla Tecnológica)',
-  'templates.artisticlayout.name': 'Artistic (Plantilla Creativa)'
+  'templates.minimalist': 'Minimal (Plantilla Minimalista)',
+  'templates.techy': 'Tech (Plantilla Tecnológica)',
+  'templates.artistic': 'Artistic (Plantilla Creativa)'
 };
 
 export type UIKeys = keyof typeof esDict;
@@ -51,9 +51,9 @@ export const ui: Record<Lang, Record<UIKeys, string>> = {
     // Modello Visivo (Italiano)
     'templates.title': 'Modello Visivo',
     'templates.subtitle': 'Seleziona il design del Curriculum',
-    'templates.minimallayout.name': 'Minimal (Modello Minimalista)',
-    'templates.techlayout.name': 'Tech (Modello Tecnologico)',
-    'templates.artisticlayout.name': 'Artistic (Modello Creativo)'
+    'templates.minimalist': 'Minimal (Modello Minimalista)',
+    'templates.techy': 'Tech (Modello Tecnologico)',
+    'templates.artistic': 'Artistic (Modello Creativo)'
   },
   en: {
     'wizard.welcome': 'Welcome to your Sustainable & Free Resume!',
@@ -72,9 +72,9 @@ export const ui: Record<Lang, Record<UIKeys, string>> = {
     // Visual Template (English)
     'templates.title': 'Visual Template',
     'templates.subtitle': 'Select the Resume Design',
-    'templates.minimallayout.name': 'Minimal (Minimalist Template)',
-    'templates.techlayout.name': 'Tech (Tech Template)',
-    'templates.artisticlayout.name': 'Artistic (Creative Template)'
+    'templates.minimalist': 'Minimal (Minimalist Template)',
+    'templates.techy': 'Tech (Tech Template)',
+    'templates.artistic': 'Artistic (Creative Template)'
   }
 };
 
