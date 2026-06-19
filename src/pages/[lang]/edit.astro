@@ -44,41 +44,35 @@ const templates = Object.entries(layoutModules)
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{t('edit.title')} — Proyecto CV</title>
+  <title>{t('edit.title')}</title>
 </head>
 <body class="bg-gray-50 min-h-screen text-gray-800 antialiased">
 
   <div class="w-full bg-white border-b border-gray-200 py-2.5 px-4 sm:px-6 sticky top-0 z-50 print:hidden shadow-sm flex items-center justify-between gap-4">
-    <div class="flex items-center gap-2">
-      <div class="bg-blue-600 text-white p-1.5 rounded-lg flex items-center justify-center shadow-sm">
+    <a href={`/${lang}`} class="flex items-center gap-2">
+      <div class="flex lg:hidden bg-blue-600 text-white p-1.5 rounded-lg items-center justify-center shadow-sm">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>
       </div>
-      <div class="flex flex-col">
-        <span class="text-xs font-black tracking-tight text-gray-900 leading-none">CV para Todos</span>
-        <span class="text-[9px] font-bold text-blue-600 tracking-wider uppercase leading-none mt-0.5 bg-blue-50 px-1.5 py-0.5 rounded w-max flex-shrink-0">no code</span>
+      <div class="hidden lg:flex flex-col items-center text-center">
+        <span class="text-xs font-black tracking-tight text-gray-900 leading-none">{t('brand.name')}</span>
+        <span class="hidden lg:inline-block text-[9px] font-bold text-blue-600 tracking-wider uppercase leading-none mt-1 bg-blue-50 px-2 py-0.5 rounded w-max">no code</span>
       </div>
-    </div>
+    </a>
 
     <div class="flex items-center justify-center">
       <div class="inline-flex rounded-xl bg-gray-100 p-0.5 border border-gray-200 shadow-inner">
-        <button onclick="window.location.href='/es/edit'" class={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all ${lang === 'es' ? 'bg-white text-gray-900 shadow-xs border border-gray-200/60' : 'text-gray-500 hover:text-gray-900'}`}>🇪🇸 ES</button>
-        <button onclick="window.location.href='/it/edit'" class={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all ${lang === 'it' ? 'bg-white text-gray-900 shadow-xs border border-gray-200/60' : 'text-gray-500 hover:text-gray-900'}`}>🇮🇹 IT</button>
-        <button onclick="window.location.href='/en/edit'" class={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all ${lang === 'en' ? 'bg-white text-gray-900 shadow-xs border border-gray-200/60' : 'text-gray-500 hover:text-gray-900'}`}>🇺🇸 EN</button>
+        <button onclick="window.location.href='/es/edit'" class={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all ${lang === 'es' ? 'bg-white text-gray-900 shadow-xs border border-gray-200/60' : 'text-gray-500 hover:text-gray-900'}`}><span class="hidden lg:inline">🇪🇸&nbsp;</span>ES</button>
+        <button onclick="window.location.href='/it/edit'" class={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all ${lang === 'it' ? 'bg-white text-gray-900 shadow-xs border border-gray-200/60' : 'text-gray-500 hover:text-gray-900'}`}><span class="hidden lg:inline">🇮🇹&nbsp;</span>IT</button>
+        <button onclick="window.location.href='/en/edit'" class={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all ${lang === 'en' ? 'bg-white text-gray-900 shadow-xs border border-gray-200/60' : 'text-gray-500 hover:text-gray-900'}`}><span class="hidden lg:inline">🇺🇸&nbsp;</span>EN</button>
       </div>
     </div>
 
     <div class="flex items-center gap-1.5">
-      <button id="btn-download-json" class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg border border-gray-200">
-        <span>{t('edit.downloadJson')}</span>
-      </button>
-      <button id="btn-print" class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg border border-gray-200 shadow-xs">
-        <span>{t('edit.downloadPdf')}</span>
-      </button>
-      <button id="btn-publish" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-white bg-gray-900 hover:bg-gray-800 rounded-lg transition-all shadow-sm">
-        <span>🚀 {t('edit.publish')}</span>
-      </button>
+      <button id="btn-download-json" class="px-3 py-1.5 text-xs font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg border border-gray-200">{t('edit.downloadJson')}</button>
+      <button id="btn-print" class="px-3 py-1.5 text-xs font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg border border-gray-200">{t('edit.downloadPdf')}</button>
+      <button id="btn-publish" class="px-3 py-1.5 text-xs font-bold text-white bg-gray-900 hover:bg-gray-800 rounded-lg transition-all"> <span class="hidden lg:inline">🚀&nbsp;</span>{t('edit.publish')}</button>
     </div>
   </div>
 
@@ -90,13 +84,18 @@ const templates = Object.entries(layoutModules)
         <h1 class="text-lg font-bold text-gray-900 tracking-tight">{t('edit.title')}</h1>
       </div>
 
-      <nav class="flex border-b border-gray-200 text-xs sm:text-sm overflow-x-auto whitespace-nowrap" aria-label="Tabs">
-        <button class="tab-btn px-4 py-2 border-b-2 border-blue-600 font-medium text-blue-600" data-tab="basics">{t('nav.contact')}</button>
-        <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="work">{lang === 'es' ? 'Experiencia' : lang === 'it' ? 'Esperienza' : 'Experience'}</button>
-        <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="education">{lang === 'es' ? 'Formación' : lang === 'it' ? 'Formazione' : 'Education'}</button>
-        <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="skills">{lang === 'es' ? 'Habilidades' : lang === 'it' ? 'Competenze' : 'Skills'}</button>
-        <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="templates">{t('templates.title')}</button>
-      </nav>
+      <div class="relative">
+        <button id="tab-prev" type="button" class="lg:hidden absolute left-0 top-1/2 z-10 -translate-y-1/2 rounded-full border border-gray-200 bg-white/90 px-2 py-1 text-sm text-gray-600 shadow-sm transition hover:bg-gray-100" aria-label="Anterior sección">‹</button>
+        <nav id="tab-nav" class="flex text-xs sm:text-sm overflow-x-auto whitespace-nowrap scroll-smooth px-10" aria-label="Tabs">
+          <button class="tab-btn px-4 py-2 border-b-2 border-blue-600 font-medium text-blue-600" data-tab="basics">{t('nav.contact')}</button>
+          <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="work">{lang === 'es' ? 'Experiencia' : lang === 'it' ? 'Esperienza' : 'Experience'}</button>
+          <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="education">{lang === 'es' ? 'Formación' : lang === 'it' ? 'Formazione' : 'Education'}</button>
+          <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="extras">{lang === 'es' ? 'Formación extra' : lang === 'it' ? 'Formazione extra' : 'Extra training'}</button>
+          <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="skills">{lang === 'es' ? 'Habilidades' : lang === 'it' ? 'Competenze' : 'Skills'}</button>
+          <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="templates">{t('templates.title')}</button>
+        </nav>
+        <button id="tab-next" type="button" class="lg:hidden absolute right-0 top-1/2 z-10 -translate-y-1/2 rounded-full border border-gray-200 bg-white/90 px-2 py-1 text-sm text-gray-600 shadow-sm transition hover:bg-gray-100" aria-label="Siguiente sección">›</button>
+      </div>
 
       <div id="cv-form" class="space-y-6">
         <div id="tab-basics" class="tab-content space-y-4">
@@ -119,6 +118,10 @@ const templates = Object.entries(layoutModules)
               <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">{lang === 'es' ? 'Teléfono' : lang === 'it' ? 'Telefono' : 'Phone'}</label>
               <input type="tel" data-path="basics.phone" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-blue-500" />
             </div>
+          </div>
+          <div class="mt-3">
+            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">{t('form.website')}</label>
+            <input type="url" data-path="basics.web" placeholder="https://" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-blue-500" />
           </div>
           <div>
             <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">{lang === 'es' ? 'Fotografía' : lang === 'it' ? 'Fotografia' : 'Photo'}</label>
@@ -151,8 +154,30 @@ const templates = Object.entries(layoutModules)
           </button>
         </div>
 
+        <div id="tab-extras" class="tab-content space-y-6 hidden">
+          <div>
+            <div class="flex items-center justify-between border-b border-gray-100 pb-3 mb-3">
+              <h2 class="text-sm font-bold text-gray-900">{lang === 'es' ? 'Certificados y titulaciones' : lang === 'it' ? 'Certificati e titoli' : 'Certificates & Degrees'}</h2>
+            </div>
+            <div id="certificates-container" class="space-y-4"></div>
+            <button type="button" id="btn-add-certificate" class="w-full py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-semibold rounded-xl border border-dashed border-blue-200">
+              {lang === 'es' ? '+ Añadir Certificado' : lang === 'it' ? '+ Aggiungi Certificato' : '+ Add Certificate'}
+            </button>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between border-b border-gray-100 pb-3 mb-3">
+              <h2 class="text-sm font-bold text-gray-900">{lang === 'es' ? 'Idiomas' : lang === 'it' ? 'Lingue' : 'Languages'}</h2>
+            </div>
+            <div id="languages-container" class="space-y-4"></div>
+            <button type="button" id="btn-add-language" class="w-full py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-semibold rounded-xl border border-dashed border-blue-200">
+              {lang === 'es' ? '+ Añadir Idioma' : lang === 'it' ? '+ Aggiungi Lingua' : '+ Add Language'}
+            </button>
+          </div>
+        </div>
+
         <div id="tab-skills" class="tab-content space-y-4 hidden">
-          <div class="bg-blue-50/60 p-3.5 rounded-xl border border-blue-100 text-xs text-blue-800">
+          <div class="hidden sm:block bg-blue-50/60 p-3.5 rounded-xl border border-blue-100 text-xs text-blue-800">
             💡 <strong>{lang === 'es' ? 'Instrucciones:' : lang === 'it' ? 'Istruzioni:' : 'Instructions:'}</strong> {lang === 'es' ? 'Escribe una habilidad y pulsa Enter o coma (,).' : lang === 'it' ? 'Scrivi una competenza e premi Invio o virgola (,).' : 'Type a skill and press Enter or comma (,).'}
           </div>
           <div>
@@ -198,7 +223,10 @@ const templates = Object.entries(layoutModules)
       </div>
     </div>
 
-    <div id="preview-section" data-template="minimalist" class="bg-white p-8 rounded-2xl border border-gray-200 shadow-lg min-h-[297mm] print:shadow-none print:border-0 print:p-0">
+    <div
+      id="preview-section"
+      class="hidden xl:block bg-white p-8 rounded-2xl border border-gray-200 shadow-lg xl:min-h-[297mm] print:block print:shadow-none print:border-0 print:p-0"
+    >
       
       <header id="preview-header" class="flex justify-between items-start pb-6 border-b border-gray-100">
         <div class="flex-1">
@@ -231,6 +259,20 @@ const templates = Object.entries(layoutModules)
       </section>
       
       <section class="mt-6">
+        <h3 class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3 pb-1 border-b border-gray-100">
+          {lang === 'es' ? 'Certificados' : lang === 'it' ? 'Certificati' : 'Certificates'}
+        </h3>
+        <div id="view-certificates" class="space-y-4"></div>
+      </section>
+
+      <section class="mt-6">
+        <h3 class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3 pb-1 border-b border-gray-100">
+          {lang === 'es' ? 'Idiomas' : lang === 'it' ? 'Lingue' : 'Languages'}
+        </h3>
+        <div id="view-languages" class="space-y-2"></div>
+      </section>
+      
+      <section class="mt-6">
         <h3 class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2 pb-1 border-b border-gray-100">
           {lang === 'es' ? 'Habilidades' : lang === 'it' ? 'Competenze' : 'Skills'}
         </h3>
@@ -243,9 +285,23 @@ const templates = Object.entries(layoutModules)
   <style is:global>
     #preview-section { font-family: 'Inter', system-ui, sans-serif; color: #111827; }
     .badge-item-live { background-color: #f3f4f6; color: #374151; font-size: 0.75rem; padding: 0.25rem 0.625rem; border-radius: 9999px; display: inline-block; font-weight: 500; }
+    /* Hide horizontal scrollbar on the tabs nav for all screen sizes */
+    #tab-nav { -ms-overflow-style: none; scrollbar-width: none; }
+    #tab-nav::-webkit-scrollbar { display: none; height: 0; }
+    /* Active tab underline style (ensure visible on all sizes) */
+    .tab-btn { border-bottom-width: 2px; }
+    .tab-btn.border-blue-600 { border-bottom-color: #2563eb; }
+
+    /* Print adjustments to avoid extra blank pages */
+    @media print {
+      #preview-section { min-height: auto !important; box-shadow: none !important; border: 0 !important; }
+      @page { size: A4; margin: 10mm; }
+      html, body { height: auto !important; }
+      .print\:block { display: block !important; }
+    }
   </style>
 
-  <script define:vars={{ lang, initialData }}>
+  <script define:vars={{ lang, initialData, currentTranslation: t('edit.currently') }}>
     const STORAGE_KEY = `cv_backup_data_${lang}`;
     const TEMPLATE_KEY = `cv_selected_template_${lang}`;
 
@@ -268,8 +324,37 @@ const templates = Object.entries(layoutModules)
     if (!state.basics) state.basics = { name: "", label: "", email: "", phone: "", summary: "", image: "" };
     if (!state.work) state.work = [];
     if (!state.education) state.education = [];
+    if (!state.certificates) state.certificates = [];
+    if (!state.languages) state.languages = [];
     if (!state.meta) state.meta = {};
     if (!state.skills) state.skills = [];
+
+    function normalizeMonthValue(value) {
+      if (!value) return '';
+      return value.slice(0, 7);
+    }
+
+    function normalizeStateDates() {
+      const normalizeDates = (item) => {
+        ['startDate', 'endDate'].forEach((key) => {
+          if (item[key]) item[key] = normalizeMonthValue(item[key]);
+        });
+      };
+      state.work.forEach(normalizeDates);
+      state.education.forEach(normalizeDates);
+      state.certificates.forEach((item) => {
+        if (item.date) item.date = normalizeMonthValue(item.date);
+      });
+    }
+
+    function formatDateRange(start, end) {
+      const from = normalizeMonthValue(start);
+      const to = end ? normalizeMonthValue(end) : currentTranslation;
+      if (from && to) return `${from} — ${to}`;
+      return to || from || '';
+    }
+
+    normalizeStateDates();
 
     const labels = {
       es: { company: 'Empresa', position: 'Puesto', start: 'Inicio', end: 'Fin', desc: 'Descripción', inst: 'Institución', area: 'Titulación', remove: 'Eliminar' },
@@ -352,17 +437,44 @@ const templates = Object.entries(layoutModules)
       saveState();
     });
 
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.tab-btn').forEach(b => {
-          b.classList.remove('border-blue-600', 'text-blue-600');
-          b.classList.add('border-transparent', 'text-gray-500');
-        });
-        btn.classList.add('border-blue-600', 'text-blue-600');
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
-        document.getElementById(`tab-${btn.dataset.tab}`)?.classList.remove('hidden');
+    const tabButtons = Array.from(document.querySelectorAll('.tab-btn'));
+    const tabNav = document.getElementById('tab-nav');
+    const tabPrev = document.getElementById('tab-prev');
+    const tabNext = document.getElementById('tab-next');
+
+    function activateTab(btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.remove('border-blue-600', 'text-blue-600');
+        b.classList.add('border-transparent', 'text-gray-500');
       });
+      btn.classList.add('border-blue-600', 'text-blue-600');
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+      document.getElementById(`tab-${btn.dataset.tab}`)?.classList.remove('hidden');
+      btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => activateTab(btn));
     });
+
+    function getActiveTabIndex() {
+      return tabButtons.findIndex(btn => btn.classList.contains('border-blue-600'));
+    }
+
+    tabPrev?.addEventListener('click', () => {
+      const currentIndex = getActiveTabIndex();
+      const prevIndex = currentIndex <= 0 ? tabButtons.length - 1 : currentIndex - 1;
+      activateTab(tabButtons[prevIndex]);
+    });
+
+    tabNext?.addEventListener('click', () => {
+      const currentIndex = getActiveTabIndex();
+      const nextIndex = currentIndex === -1 || currentIndex === tabButtons.length - 1 ? 0 : currentIndex + 1;
+      activateTab(tabButtons[nextIndex]);
+    });
+
+    tabPrev?.addEventListener('touchstart', () => tabNav?.scrollBy({ left: -150, behavior: 'smooth' }));
+    tabNext?.addEventListener('touchstart', () => tabNav?.scrollBy({ left: 150, behavior: 'smooth' }));
 
     function setupInputSync() {
       document.querySelectorAll('#cv-form input[data-path], #cv-form textarea[data-path]').forEach(input => {
@@ -401,6 +513,16 @@ const templates = Object.entries(layoutModules)
         eduContainer.innerHTML = '';
         state.education.forEach((item, index) => { eduContainer.appendChild(createEduBlock(item, index)); });
       }
+      const certContainer = document.getElementById('certificates-container');
+      if (certContainer) {
+        certContainer.innerHTML = '';
+        state.certificates.forEach((item, index) => { certContainer.appendChild(createCertificateBlock(item, index)); });
+      }
+      const langContainer = document.getElementById('languages-container');
+      if (langContainer) {
+        langContainer.innerHTML = '';
+        state.languages.forEach((item, index) => { langContainer.appendChild(createLanguageBlock(item, index)); });
+      }
       setupInputSync();
     }
 
@@ -422,11 +544,11 @@ const templates = Object.entries(layoutModules)
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${labels.start}</label>
-            <input type="text" placeholder="YYYY-MM" data-path="work.${index}.startDate" value="${item.startDate || ''}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" />
+            <input type="month" data-path="work.${index}.startDate" value="${normalizeMonthValue(item.startDate || '')}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" />
           </div>
           <div>
             <label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${labels.end}</label>
-            <input type="text" placeholder="YYYY-MM" data-path="work.${index}.endDate" value="${item.endDate || ''}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" />
+            <input type="month" data-path="work.${index}.endDate" value="${normalizeMonthValue(item.endDate || '')}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" />
           </div>
         </div>
         <div>
@@ -457,11 +579,11 @@ const templates = Object.entries(layoutModules)
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${labels.start}</label>
-            <input type="text" placeholder="YYYY-MM" data-path="education.${index}.startDate" value="${item.startDate || ''}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" />
+            <input type="month" data-path="education.${index}.startDate" value="${normalizeMonthValue(item.startDate || '')}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" />
           </div>
           <div>
             <label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${labels.end}</label>
-            <input type="text" placeholder="YYYY-MM" data-path="education.${index}.endDate" value="${item.endDate || ''}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" />
+            <input type="month" data-path="education.${index}.endDate" value="${normalizeMonthValue(item.endDate || '')}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" />
           </div>
         </div>
       `;
@@ -470,6 +592,52 @@ const templates = Object.entries(layoutModules)
 
     window.removeEduBlock = (index) => { state.education.splice(index, 1); saveState(); renderDynamicBlocks(); };
 
+    function createCertificateBlock(item, index) {
+      const div = document.createElement('div');
+      div.className = "p-4 bg-gray-50 rounded-xl border border-gray-200 relative space-y-3";
+      div.innerHTML = `
+        <button type="button" class="absolute top-2 right-2 text-red-500 text-xs font-medium" onclick="removeCertificateBlock(${index})">${labels.remove}</button>
+        <div>
+          <label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${lang === 'es' ? 'Nombre del certificado' : lang === 'it' ? 'Nome certificato' : 'Certificate name'}</label>
+          <input type="text" data-path="certificates.${index}.name" value="${item.name || ''}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" />
+        </div>
+        <div class="grid sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${lang === 'es' ? 'Emisor' : lang === 'it' ? 'Emittente' : 'Issuer'}</label>
+            <input type="text" data-path="certificates.${index}.issuer" value="${item.issuer || ''}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${lang === 'es' ? 'Fecha' : lang === 'it' ? 'Data' : 'Date'}</label>
+            <input type="month" data-path="certificates.${index}.date" value="${normalizeMonthValue(item.date || '')}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" />
+          </div>
+        </div>
+      `;
+      return div;
+    }
+
+    window.removeCertificateBlock = (index) => { state.certificates.splice(index, 1); saveState(); renderDynamicBlocks(); };
+
+    function createLanguageBlock(item, index) {
+      const div = document.createElement('div');
+      div.className = "p-4 bg-gray-50 rounded-xl border border-gray-200 relative space-y-3";
+      div.innerHTML = `
+        <button type="button" class="absolute top-2 right-2 text-red-500 text-xs font-medium" onclick="removeLanguageBlock(${index})">${labels.remove}</button>
+        <div class="grid sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${lang === 'es' ? 'Idioma' : lang === 'it' ? 'Lingua' : 'Language'}</label>
+            <input type="text" data-path="languages.${index}.language" value="${item.language || ''}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${lang === 'es' ? 'Nivel' : lang === 'it' ? 'Livello' : 'Fluency'}</label>
+            <input type="text" data-path="languages.${index}.fluency" value="${item.fluency || ''}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" />
+          </div>
+        </div>
+      `;
+      return div;
+    }
+
+    window.removeLanguageBlock = (index) => { state.languages.splice(index, 1); saveState(); renderDynamicBlocks(); };
+
     document.getElementById('btn-add-work')?.addEventListener('click', () => {
       state.work.push({ name: "", position: "", startDate: "", endDate: "", summary: "" });
       saveState(); renderDynamicBlocks();
@@ -477,6 +645,16 @@ const templates = Object.entries(layoutModules)
 
     document.getElementById('btn-add-edu')?.addEventListener('click', () => {
       state.education.push({ institution: "", area: "", startDate: "", endDate: "" });
+      saveState(); renderDynamicBlocks();
+    });
+
+    document.getElementById('btn-add-certificate')?.addEventListener('click', () => {
+      state.certificates.push({ name: "", issuer: "", date: "" });
+      saveState(); renderDynamicBlocks();
+    });
+
+    document.getElementById('btn-add-language')?.addEventListener('click', () => {
+      state.languages.push({ language: "", fluency: "" });
       saveState(); renderDynamicBlocks();
     });
 
@@ -526,6 +704,7 @@ const templates = Object.entries(layoutModules)
         let html = '';
         if (state.basics.email) html += `<span>📧 ${state.basics.email}</span>`;
         if (state.basics.phone) html += `<span>📞 ${state.basics.phone}</span>`;
+        if (state.basics.web) html += `<span>🔗 <a href="${state.basics.web}" target="_blank" rel="noopener noreferrer">${state.basics.web}</a></span>`;
         contactEl.innerHTML = html;
       }
 
@@ -547,7 +726,7 @@ const templates = Object.entries(layoutModules)
           div.innerHTML = `
             <div class="flex justify-between font-semibold text-sm">
               <span class="text-gray-900 font-bold">${w.position || ''}</span>
-              <span class="text-gray-500 text-xs">${w.startDate || ''} — ${w.endDate || ''}</span>
+              <span class="text-gray-500 text-xs">${formatDateRange(w.startDate, w.endDate)}</span>
             </div>
             <div class="text-blue-600 text-xs font-medium">${w.name || ''}</div>
             <p class="text-gray-600 text-xs mt-1 whitespace-pre-line">${w.summary || ''}</p>
@@ -564,11 +743,38 @@ const templates = Object.entries(layoutModules)
           div.innerHTML = `
             <div class="flex justify-between font-semibold text-sm">
               <span class="text-gray-900 font-bold">${e.area || ''}</span>
-              <span class="text-gray-500 text-xs">${e.startDate || ''} — ${e.endDate || ''}</span>
+              <span class="text-gray-500 text-xs">${formatDateRange(e.startDate, e.endDate)}</span>
             </div>
             <div class="text-gray-500 text-xs font-medium">${e.institution || ''}</div>
           `;
           eduEl.appendChild(div);
+        });
+      }
+
+      const certEl = document.getElementById('view-certificates');
+      if (certEl) {
+        certEl.innerHTML = '';
+        state.certificates.forEach(c => {
+          const div = document.createElement('div');
+          div.innerHTML = `
+            <div class="flex justify-between font-semibold text-sm">
+              <span class="text-gray-900 font-bold">${c.name || ''}</span>
+              <span class="text-gray-500 text-xs">${normalizeMonthValue(c.date || '')}</span>
+            </div>
+            <div class="text-gray-500 text-xs font-medium">${c.issuer || ''}</div>
+          `;
+          certEl.appendChild(div);
+        });
+      }
+
+      const langEl = document.getElementById('view-languages');
+      if (langEl) {
+        langEl.innerHTML = '';
+        state.languages.forEach(l => {
+          const div = document.createElement('div');
+          div.className = "flex justify-between text-sm text-gray-700";
+          div.innerHTML = `<span>${l.language || ''}</span><span class="text-gray-500">${l.fluency || ''}</span>`;
+          langEl.appendChild(div);
         });
       }
 
