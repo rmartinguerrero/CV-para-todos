@@ -27,7 +27,3 @@
   to = "/en"
   status = 302
 
-# --- EDGE FUNCTIONS DE AUTENTICACIÓN ---
-[[edge_functions]]
-  path = "/api/auth/callback"
-  function = "auth"

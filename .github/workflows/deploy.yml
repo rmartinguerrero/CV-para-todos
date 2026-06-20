@@ -1,0 +1,65 @@
+name: Deploy CV to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # 🔐 PASO CRÍTICO: Eliminar archivos de edición para privacidad
+      - name: Remove edit and wizard components (Privacy)
+        run: |
+          echo "🔐 Eliminando archivos de edición para privacidad..."
+          rm -f src/pages/*/edit.astro
+          rm -f src/pages/[lang]/edit.astro
+          rm -f src/components/SetupWizard.astro
+          echo "✅ Archivos de edición eliminados. El editor NO aparecerá en la web estática."
+
+      - name: Build with Astro
+        run: pnpm build
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: ./dist
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2

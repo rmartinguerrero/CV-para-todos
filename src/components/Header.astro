@@ -13,15 +13,15 @@ const { basics } = resume;
 
 <header class="mb-10 print:mb-6">
   <!-- Barra superior: selector de idioma + botón imprimir -->
-  <div class="flex justify-between items-center mb-6 no-print">
+  <div class="flex flex-wrap justify-between items-center gap-2 mb-6 no-print w-full overflow-hidden">
     <!-- Selector de idioma -->
-    <nav aria-label={t('nav.language')} class="flex gap-2">
+    <nav aria-label={t('nav.language')} class="flex gap-1 sm:gap-2 flex-wrap">
       {availableLangs.map((l) => (
         <a
           href={`/${l}/`}
           aria-current={l === lang ? 'page' : undefined}
           class:list={[
-            'px-3 py-1 rounded-full text-sm font-medium transition-colors',
+            'px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium transition-colors whitespace-nowrap',
             l === lang
               ? 'bg-gray-900 text-white'
               : 'bg-white border border-gray-200 text-gray-600 hover:border-gray-400',
@@ -35,17 +35,17 @@ const { basics } = resume;
     <!-- Botón imprimir -->
     <button
       onclick="window.print()"
-      class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200
-             text-sm text-gray-600 hover:border-gray-400 transition-colors bg-white"
+      class="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg border border-gray-200
+             text-xs sm:text-sm text-gray-600 hover:border-gray-400 transition-colors bg-white flex-shrink-0"
       aria-label={t('nav.print')}
     >
       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
-           fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+           fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" class="flex-shrink-0">
         <polyline points="6 9 6 2 18 2 18 9"/>
         <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
         <rect x="6" y="14" width="12" height="8"/>
       </svg>
-      {t('nav.print')}
+      <span class="hidden sm:inline">{t('nav.print')}</span>
     </button>
   </div>
 
