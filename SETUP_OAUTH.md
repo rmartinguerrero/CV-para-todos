@@ -86,7 +86,7 @@ GITHUB_REDIRECT_URI=https://tu-dominio.com/.netlify/functions/auth-callback
 |----------|-------------|------------|
 | `DEPLOY_URL` | URL del sitio (se rellena en Netlify automáticamente) | `http://localhost:3000` |
 | `DEFAULT_LANG` | Idioma por defecto | `es` |
-| `BASE_REPO` | Repositorio base para fork | `raul/cv-para-todos` |
+| `BASE_REPO` | Repositorio base para fork (ajusta al repo del proyecto si no estás usando `raul/cv-para-todos`) | `raul/cv-para-todos` |
 
 ## 🔄 Arquitectura de Autenticación
 

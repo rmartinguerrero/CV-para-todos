@@ -41,7 +41,7 @@ export const handler = async (event: any) => {
     // Validar variables de entorno
     const clientId = process.env.GITHUB_CLIENT_ID;
     const clientSecret = process.env.GITHUB_CLIENT_SECRET;
-    const redirectUri = process.env.GITHUB_REDIRECT_URI || `${process.env.DEPLOY_URL || 'http://localhost:3000'}/api/auth/callback`;
+    const redirectUri = process.env.GITHUB_REDIRECT_URI || `${process.env.DEPLOY_URL || 'http://localhost:8888'}/.netlify/functions/auth/callback`;
 
     if (!clientId || !clientSecret) {
       return {

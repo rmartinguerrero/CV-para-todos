@@ -28,7 +28,7 @@ interface GithubRepo {
   repo: string;
 }
 
-const BASE_REPO = 'raul/cv-para-todos'; // Tu repositorio base
+const BASE_REPO = process.env.BASE_REPO || 'raul/cv-para-todos'; // Repositorio base configurable
 
 export const handler = async (event: any) => {
   const headers = {
@@ -71,7 +71,16 @@ export const handler = async (event: any) => {
 
     // Parsear el cuerpo de la solicitud
     const body: DeployRequest = JSON.parse(event.body || '{}');
-    const { langs = ['es'], resumeData, sourceRepo = BASE_REPO } = body;
+    const sourceRepoValue = (body.sourceRepo || BASE_REPO || '').trim();
+    const { langs = ['es'], resumeData } = body;
+
+    if (!sourceRepoValue || !sourceRepoValue.includes('/')) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ error: "Repositorio base inválido. Ajusta BASE_REPO o sourceRepo a 'owner/repo'." })
+      };
+    }
 
     // Validaciones básicas
     if (!Array.isArray(langs) || langs.length === 0) {
@@ -103,8 +112,8 @@ export const handler = async (event: any) => {
     const octokit = new Octokit({ auth: userToken });
 
     // Paso 1: Obtener el repositorio base a hacer fork
-    const [baseOwner, baseRepoName] = sourceRepo.split('/');
-    let userRepoName = 'cv-para-todos'; // Nombre del fork en el usuario
+    const [baseOwner, baseRepoName] = sourceRepoValue.split('/');
+    let userRepoName = baseRepoName; // Nombre del fork en el usuario
 
     let forkRepo: GithubRepo | null = null;
 
@@ -125,9 +134,9 @@ export const handler = async (event: any) => {
       }
     }
 
-    // Paso 3: Si no existe fork, crarlo
+    // Paso 3: Si no existe fork, crearlo
     if (!forkRepo) {
-      console.log(`Creando fork de ${sourceRepo} para usuario ${username}...`);
+      console.log(`Creando fork de ${sourceRepoValue} para usuario ${username}...`);
       
       try {
         const forkResponse = await octokit.repos.createFork({
@@ -144,6 +153,16 @@ export const handler = async (event: any) => {
         };
       } catch (forkError: any) {
         console.error("Error al crear fork:", forkError);
+
+        if (forkError.status === 404) {
+          return {
+            statusCode: 404,
+            headers,
+            body: JSON.stringify({
+              error: `No se encontró el repositorio base ${sourceRepoValue}. Verifica BASE_REPO o sourceRepo.`
+            })
+          };
+        }
 
         // Si el fork ya existe pero no lo pudimos detectar, intentar usar el que existe
         if (forkError.message?.includes('already exists')) {
@@ -241,6 +260,8 @@ export const handler = async (event: any) => {
       console.warn("No se pudieron actualizar settings de Pages:", settingsErr.message);
     }
 
+    const pagePath = forkRepo.repo === `${forkRepo.owner}.github.io` ? '' : `${forkRepo.repo}/`;
+
     // Retornar éxito
     return {
       statusCode: 200,
@@ -249,7 +270,7 @@ export const handler = async (event: any) => {
         success: true,
         message: `¡Éxito! Tu CV ha sido guardado en https://github.com/${forkRepo.owner}/${forkRepo.repo}`,
         repository: `${forkRepo.owner}/${forkRepo.repo}`,
-        webUrl: `https://${forkRepo.owner}.github.io/${forkRepo.repo === 'cv-para-todos' ? '' : forkRepo.repo + '/'}`,
+        webUrl: `https://${forkRepo.owner}.github.io/${pagePath}`,
         updateResults
       })
     };
