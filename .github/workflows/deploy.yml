@@ -22,19 +22,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # 👇 ACTUALIZADO: De @v2 a @v4 y subimos la versión de pnpm a la 9
       - name: Install pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v4
         with:
-          version: 8
+          version: 9
 
+      # 👇 ACTUALIZADO: Subimos Node a la versión 20 (la 18 ya está obsoleta)
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'pnpm'
 
+      # 👇 ACTUALIZADO: Usamos --no-frozen-lockfile para evitar conflictos de versiones en los forks
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       # 🔐 PASO CRÍTICO: Eliminar archivos de edición para privacidad
       - name: Remove edit and wizard components (Privacy)
@@ -48,7 +51,6 @@ jobs:
       - name: Build with Astro
         run: pnpm build
 
-      # 👇 ACTUALIZADO DE @v2 A @v3 (Usa internamente upload-artifact@v4)
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
@@ -61,7 +63,6 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      # 👇 ACTUALIZADO DE @v2 A @v4
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
