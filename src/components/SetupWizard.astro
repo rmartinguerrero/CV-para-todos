@@ -13,6 +13,46 @@ const lang = defaultLang as Lang;
 
 const strictT = useTranslations(lang);
 const t = (key: string) => strictT(key as UIKeys);
+
+// Contenido de beneficios traducido
+const benefits = {
+  es: [
+    { icon: '🆓', title: 'Completamente Gratuito', desc: 'Sin suscripción, sin anuncios, sin restricciones.' },
+    { icon: '🔐', title: '100% Privacidad', desc: 'Tu CV vive en tu repositorio GitHub. Nadie más tiene acceso.' },
+    { icon: '⚡', title: 'Súper Rápido', desc: 'Generador No-Code. Crea un CV profesional en minutos.' }
+  ],
+  it: [
+    { icon: '🆓', title: 'Completamente Gratuito', desc: 'Nessun abbonamento, nessun annuncio, nessuna limitazione.' },
+    { icon: '🔐', title: '100% Privacy', desc: 'Il tuo CV vive nel tuo repository GitHub. Nessun altro ha accesso.' },
+    { icon: '⚡', title: 'Super Veloce', desc: 'Generatore No-Code. Crea un CV professionale in minuti.' }
+  ],
+  en: [
+    { icon: '🆓', title: 'Completely Free', desc: 'No subscription, no ads, no restrictions.' },
+    { icon: '🔐', title: '100% Privacy', desc: 'Your CV lives in your GitHub repository. Nobody else has access.' },
+    { icon: '⚡', title: 'Super Fast', desc: 'No-Code generator. Create a professional CV in minutes.' }
+  ]
+};
+
+const steps = {
+  es: [
+    { num: '1', title: 'Conecta tu GitHub', desc: 'Autoriza la aplicación con tu cuenta de GitHub de forma segura.' },
+    { num: '2', title: 'Rellena tus Datos', desc: 'Completa el formulario No-Code con tu experiencia y habilidades.' },
+    { num: '3', title: 'Publica en la Web', desc: 'Tu CV estará disponible en tu web personal (username.github.io).' }
+  ],
+  it: [
+    { num: '1', title: 'Connetti il tuo GitHub', desc: 'Autorizza l\'app con il tuo account GitHub in modo sicuro.' },
+    { num: '2', title: 'Compila i Tuoi Dati', desc: 'Completa il modulo No-Code con la tua esperienza e competenze.' },
+    { num: '3', title: 'Pubblica sul Web', desc: 'Il tuo CV sarà disponibile sulla tua pagina personale (username.github.io).' }
+  ],
+  en: [
+    { num: '1', title: 'Connect your GitHub', desc: 'Authorize the app with your GitHub account securely.' },
+    { num: '2', title: 'Fill in Your Data', desc: 'Complete the No-Code form with your experience and skills.' },
+    { num: '3', title: 'Publish Online', desc: 'Your CV will be available on your personal web (username.github.io).' }
+  ]
+};
+
+const currentBenefits = benefits[lang] || benefits.es;
+const currentSteps = steps[lang] || steps.es;
 ---
 
 <MinimalistLayout
@@ -24,59 +64,134 @@ const t = (key: string) => strictT(key as UIKeys);
   resume={{}}
   t={t}
 >
-  <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col justify-center py-6 px-4 sm:px-6 lg:px-8 font-sans overflow-hidden">
-    <div class="max-w-md w-full mx-auto bg-white rounded-2xl shadow-xl border border-gray-100 p-6 text-center space-y-4 my-auto">
-      
-      <div class="flex flex-col items-center gap-1.5">
-        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Idioma del CV</span>
-        <div class="inline-flex rounded-xl bg-gray-100 p-1 border border-gray-200">
-          <a href="/es/" class={`px-3 py-1 rounded-lg text-xs font-semibold transition-all no-underline ${lang === 'es' ? 'bg-white text-gray-900 shadow-sm border border-gray-200/50' : 'text-gray-500 hover:text-gray-900'}`}>
-            🇪🇸 Español
-          </a>
-          <a href="/it/" class={`px-3 py-1 rounded-lg text-xs font-semibold transition-all no-underline ${lang === 'it' ? 'bg-white text-gray-900 shadow-sm border border-gray-200/50' : 'text-gray-500 hover:text-gray-900'}`}>
-            🇮🇹 Italiano
-          </a>
-          <a href="/en/" class={`px-3 py-1 rounded-lg text-xs font-semibold transition-all no-underline ${lang === 'en' ? 'bg-white text-gray-900 shadow-sm border border-gray-200/50' : 'text-gray-500 hover:text-gray-900'}`}>
-            🇺🇸 English
-          </a>
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 flex flex-col font-sans overflow-hidden">
+    
+    <!-- Selector de idiomas - Sticky en la parte superior -->
+    <div class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-200 py-3 px-4 sm:px-6 lg:px-8">
+      <div class="max-w-6xl mx-auto flex justify-between items-center">
+        <div class="text-sm font-semibold text-gray-600">
+          {lang === 'es' ? 'Idioma del CV' : lang === 'it' ? 'Lingua del CV' : 'CV Language'}
+        </div>
+        <div class="inline-flex rounded-full bg-gray-100 p-1 border border-gray-200 gap-1">
+          {['es', 'it', 'en'].map((l) => (
+            <a 
+              href={`/${l}/`}
+              class={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all no-underline ${
+                lang === l 
+                  ? 'bg-white text-gray-900 shadow-sm border border-gray-300' 
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              {l === 'es' ? '🇪🇸 Español' : l === 'it' ? '🇮🇹 Italiano' : '🇺🇸 English'}
+            </a>
+          ))}
         </div>
       </div>
+    </div>
 
-      <div class="space-y-1">
-        <h1 class="text-xl font-extrabold text-gray-900 tracking-tight sm:text-2xl">
-          {t('wizard.welcome')}
-        </h1>
-        <p class="text-xs text-gray-500 max-w-xs mx-auto">
-          {t('wizard.subtitle')}
-        </p>
-      </div>
+    <!-- Hero Section -->
+    <div class="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div class="max-w-4xl mx-auto w-full space-y-12">
+        
+        <!-- Header Hero -->
+        <div class="text-center space-y-4">
+          <div class="inline-block">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-sm font-semibold">
+              <span class="text-lg">✨</span>
+              {lang === 'es' ? 'Generador de CVs Gratis' : lang === 'it' ? 'Generatore di CV Gratuito' : 'Free CV Generator'}
+            </div>
+          </div>
+          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 tracking-tight">
+            {t('wizard.welcome')}
+          </h1>
+          <p class="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">
+            {t('wizard.subtitle')}
+          </p>
+        </div>
 
-      <div class="flex flex-col gap-2.5 pt-2">
-        <a 
-          href={`/${lang}/edit`}
-          class="w-full inline-flex justify-center items-center py-2.5 px-4 border border-transparent text-xs font-medium rounded-xl text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-md no-underline"
-        >
-          ✨ {t('wizard.create')}
-        </a>
-        
-        <input type="file" id="wizard-file-input" accept=".json" class="hidden" />
-        
-        <div class="space-y-1">
+        <!-- CTA Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a 
+            href={`/${lang}/edit`}
+            class="inline-flex justify-center items-center py-3.5 px-8 border border-transparent text-base font-semibold rounded-xl text-white bg-blue-600 hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl no-underline"
+          >
+            <span class="mr-2">✨</span>
+            {t('wizard.create')}
+          </a>
+          
           <button 
             type="button"
             id="wizard-import-btn"
-            class="w-full inline-flex justify-center items-center py-2.5 px-4 border border-gray-300 text-xs font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-colors shadow-sm cursor-pointer"
+            class="inline-flex justify-center items-center py-3.5 px-8 border border-gray-300 text-base font-semibold rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-all shadow-md hover:shadow-lg cursor-pointer"
           >
-            📥 {t('wizard.import')}
+            <span class="mr-2">📥</span>
+            {t('wizard.import')}
           </button>
-          <p class="text-[10px] text-gray-400 font-medium">
-            Archivo recomendado: <span class="text-blue-600 font-mono">resume.{lang}.json</span>
+        </div>
+
+        <!-- Beneficios -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 py-8">
+          {currentBenefits.map((benefit) => (
+            <div class="p-6 rounded-xl border border-gray-200 bg-white hover:shadow-lg transition-all hover:-translate-y-1">
+              <div class="text-3xl mb-3">{benefit.icon}</div>
+              <h3 class="text-lg font-bold text-gray-900 mb-2">{benefit.title}</h3>
+              <p class="text-sm text-gray-600">{benefit.desc}</p>
+            </div>
+          ))}
+        </div>
+
+        <!-- 3 Pasos Clave -->
+        <div class="py-8 space-y-8">
+          <h2 class="text-3xl font-bold text-gray-900 text-center">
+            {lang === 'es' ? '3 Pasos Simples' : lang === 'it' ? '3 Semplici Passi' : '3 Simple Steps'}
+          </h2>
+          
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {currentSteps.map((step, idx) => (
+              <div class="relative">
+                {/* Conector visual (solo en desktop) */}
+                {idx < 2 && (
+                  <div class="hidden md:block absolute top-12 right-0 w-full h-1 bg-gradient-to-r from-blue-300 to-transparent -left-1/2 -z-10" />
+                )}
+                
+                <div class="flex flex-col items-center text-center">
+                  <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white text-2xl font-bold shadow-lg mb-4">
+                    {step.num}
+                  </div>
+                  <h3 class="text-xl font-bold text-gray-900 mb-2">{step.title}</h3>
+                  <p class="text-sm text-gray-600">{step.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <!-- Info Footer -->
+        <div class="mt-8 p-6 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 text-center">
+          <p class="text-sm text-gray-700 mb-3">
+            {lang === 'es' 
+              ? '📥 Recomendado: Sube un archivo' 
+              : lang === 'it' 
+              ? '📥 Consigliato: Carica un file' 
+              : '📥 Recommended: Upload a file'}
+            <code class="bg-white px-2 py-1 rounded border border-gray-300 font-mono text-xs font-semibold text-blue-600 ml-1">resume.{lang}.json</code>
+          </p>
+          <p class="text-xs text-gray-600">
+            {lang === 'es'
+              ? 'Puedes descargar tu CV actual en JSON desde cualquier editor y reimportarlo aquí.'
+              : lang === 'it'
+              ? 'Puoi scaricare il tuo CV attuale in JSON da qualsiasi editor e reimportarlo qui.'
+              : 'You can download your current CV in JSON from any editor and re-import it here.'}
           </p>
         </div>
-      </div>
 
+      </div>
     </div>
   </div>
+
+  <!-- Input file oculto -->
+  <input type="file" id="wizard-file-input" accept=".json" class="hidden" />
+
 </MinimalistLayout>
 
 <script define:vars={{ lang }}>

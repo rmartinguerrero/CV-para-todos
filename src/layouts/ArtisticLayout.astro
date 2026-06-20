@@ -27,11 +27,13 @@ interface Props {
   title: string;
   description: string;
   lang: string;
+  currentLang: string;
+  availableLangs: string[];
   resume: any;
   t: (key: string) => string;
 }
 
-const { title, description, lang, resume, t } = Astro.props;
+const { title, description, lang, currentLang, availableLangs, resume, t } = Astro.props;
 ---
 <!DOCTYPE html>
 <html lang={lang}>
