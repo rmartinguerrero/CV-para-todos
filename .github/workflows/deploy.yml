@@ -48,8 +48,9 @@ jobs:
       - name: Build with Astro
         run: pnpm build
 
+      # 👇 ACTUALIZADO DE @v2 A @v3 (Usa internamente upload-artifact@v4)
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2
+        uses: actions/upload-pages-artifact@v3
         with:
           path: ./dist
 
@@ -60,6 +61,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      # 👇 ACTUALIZADO DE @v2 A @v4
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v2
+        uses: actions/deploy-pages@v4
