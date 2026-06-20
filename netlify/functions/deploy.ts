@@ -28,7 +28,7 @@ interface GithubRepo {
   repo: string;
 }
 
-const BASE_REPO = process.env.BASE_REPO || 'raul/cv-para-todos'; // Repositorio base configurable
+const BASE_REPO = process.env.BASE_REPO || 'rmartinguerrero/CV-para-todos'; // Repositorio base configurable
 
 export const handler = async (event: any) => {
   const headers = {
