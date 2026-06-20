@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -22,46 +22,35 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 👇 ACTUALIZADO: De @v2 a @v4 y subimos la versión de pnpm a la 9
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 9
 
-      # 👇 ACTUALIZADO: Subimos Node a la versión 20 (la 18 ya está obsoleta)
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'pnpm'
 
-      # 👇 ACTUALIZADO: Usamos --no-frozen-lockfile para evitar conflictos de versiones en los forks
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      # 🔐 PASO CRÍTICO: Eliminar solo la ruta de edición para privacidad
       - name: Remove edit page for privacy
         run: |
           echo "🔐 Eliminando página de edición para privacidad..."
           rm -f src/pages/*/edit.astro
           rm -f src/pages/[lang]/edit.astro
-          echo "✅ Página de edición eliminada. La landing y el wizard público permanecen." 
+          echo "✅ Página de edición eliminada. La landing y el wizard público permanecen."
 
       - name: Build with Astro
         run: pnpm build
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Deploy to gh-pages branch
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          path: ./dist
-
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          publish_branch: gh-pages
+          commit_message: "Deploy static site from main"
+          clean: true
