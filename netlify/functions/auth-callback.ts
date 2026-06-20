@@ -138,7 +138,9 @@ export const handler = async (event: any) => {
       statusCode: 302,
       headers: {
         ...headers,
-        'Location': redirectUrl,
+        'Location': redirectUrl
+      },
+      multiValueHeaders: {
         'Set-Cookie': [tokenCookie, userCookie]
       },
       body: ''
