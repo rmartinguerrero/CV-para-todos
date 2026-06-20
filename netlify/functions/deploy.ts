@@ -17,6 +17,10 @@
 
 import { Octokit } from "@octokit/rest";
 
+// Evitar errores de tipado en el entorno TS del editor (process/Buffer son globals en Node)
+declare const process: any;
+declare const Buffer: any;
+
 interface DeployRequest {
   langs: string[];
   resumeData: any;
@@ -154,21 +158,39 @@ export const handler = async (event: any) => {
       } catch (forkError: any) {
         console.error("Error al crear fork:", forkError);
 
+        // Si GitHub responde 404 al intentar forkar, intentaremos crear un repo nuevo
+        // en la cuenta del usuario como fallback (requiere scope 'repo').
         if (forkError.status === 404) {
-          return {
-            statusCode: 404,
-            headers,
-            body: JSON.stringify({
-              error: `No se encontró el repositorio base ${sourceRepoValue}. Verifica BASE_REPO o sourceRepo.`
-            })
-          };
-        }
+          console.warn(`Fork no encontrado o sin acceso a ${sourceRepoValue}. Intentando crear un repo en la cuenta del usuario: ${username}/${baseRepoName}`);
+          try {
+            const createResp = await octokit.repos.createForAuthenticatedUser({
+              name: baseRepoName,
+              description: `Repositorio creado automáticamente por CV-para-todos a partir de ${sourceRepoValue}`,
+              private: false,
+              auto_init: true
+            } as any);
 
-        // Si el fork ya existe pero no lo pudimos detectar, intentar usar el que existe
-        if (forkError.message?.includes('already exists')) {
+            forkRepo = { owner: username, repo: createResp.data.name };
+            console.log(`Repositorio creado como ${forkRepo.owner}/${forkRepo.repo}`);
+          } catch (createErr: any) {
+            console.error('Error creando repositorio en la cuenta del usuario:', createErr);
+            return {
+              statusCode: 500,
+              headers,
+              body: JSON.stringify({ error: `No se pudo crear el repositorio en la cuenta del usuario: ${createErr.message || createErr}` })
+            };
+          }
+        } else if (forkError.message?.includes('already exists')) {
+          // Si el fork ya existe pero no lo pudimos detectar, usarlo
           forkRepo = { owner: username, repo: userRepoName };
         } else {
-          throw forkError;
+          // Devolver error detallado de GitHub si está disponible
+          const ghMessage = forkError.message || JSON.stringify(forkError);
+          return {
+            statusCode: 500,
+            headers,
+            body: JSON.stringify({ error: `Error al crear fork: ${ghMessage}` })
+          };
         }
       }
     }
