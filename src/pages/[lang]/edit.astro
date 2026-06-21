@@ -893,20 +893,41 @@ const templates = Object.entries(layoutModules)
       btn.textContent = lang === 'es' ? 'Publicando...' : lang === 'it' ? 'Pubblicazione...' : 'Publishing...';
       
       try {
+        const savedLangs = ['es', 'it', 'en'];
+        const resumeDataByLang = {};
+
+        savedLangs.forEach((code) => {
+          const saved = localStorage.getItem(`cv_backup_data_${code}`);
+          if (!saved) return;
+          try {
+            const parsed = JSON.parse(saved);
+            if (parsed?.basics?.name?.trim()) {
+              resumeDataByLang[code] = parsed;
+            }
+          } catch {
+            // ignorar entradas corruptas
+          }
+        });
+
+        if (!resumeDataByLang[lang]) {
+          resumeDataByLang[lang] = state;
+        }
+
         const response = await fetch('/.netlify/functions/deploy', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
-          body: JSON.stringify({ 
-            langs: [lang], 
-            resumeData: state 
+          body: JSON.stringify({
+            langs: Object.keys(resumeDataByLang),
+            resumeDataByLang,
+            template: savedTemplate
           })
         });
-        
+
         const data = await response.json();
-        
+
         if (response.ok) {
-          const successMsg = lang === 'es' 
+          const successMsg = lang === 'es'
             ? `¡Publicado! Tu CV está en: ${data.webUrl}`
             : lang === 'it'
             ? `Pubblicato! Il tuo CV è su: ${data.webUrl}`
