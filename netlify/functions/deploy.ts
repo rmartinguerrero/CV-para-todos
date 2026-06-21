@@ -2,17 +2,19 @@
 /**
  * /api/deploy
  *
- * Endpoint principal para:
- * 1. Crear o actualizar un repositorio Astro mínimo en la cuenta del usuario.
- * 2. Escribir solo archivos mínimos para generar una web funcional en GitHub Pages.
- * 3. Incluir únicamente los JSON de idiomas completados y la foto subida.
+ * Crea/actualiza un repositorio en la cuenta del usuario con:
+ *   - index.html         (redirección por idioma)
+ *   - {lang}/index.html  (CV renderizado por idioma)
+ *   - style.css          (todos los temas + responsive + print)
+ *   - resume.{lang}.json (datos del CV en formato JSON Resume)
+ *   - profile.jpg        (foto de perfil)
+ *
+ * Sin Astro, sin GitHub Actions, sin build — directamente servible por GitHub Pages.
  */
 
 /// <reference lib="es2022" />
 import { Octokit } from "@octokit/rest";
-// no imports from 'path' to avoid requiring node types here; use a small helper
 
-// Evitar errores de tipado en el entorno TS del editor (process/Buffer son globals en Node)
 declare const process: any;
 declare const Buffer: any;
 
@@ -32,6 +34,235 @@ const PUBLISHED_REPO_NAME = process.env.PUBLISHED_REPO_NAME || 'cv-para-todos';
 const DEFAULT_TEMPLATE = 'minimalist';
 const SUPPORTED_LANGS = ['es', 'it', 'en'];
 
+// =========================================================================
+// CSS estático incrustado (3 temas + responsive + print)
+// =========================================================================
+const STYLE_CSS: string = `/* CV para Todos — Static Stylesheet */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{font-family:'Inter',system-ui,sans-serif;line-height:1.6;min-height:100vh;-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%;height:auto}
+a{color:inherit;text-decoration:none}
+a:hover{opacity:.85}
+h1,h2,h3,strong{font-family:'Inter',system-ui,sans-serif}
+
+.theme-minimalist{background:#f8fafc;color:#111827}
+.theme-minimalist .page{max-width:900px;margin:0 auto;padding:3rem 1.5rem}
+.theme-minimalist .panel{background:#fff;border:1px solid #e5e7eb;border-radius:1.25rem;box-shadow:0 24px 80px rgba(15,23,42,.06)}
+.theme-minimalist .tag{display:inline-flex;gap:.5rem;padding:.5rem 1rem;background:#eff6ff;border-radius:9999px;font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+.theme-minimalist .section-title{color:#111827;font-size:1rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:1rem}
+.theme-minimalist .profile-image{width:128px;height:128px;object-fit:cover;border-radius:1rem;border:1px solid #e5e7eb}
+.theme-minimalist .lang-btn-active{background:#2563eb!important;color:#fff!important}
+.theme-minimalist .lang-btn-inactive{background:rgba(0,0,0,.06)!important;color:inherit!important}
+
+.theme-techy{background:#0f172a;color:#e2e8f0}
+.theme-techy .page{max-width:1000px;margin:0 auto;padding:3rem 1.5rem}
+.theme-techy .panel{background:rgba(15,23,42,0.96);border:1px solid rgba(148,163,184,.18);border-radius:1.5rem;box-shadow:0 30px 80px rgba(15,23,42,.3)}
+.theme-techy .tag{display:inline-flex;gap:.5rem;padding:.5rem 1rem;background:rgba(56,189,248,.12);border-radius:9999px;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#c7d2fe}
+.theme-techy .section-title{color:#cbd5e1;font-size:1rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:1rem}
+.theme-techy .profile-image{width:128px;height:128px;object-fit:cover;border-radius:1rem;border:1px solid rgba(148,163,184,.2)}
+.theme-techy .lang-btn-active{background:#38bdf8!important;color:#0f172a!important}
+.theme-techy .lang-btn-inactive{background:rgba(255,255,255,.1)!important;color:inherit!important}
+
+.theme-artistic{background:#fdf2e9;color:#17212b}
+.theme-artistic .page{max-width:900px;margin:0 auto;padding:3rem 1.5rem}
+.theme-artistic .panel{background:#fff;border:1px solid #f1e4d3;border-radius:1.75rem;box-shadow:0 25px 90px rgba(15,23,42,.08)}
+.theme-artistic .tag{display:inline-flex;gap:.5rem;padding:.5rem 1rem;background:#fff7ed;border-radius:9999px;font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#92400e}
+.theme-artistic .section-title{color:#7c2d12;font-size:1rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:1rem}
+.theme-artistic .profile-image{width:128px;height:128px;object-fit:cover;border-radius:1.5rem;border:1px solid #fde2b6}
+.theme-artistic .lang-btn-active{background:#d97706!important;color:#fff!important}
+.theme-artistic .lang-btn-inactive{background:rgba(0,0,0,.06)!important;color:inherit!important}
+
+.panel-header{display:flex;flex-wrap:wrap;gap:1.5rem;align-items:flex-start;justify-content:space-between}
+.panel-header-content{flex:1;min-width:220px}
+.panel-name{font-size:clamp(2rem,3vw,3rem);margin:.75rem 0 .5rem;line-height:1.05}
+.panel-summary{max-width:40rem;line-height:1.8}
+.panel-contact{display:grid;gap:.75rem;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin-top:1.5rem}
+.panel-contact strong{display:block;font-size:.875rem}
+.panel-nav{display:flex;flex-wrap:wrap;gap:.75rem;margin:2rem 0 1rem}
+.panel-nav a{padding:.65rem 1rem;border-radius:9999px;text-decoration:none;font-weight:700;font-size:.875rem}
+.panel-main{display:grid;gap:2rem}
+.card{padding:1.25rem;border:1px solid rgba(148,163,184,.16);border-radius:1rem}
+.card-header{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.card-title{font-weight:700}
+.card-body{margin-top:.75rem;line-height:1.8;white-space:pre-line;font-size:.9rem}
+.card-date{opacity:.75;font-size:.85rem}
+.cards-grid{display:grid;gap:1.25rem}
+.skills-wrap{display:flex;flex-wrap:wrap;gap:.6rem}
+.extra-grid{display:grid;gap:1.5rem}
+.cert-item,.lang-item{padding:.95rem;border:1px solid rgba(148,163,184,.16);border-radius:1rem}
+.cert-name{font-weight:700}
+.cert-meta{opacity:.75;font-size:.875rem}
+.lang-item{display:flex;justify-content:space-between;gap:1rem}
+.lang-fluency{font-weight:700}
+
+@media(max-width:640px){
+  .page{padding:1.5rem 1rem!important}
+  .panel-header{flex-direction:column-reverse;align-items:stretch}
+  .panel-name{font-size:1.75rem!important}
+  .panel-contact{grid-template-columns:1fr!important}
+  .card-header{flex-direction:column;gap:.25rem}
+  .profile-image{width:96px!important;height:96px!important}
+}
+
+@media print{
+  body{background:#fff!important;color:#000!important}
+  .page{padding:0!important;margin:0!important}
+  .panel{box-shadow:none!important;border:none!important;border-radius:0!important}
+  .panel-nav{display:none!important}
+  @page{size:A4;margin:10mm}
+}`;
+
+// =========================================================================
+// Helpers
+// =========================================================================
+function h(s: string): string {
+  if (!s) return '';
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function fmtDate(d: string): string {
+  if (!d) return '';
+  try {
+    const dt = new Date(d);
+    return isNaN(dt.getTime()) ? d : dt.toLocaleDateString('en',{year:'numeric',month:'short'});
+  } catch { return d; }
+}
+
+function dateRange(start: string, end: string | null, present: string): string {
+  const f = start ? fmtDate(start.slice(0,7)) : '';
+  const t = end ? fmtDate(end.slice(0,7)) : present;
+  return f && t ? `${f} — ${t}` : t || f || '';
+}
+
+// =========================================================================
+// Generadores de HTML
+// =========================================================================
+function renderRootIndex(langs: string[]): string {
+  const json = JSON.stringify(langs);
+  const fallback = langs[0] || 'en';
+  return `<!DOCTYPE html>
+<html lang="es">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>CV</title>
+<script>(function(){var a=${json};var p=(navigator.languages||[navigator.language]).map(function(l){return l.split('-')[0]}).find(function(l){return a.indexOf(l)!==-1})||'${fallback}';window.location.replace('/'+p+'/')})()</script>
+</head><body><p>Redirecting to <a href="/${fallback}/">/${fallback}/</a></p></body></html>`;
+}
+
+function renderCvPage(resume: any, lang: string, template: string, langs: string[]): string {
+  const b = resume?.basics || {};
+  const title = b.name ? `${h(b.name)} — ${h(b.label || 'CV')}` : 'Curriculum Vitae';
+  const hasImg = !!b.image;
+  const langNav = langs.map(l => `<a href="/${l}/" class="${l===lang?'lang-btn-active':'lang-btn-inactive'}">${l.toUpperCase()}</a>`).join('\n');
+
+  const contacts: string[] = [];
+  if (b.email) contacts.push(`<div><strong>Email</strong><br/>${h(b.email)}</div>`);
+  if (b.phone) contacts.push(`<div><strong>Phone</strong><br/>${h(b.phone)}</div>`);
+  if (b.url) contacts.push(`<div><strong>Website</strong><br/><a href="${h(b.url)}" target="_blank" rel="noreferrer">${h(b.url)}</a></div>`);
+
+  let workHtml = '';
+  if (resume.work?.length) {
+    const items = resume.work.filter((w:any)=>w.name).map((w:any) =>
+      `<article class="card"><div class="card-header"><strong class="card-title">${h(w.position||w.name)}</strong><span class="card-date">${dateRange(w.startDate,w.endDate,'Present')}</span></div><div style="margin-top:.75rem;opacity:.85">${h(w.name)}</div>${w.summary?`<p class="card-body">${h(w.summary)}</p>`:''}</article>`
+    ).join('\n');
+    workHtml = `<section><h2 class="section-title">Experience</h2><div class="cards-grid">${items}</div></section>`;
+  }
+
+  let eduHtml = '';
+  if (resume.education?.length) {
+    const items = resume.education.filter((e:any)=>e.institution).map((e:any) =>
+      `<article class="card"><div class="card-header"><strong class="card-title">${h(e.area||'')}</strong><span class="card-date">${dateRange(e.startDate,e.endDate,'Present')}</span></div><p style="margin-top:.75rem">${h(e.institution)}</p></article>`
+    ).join('\n');
+    eduHtml = `<section><h2 class="section-title">Education</h2><div class="cards-grid">${items}</div></section>`;
+  }
+
+  let skillsHtml = '';
+  if (resume.skills?.length) {
+    const tags = resume.skills.filter((s:any)=>s.name).map((s:any)=>`<span class="tag">${h(s.name)}</span>`).join('\n');
+    skillsHtml = `<section><h2 class="section-title">Skills</h2><div class="skills-wrap">${tags}</div></section>`;
+  }
+
+  let projHtml = '';
+  if (resume.projects?.length) {
+    const items = resume.projects.filter((p:any)=>p.name).map((p:any) =>
+      `<article class="card"><div class="card-header"><strong class="card-title">${h(p.name)}</strong>${p.startDate?`<span class="card-date">${fmtDate(p.startDate)}</span>`:''}</div>${p.description?`<p class="card-body">${h(p.description)}</p>`:''}</article>`
+    ).join('\n');
+    projHtml = `<section><h2 class="section-title">Projects</h2><div class="cards-grid">${items}</div></section>`;
+  }
+
+  let extraHtml = '';
+  const hasCerts = resume.certificates?.length;
+  const hasLangs = resume.languages?.length;
+  if (hasCerts || hasLangs) {
+    extraHtml = '<section class="extra-grid">';
+    if (hasCerts) {
+      extraHtml += '<div><h2 class="section-title">Certificates</h2>';
+      resume.certificates.forEach((c:any) => {
+        const meta = [c.issuer,c.date].filter(Boolean).join(' • ');
+        extraHtml += `<div class="cert-item" style="margin-bottom:.8rem"><div class="cert-name">${h(c.name||'')}</div>${meta?`<div class="cert-meta">${h(meta)}</div>`:''}</div>`;
+      });
+      extraHtml += '</div>';
+    }
+    if (hasLangs) {
+      extraHtml += '<div><h2 class="section-title">Languages</h2>';
+      resume.languages.forEach((l:any) => {
+        extraHtml += `<div class="lang-item" style="margin-bottom:.6rem"><span>${h(l.language||'')}</span><strong class="lang-fluency">${h(l.fluency||'')}</strong></div>`;
+      });
+      extraHtml += '</div>';
+    }
+    extraHtml += '</section>';
+  }
+
+  return `<!DOCTYPE html>
+<html lang="${lang}">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>${h(title)}</title>
+  <meta name="description" content="${h(b.summary||'Curriculum Vitae')}" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body class="theme-${template}">
+  <div class="page">
+    <div class="panel" style="padding:2.5rem">
+      <header class="panel-header">
+        <div class="panel-header-content">
+          <p class="tag">${h(b.label||'Curriculum Vitae')}</p>
+          <h1 class="panel-name">${h(b.name||'Your Name')}</h1>
+          ${b.summary?`<p class="panel-summary">${h(b.summary)}</p>`:''}
+          ${contacts.length?`<div class="panel-contact">${contacts.join('\n        ')}</div>`:''}
+        </div>
+        ${hasImg?'<div><img class="profile-image" src="/profile.jpg" alt="Profile photo" loading="lazy" /></div>':''}
+      </header>
+      <nav class="panel-nav">${langNav}</nav>
+      <div class="panel-main">
+        ${workHtml}
+        ${eduHtml}
+        ${skillsHtml}
+        ${projHtml}
+        ${extraHtml}
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+function renderJsonStringify(resume: any): string {
+  const clone: any = {};
+  for (const k of Object.keys(resume)) {
+    if (k === '$schema') continue;
+    clone[k] = resume[k];
+  }
+  return JSON.stringify(clone, null, 2);
+}
+
+// =========================================================================
+// GitHub helpers
+// =========================================================================
 function parseDataUrl(dataUrl: string) {
   const match = /^data:(image\/[a-zA-Z0-9.+-]+);base64,(.*)$/.exec(dataUrl);
   if (!match) return null;
@@ -39,289 +270,6 @@ function parseDataUrl(dataUrl: string) {
   const base64 = match[2];
   const ext = mime === 'image/jpeg' ? 'jpg' : mime.split('/')[1] || 'jpg';
   return { ext, buffer: Buffer.from(base64, 'base64') };
-}
-
-function basename(p: string) {
-  if (!p) return p;
-  const parts = p.split('/');
-  return parts[parts.length - 1];
-}
-
-function buildPackageJson() {
-  return JSON.stringify({
-    name: 'cv-para-todos',
-    private: false,
-    type: 'module',
-    scripts: {
-      dev: 'astro dev',
-      build: 'astro build',
-      preview: 'astro preview'
-    },
-    dependencies: {
-      astro: '^4.9.0'
-    }
-  }, null, 2);
-}
-
-function buildAstroConfig() {
-  return `import { defineConfig } from 'astro/config';\n\nexport default defineConfig();\n`;
-}
-
-function buildIndexAstro() {
-  return '---\n'
-    + 'import SelectedLayout from \'../layouts/SelectedLayout.astro\';\n\n'
-    + 'const modules = import.meta.glob(\'../data/resume.*.json\', { eager: true, as: \'json\' });\n'
-    + 'const resumes = Object.fromEntries(\n'
-    + '  Object.entries(modules).map(([filePath, data]) => {\n'
-    + '    const match = filePath.match(/resume\\.([a-z]{2})\\.json$/);\n'
-    + '    const lang = match ? match[1] : \'es\';\n'
-    + '    return [lang, data];\n'
-    + '  })\n'
-    + ');\n\n'
-    + 'const availableLangs = Object.keys(resumes).sort();\n'
-    + 'const url = new URL(Astro.request.url);\n'
-    + 'const currentLang = availableLangs.includes(url.searchParams.get(\'lang\'))\n'
-    + '  ? url.searchParams.get(\'lang\')\n'
-    + '  : availableLangs[0] || \'es\';\n'
-    + 'const resume = resumes[currentLang] || resumes[availableLangs[0]] || {};\n'
-    + '---\n'
-    + '<!DOCTYPE html>\n'
-    + '<html lang={currentLang}>\n'
-    + '  <head>\n'
-    + '    <meta charset=\"UTF-8\" />\n'
-    + '    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n'
-    + '    <title>{resume?.basics?.name ? `\${resume.basics.name} — \${resume.basics.label || \'CV\'}` : \'CV\'}</title>\n'
-    + '    <meta name=\"description\" content={resume?.basics?.summary || \'Curriculum Vitae\'} />\n'
-    + '  </head>\n'
-    + '  <body>\n'
-    + '    <SelectedLayout resume={resume} availableLangs={availableLangs} currentLang={currentLang} />\n'
-    + '  </body>\n'
-    + '</html>\n';
-}
-
-function buildSelectedLayoutAstro(templateId: string) {
-  const themeStyles = {
-    minimalist: `body { background: #f8fafc; color: #111827; font-family: Inter, system-ui, sans-serif; }
-      .page { max-width: 900px; margin: 0 auto; padding: 3rem 1.5rem; }
-      .panel { background: white; border: 1px solid #e5e7eb; border-radius: 1.25rem; box-shadow: 0 24px 80px rgba(15,23,42,.06); }
-      .accent { color: #2563eb; }
-      .tag { display: inline-flex; gap: .5rem; padding: .5rem 1rem; background: #eff6ff; border-radius: 9999px; font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
-      .section-title { color: #111827; font-size: 1rem; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 1rem; }
-      .profile-image { width: 128px; height: 128px; object-fit: cover; border-radius: 1rem; border: 1px solid #e5e7eb; }`,
-    techy: `body { background: #0f172a; color: #e2e8f0; font-family: Inter, system-ui, sans-serif; }
-      .page { max-width: 1000px; margin: 0 auto; padding: 3rem 1.5rem; }
-      .panel { background: rgba(15,23,42,0.96); border: 1px solid rgba(148,163,184,0.18); border-radius: 1.5rem; box-shadow: 0 30px 80px rgba(15,23,42,.3); }
-      .accent { color: #38bdf8; }
-      .tag { display: inline-flex; gap: .5rem; padding: .5rem 1rem; background: rgba(56,189,248,.12); border-radius: 9999px; font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #c7d2fe; }
-      .section-title { color: #cbd5e1; font-size: 1rem; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 1rem; }
-      .profile-image { width: 128px; height: 128px; object-fit: cover; border-radius: 1rem; border: 1px solid rgba(148,163,184,.2); }`,
-    artistic: `body { background: #fdf2e9; color: #17212b; font-family: Inter, system-ui, sans-serif; }
-      .page { max-width: 900px; margin: 0 auto; padding: 3rem 1.5rem; }
-      .panel { background: #ffffff; border: 1px solid #f1e4d3; border-radius: 1.75rem; box-shadow: 0 25px 90px rgba(15,23,42,.08); }
-      .accent { color: #d97706; }
-      .tag { display: inline-flex; gap: .5rem; padding: .5rem 1rem; background: #fff7ed; border-radius: 9999px; font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #92400e; }
-      .section-title { color: #7c2d12; font-size: 1rem; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 1rem; }
-      .profile-image { width: 128px; height: 128px; object-fit: cover; border-radius: 1.5rem; border: 1px solid #fde2b6; }`
-  };
-
-  type TemplateId = keyof typeof themeStyles;
-  const styles = themeStyles[(templateId as TemplateId)] ?? themeStyles.minimalist;
-
-  return `---
-const { resume, availableLangs, currentLang } = Astro.props;
-const profileImage = resume?.basics?.image || '/profile.jpg';
-const hasImage = !!resume?.basics?.image;
-function formatDate(dateString) {
-  if (!dateString) return '';
-  try {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en', { year: 'numeric', month: 'short' }).format(date);
-  } catch {
-    return dateString;
-  }
-}
----
-<!DOCTYPE html>
-<html lang={currentLang}>
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{resume?.basics?.name ? \`\${resume.basics.name} — \${resume.basics?.label || 'CV'}\` : 'Curriculum Vitae'}</title>
-  </head>
-  <body>
-    <div class="page">
-      <div class="panel">
-        <header style="display:flex;flex-wrap:wrap;gap:1.5rem;align-items:flex-start;justify-content:space-between;">
-          <div style="flex:1;min-width:220px;">
-            <p class="tag">{resume?.basics?.label || 'Curriculum Vitae'}</p>
-            <h1 style="font-size:clamp(2rem,3vw,3rem);margin:.75rem 0 .5rem;line-height:1.05;">{resume?.basics?.name || 'Your Name'}</h1>
-            <p style="max-width:40rem;line-height:1.8;color:inherit;opacity:.9;">{resume?.basics?.summary || 'This CV was generated automatically.'}</p>
-            <div style="display:grid;gap:.75rem;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin-top:1.5rem;">
-              {resume?.basics?.email ? <div><strong>Email</strong><br />{resume.basics.email}</div> : null}
-              {resume?.basics?.phone ? <div><strong>Phone</strong><br />{resume.basics.phone}</div> : null}
-              {resume?.basics?.web ? <div><strong>Website</strong><br /><a href={resume.basics.web} target="_blank" rel="noreferrer noopener">{resume.basics.web}</a></div> : null}
-            </div>
-          </div>
-          {hasImage ? <img class="profile-image" src={profileImage} alt="Profile photo" loading="lazy" /> : null}
-        </header>
-
-        <nav style="display:flex;flex-wrap:wrap;gap:.75rem;margin:2rem 0 1rem;">
-          {availableLangs.map((lang) => (
-            <a href={\`/?lang=\${lang}\`} style={\`padding:.65rem 1rem;border-radius:9999px;text-decoration:none;font-weight:700;color:\${lang === currentLang ? '#ffffff' : 'inherit'};background:\${lang === currentLang ? '#2563eb' : 'rgba(0,0,0,.06)'};\`}>
-              {lang.toUpperCase()}
-            </a>
-          ))}
-        </nav>
-
-        <main style="display:grid;gap:2rem;">
-          {resume?.work?.length ? (
-            <section>
-              <h2 class="section-title">Work Experience</h2>
-              <div style="display:grid;gap:1.25rem;">
-                {resume.work.map((item) => (
-                  <article style="padding:1.25rem;border:1px solid rgba(148,163,184,.16);border-radius:1rem;">
-                    <div style="display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
-                      <strong>{item.position || item.name}</strong>
-                      <span style="color:inherit;opacity:.75;">{formatDate(item.startDate)} – {item.endDate ? formatDate(item.endDate) : 'Present'}</span>
-                    </div>
-                    <div style="margin-top:.5rem;color:inherit;opacity:.85;">{item.name || ''}</div>
-                    <p style="margin-top:.75rem;line-height:1.8;white-space:pre-line;">{item.summary || ''}</p>
-                  </article>
-                ))}
-              </div>
-            </section>
-          ) : null}
-
-          {resume?.education?.length ? (
-            <section>
-              <h2 class="section-title">Education</h2>
-              <div style="display:grid;gap:1.25rem;">
-                {resume.education.map((item) => (
-                  <article style="padding:1.25rem;border:1px solid rgba(148,163,184,.16);border-radius:1rem;">
-                    <div style="display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
-                      <strong>{item.area || ''}</strong>
-                      <span style="opacity:.75;">{formatDate(item.startDate)} – {item.endDate ? formatDate(item.endDate) : 'Present'}</span>
-                    </div>
-                    <p style="margin-top:.75rem;color:inherit;opacity:.85;">{item.institution || ''}</p>
-                  </article>
-                ))}
-              </div>
-            </section>
-          ) : null}
-
-          {resume?.skills?.length ? (
-            <section>
-              <h2 class="section-title">Skills</h2>
-              <div style="display:flex;flex-wrap:wrap;gap:.6rem;">
-                {resume.skills.map((skill) => skill?.name ? <span class="tag">{skill.name}</span> : null)}
-              </div>
-            </section>
-          ) : null}
-
-          {resume?.projects?.length ? (
-            <section>
-              <h2 class="section-title">Projects</h2>
-              <div style="display:grid;gap:1.25rem;">
-                {resume.projects.map((project) => (
-                  <article style="padding:1.25rem;border:1px solid rgba(148,163,184,.16);border-radius:1rem;">
-                    <div style="display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
-                      <strong>{project.name || ''}</strong>
-                      <span style="opacity:.75;">{project.startDate ? formatDate(project.startDate) : ''}</span>
-                    </div>
-                    <p style="margin-top:.75rem;line-height:1.8;">{project.summary || ''}</p>
-                  </article>
-                ))}
-              </div>
-            </section>
-          ) : null}
-
-          {resume?.certificates?.length || resume?.languages?.length ? (
-            <section style="display:grid;gap:1.5rem;">
-              {resume?.certificates?.length ? (
-                <div>
-                  <h2 class="section-title">Certificates</h2>
-                  <ul style="display:grid;gap:.8rem;list-style:none;padding:0;margin:0;">
-                    {resume.certificates.map((item) => (
-                      <li style="padding:.95rem;border:1px solid rgba(148,163,184,.16);border-radius:1rem;">
-                        <div style="font-weight:700;">{item.name || ''}</div>
-                        <div style="opacity:.75;">{item.issuer || ''} • {item.date || ''}</div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
-
-              {resume?.languages?.length ? (
-                <div>
-                  <h2 class="section-title">Languages</h2>
-                  <ul style="display:grid;gap:.6rem;list-style:none;padding:0;margin:0;">
-                    {resume.languages.map((item) => (
-                      <li style="display:flex;justify-content:space-between;gap:1rem;padding:.95rem;border:1px solid rgba(148,163,184,.16);border-radius:1rem;">
-                        <span>{item.language || ''}</span>
-                        <strong style="opacity:.85;">{item.fluency || ''}</strong>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
-            </section>
-          ) : null}
-        </main>
-      </div>
-    </div>
-  </body>
-</html>
-
-<style is:global>
-  ${styles}
-  a { color: inherit; text-decoration: none; }
-  a:hover { opacity: .85; }
-  h1, h2, strong { font-family: Inter, system-ui, sans-serif; }
-  img { display: block; }
-</style>
-`;
-}
-
-function buildGhPagesWorkflow() {
-  return `name: Deploy to GitHub Pages
-
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build Astro site
-        run: npm run build
-
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: \${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
-          publish_branch: gh-pages
-          commit_message: 'Deploy static site from GitHub Actions'
-          clean: true
-`;
 }
 
 async function createOrUpdateFile(octokit: Octokit, owner: string, repo: string, filePath: string, content: string | typeof Buffer, message: string) {
@@ -333,22 +281,13 @@ async function createOrUpdateFile(octokit: Octokit, owner: string, repo: string,
       sha = response.data.sha;
     }
   } catch (error: any) {
-    if (error.status !== 404) {
-      throw error;
-    }
+    if (error.status !== 404) throw error;
   }
-
   try {
     await octokit.repos.createOrUpdateFileContents({
-      owner,
-      repo,
-      path: filePath,
-      message,
-      content: base64,
-      sha
+      owner, repo, path: filePath, message, content: base64, sha
     } as any);
   } catch (err: any) {
-    // Añadir contexto útil para depuración y re-lanzar
     err.message = `Error escribiendo ${filePath}: ${err.message}`;
     throw err;
   }
@@ -357,13 +296,11 @@ async function createOrUpdateFile(octokit: Octokit, owner: string, repo: string,
 async function listRepoFiles(octokit: Octokit, owner: string, repo: string, dir = ''): Promise<string[]> {
   const result: string[] = [];
   try {
-    // Evitar usar '.' como path raíz; pasar undefined para la raíz
     const response = await octokit.repos.getContent({ owner, repo, path: dir || undefined } as any);
     if (Array.isArray(response.data)) {
       for (const item of response.data) {
-        if (item.type === 'file') {
-          result.push(item.path);
-        } else if (item.type === 'dir') {
+        if (item.type === 'file') result.push(item.path);
+        else if (item.type === 'dir') {
           const nested = await listRepoFiles(octokit, owner, repo, item.path);
           result.push(...nested);
         }
@@ -372,9 +309,7 @@ async function listRepoFiles(octokit: Octokit, owner: string, repo: string, dir 
       result.push(response.data.path);
     }
   } catch (error: any) {
-    if (error.status !== 404) {
-      throw error;
-    }
+    if (error.status !== 404) throw error;
   }
   return result;
 }
@@ -392,6 +327,9 @@ async function deleteFileIfNeeded(octokit: Octokit, owner: string, repo: string,
   }
 }
 
+// =========================================================================
+// Handler principal
+// =========================================================================
 export const handler = async (event: any) => {
   const headers = {
     "Content-Type": "application/json",
@@ -403,13 +341,8 @@ export const handler = async (event: any) => {
   if (event.httpMethod === "OPTIONS") {
     return { statusCode: 200, headers, body: "" };
   }
-
   if (event.httpMethod !== "POST") {
-    return {
-      statusCode: 405,
-      headers,
-      body: JSON.stringify({ error: "Solo se permite POST" })
-    };
+    return { statusCode: 405, headers, body: JSON.stringify({ error: "Solo se permite POST" }) };
   }
 
   try {
@@ -418,16 +351,11 @@ export const handler = async (event: any) => {
       acc[key] = value;
       return acc;
     }, {}) : {};
-
     const userToken = cookies.github_token;
     const username = cookies.github_user;
 
     if (!userToken || !username) {
-      return {
-        statusCode: 401,
-        headers,
-        body: JSON.stringify({ error: "No autenticado. Debe conectar GitHub primero." })
-      };
+      return { statusCode: 401, headers, body: JSON.stringify({ error: "No autenticado. Debe conectar GitHub primero." }) };
     }
 
     const body: DeployRequest = JSON.parse(event.body || '{}');
@@ -437,131 +365,133 @@ export const handler = async (event: any) => {
 
     const resumeByLang: Record<string, any> = { ...rawResumeByLang };
     if (body.resumeData && typeof body.resumeData === 'object') {
-      if (!body.langs || body.langs.length === 0) {
-        langs.push('es');
-      }
+      if (!body.langs || body.langs.length === 0) langs.push('es');
       langs.forEach((lang) => {
-        if (!resumeByLang[lang]) {
-          resumeByLang[lang] = body.resumeData;
-        }
+        if (!resumeByLang[lang]) resumeByLang[lang] = body.resumeData;
       });
     }
 
-    const filteredLangs = (langs || [])
-      .filter(lang => SUPPORTED_LANGS.includes(lang))
-      .filter((lang, index, self) => self.indexOf(lang) === index)
-      .filter(lang => resumeByLang[lang] && resumeByLang[lang].basics && resumeByLang[lang].basics.name?.trim());
+    // Filtrar solo idiomas completados y válidos
+    const filteredLangs = langs
+      .filter(l => SUPPORTED_LANGS.includes(l))
+      .filter((l, i, self) => self.indexOf(l) === i)
+      .filter(l => resumeByLang[l]?.basics?.name?.trim());
 
     if (filteredLangs.length === 0) {
-      return {
-        statusCode: 400,
-        headers,
-        body: JSON.stringify({ error: 'No hay datos válidos de CV para publicar.' })
-      };
+      return { statusCode: 400, headers, body: JSON.stringify({ error: 'No hay datos válidos de CV para publicar.' }) };
     }
 
-    // Usar un único repositorio llamado cv-para-todos en la cuenta del usuario
-    const repoName = PUBLISHED_REPO_NAME;
     const octokit = new Octokit({ auth: userToken });
     let targetRepo: GithubRepo;
 
     try {
-      await octokit.repos.get({ owner: username, repo: repoName });
-      targetRepo = { owner: username, repo: repoName };
+      await octokit.repos.get({ owner: username, repo: PUBLISHED_REPO_NAME });
+      targetRepo = { owner: username, repo: PUBLISHED_REPO_NAME };
     } catch (repoError: any) {
       if (repoError.status === 404) {
         const created = await octokit.repos.createForAuthenticatedUser({
-          name: repoName,
-          description: 'CV para Todos - repositorio minimal desplegado en GitHub Pages',
+          name: PUBLISHED_REPO_NAME,
+          description: 'CV para Todos - sitio estático publicado en GitHub Pages',
           private: false,
           auto_init: true,
         } as any);
         targetRepo = { owner: username, repo: created.data.name };
-        // Esperar un poco para que GitHub propague la rama inicial
         await new Promise((r) => setTimeout(r, 3000));
       } else {
         throw repoError;
       }
     }
 
-    // Log básico para depuración: usuario y repo objetivo
-    try {
-      const repoCheck = await octokit.repos.get({ owner: username, repo: repoName });
-      console.log('Publishing to repo:', repoCheck.data.full_name, 'default_branch:', repoCheck.data.default_branch);
-    } catch (e) {
-      console.log('Repo check failed (will attempt writes):', e && e.message ? e.message : e);
-    }
-
-    const imagePath = '/profile';
+    // Extraer foto de perfil (primera que encontremos)
     let profileFileName: string | null = null;
     let profileFileBuffer: typeof Buffer | null = null;
-
     for (const lang of filteredLangs) {
       const resume = resumeByLang[lang];
       const imageValue = resume?.basics?.image;
       if (!profileFileBuffer && typeof imageValue === 'string' && imageValue.startsWith('data:')) {
         const parsed = parseDataUrl(imageValue);
         if (parsed) {
-          profileFileName = `${imagePath}.${parsed.ext}`;
+          profileFileName = `profile.${parsed.ext}`;
           profileFileBuffer = parsed.buffer;
         }
       }
     }
 
+    // Reescribir basics.image al path relativo
     if (profileFileName) {
       filteredLangs.forEach((lang) => {
         if (resumeByLang[lang]?.basics) {
-          resumeByLang[lang].basics.image = `/${basename(profileFileName)}`;
+          resumeByLang[lang].basics.image = `/${profileFileName}`;
         }
       });
     }
 
+    // =====================================================================
+    // Definir los archivos permitidos (todo lo demás se limpia)
+    // =====================================================================
     const allowedFiles = new Set<string>([
-      'package.json',
-      'astro.config.mjs',
-      '.github/workflows/deploy.yml',
-      'src/pages/index.astro',
-      'src/layouts/SelectedLayout.astro'
+      'index.html',
+      'style.css',
     ]);
-    filteredLangs.forEach(lang => allowedFiles.add(`src/data/resume.${lang}.json`));
+    filteredLangs.forEach(lang => {
+      allowedFiles.add(`${lang}/index.html`);
+      allowedFiles.add(`resume.${lang}.json`);
+    });
     if (profileFileName) {
-      allowedFiles.add(`public/${basename(profileFileName)}`);
+      allowedFiles.add(profileFileName);
     }
 
-    const allFiles = await listRepoFiles(octokit, username, repoName);
+    // Limpiar archivos obsoletos del repo
+    const allFiles = await listRepoFiles(octokit, username, PUBLISHED_REPO_NAME);
     for (const file of allFiles) {
       if (!allowedFiles.has(file)) {
-        await deleteFileIfNeeded(octokit, username, repoName, file);
+        await deleteFileIfNeeded(octokit, username, PUBLISHED_REPO_NAME, file);
       }
     }
 
-    await createOrUpdateFile(octokit, username, repoName, 'package.json', buildPackageJson(), 'Publish CV: package.json');
-    await createOrUpdateFile(octokit, username, repoName, 'astro.config.mjs', buildAstroConfig(), 'Publish CV: astro.config.mjs');
-    // Intentar escribir el workflow; si el token no tiene permiso para workflows, no fallar entero
-    try {
-      console.log('Writing workflow file .github/workflows/deploy.yml');
-      await createOrUpdateFile(octokit, username, repoName, '.github/workflows/deploy.yml', buildGhPagesWorkflow(), 'Publish CV: GitHub Pages workflow');
-    } catch (err: any) {
-      console.warn('Could not write workflow file; skipping. Reason:', err && err.message ? err.message : err);
-    }
-    console.log('Writing core site files');
-    await createOrUpdateFile(octokit, username, repoName, 'src/pages/index.astro', buildIndexAstro(), 'Publish CV: index.astro');
-    await createOrUpdateFile(octokit, username, repoName, 'src/layouts/SelectedLayout.astro', buildSelectedLayoutAstro(template), 'Publish CV: SelectedLayout');
+    // =====================================================================
+    // Escribir archivos estáticos
+    // =====================================================================
+    console.log('Writing style.css');
+    await createOrUpdateFile(octokit, username, PUBLISHED_REPO_NAME, 'style.css', STYLE_CSS, 'Publish CV: stylesheet');
+
+    console.log('Writing index.html (language redirect)');
+    await createOrUpdateFile(octokit, username, PUBLISHED_REPO_NAME, 'index.html', renderRootIndex(filteredLangs), 'Publish CV: root redirect');
 
     if (profileFileBuffer && profileFileName) {
-      await createOrUpdateFile(octokit, username, repoName, `public/${basename(profileFileName)}`, profileFileBuffer, 'Publish CV: profile image');
+      console.log(`Writing ${profileFileName}`);
+      await createOrUpdateFile(octokit, username, PUBLISHED_REPO_NAME, profileFileName, profileFileBuffer, 'Publish CV: profile image');
     }
 
-    const results = [];
+    const results: any[] = [];
     for (const lang of filteredLangs) {
       const resumeData = resumeByLang[lang];
-      const content = JSON.stringify(resumeData, null, 2);
-      await createOrUpdateFile(octokit, username, repoName, `src/data/resume.${lang}.json`, content, `Publish CV: resume.${lang}.json`);
+
+      // Escribir resume.json
+      await createOrUpdateFile(octokit, username, PUBLISHED_REPO_NAME, `resume.${lang}.json`, renderJsonStringify(resumeData), `Publish CV: resume.${lang}.json`);
+
+      // Escribir página HTML del idioma
+      await createOrUpdateFile(octokit, username, PUBLISHED_REPO_NAME, `${lang}/index.html`, renderCvPage(resumeData, lang, template, filteredLangs), `Publish CV: ${lang}/index.html`);
+
       results.push({ lang, success: true });
     }
 
-    const repoUrl = `https://github.com/${username}/${repoName}`;
-    const pagePath = repoName === `${username}.github.io` ? '' : `${repoName}/`;
+    // Habilitar GitHub Pages desde la rama principal
+    try {
+      await octokit.repos.createPagesSite({
+        owner: username,
+        repo: PUBLISHED_REPO_NAME,
+        source: { branch: 'main', path: '/' }
+      } as any);
+    } catch (pagesError: any) {
+      // Si ya está habilitado, puede dar error 409 — lo ignoramos
+      if (pagesError.status !== 409) {
+        console.warn('No se pudo habilitar GitHub Pages automáticamente:', pagesError.message || pagesError);
+      }
+    }
+
+    const repoUrl = `https://github.com/${username}/${PUBLISHED_REPO_NAME}`;
+    const pagePath = PUBLISHED_REPO_NAME === `${username}.github.io` ? '' : `${PUBLISHED_REPO_NAME}/`;
     const webUrl = `https://${username}.github.io/${pagePath}`;
 
     return {
@@ -570,7 +500,7 @@ export const handler = async (event: any) => {
       body: JSON.stringify({
         success: true,
         message: `¡Éxito! Tu CV ha sido publicado en ${repoUrl}`,
-        repository: `${username}/${repoName}`,
+        repository: `${username}/${PUBLISHED_REPO_NAME}`,
         webUrl,
         results
       })
@@ -578,16 +508,8 @@ export const handler = async (event: any) => {
   } catch (error: any) {
     console.error('Error crítico en /api/deploy:', error);
     if (error.status === 401 || error.status === 403) {
-      return {
-        statusCode: error.status,
-        headers,
-        body: JSON.stringify({ error: 'Tu sesión de GitHub ha expirado o no tienes permisos. Por favor, reautentica.' })
-      };
+      return { statusCode: error.status, headers, body: JSON.stringify({ error: 'Tu sesión de GitHub ha expirado o no tienes permisos. Por favor, reautentica.' }) };
     }
-    return {
-      statusCode: 500,
-      headers,
-      body: JSON.stringify({ error: error.message || 'Error al procesar el despliegue.' })
-    };
+    return { statusCode: 500, headers, body: JSON.stringify({ error: error.message || 'Error al procesar el despliegue.' }) };
   }
 };
