@@ -45,6 +45,27 @@ const templates = Object.entries(layoutModules)
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{t('edit.title')}</title>
+
+  <!-- Cookie Consent + Google Analytics (RGPD) -->
+  <script is:inline>
+    (() => {
+      const consent = localStorage.getItem('cookie-consent');
+      if (consent !== 'accepted') return;
+
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){ dataLayer.push(arguments); }
+      window.gtag = gtag;
+
+      gtag('js', new Date());
+      gtag('config', 'G-R3TG90C8J5', { anonymize_ip: true });
+
+      const gaScript = document.createElement('script');
+      gaScript.async = true;
+      gaScript.src = "https://www.googletagmanager.com/gtag/js?id=G-R3TG90C8J5";
+      const firstScript = document.getElementsByTagName('script')[0];
+      firstScript.parentNode.insertBefore(gaScript, firstScript);
+    })();
+  </script>
 </head>
 <body class="bg-gray-50 min-h-screen text-gray-800 antialiased">
 
@@ -994,6 +1015,74 @@ const templates = Object.entries(layoutModules)
       renderDynamicBlocks();
       renderSkillsTags();
       applyTemplate(savedTemplate);
+    })();
+  </script>
+
+  <!-- Cookie Consent Banner -->
+  <div id="privacy-banner"
+    class="fixed bottom-4 left-4 right-4 md:left-4 md:right-auto md:max-w-md bg-white border border-gray-200 p-4 rounded-xl shadow-2xl z-50 opacity-0 translate-y-8 pointer-events-none flex flex-col sm:flex-row items-start sm:items-center gap-4 transition-all duration-500 ease-out"
+  >
+    <div class="hidden sm:flex flex-shrink-0 w-16 h-16 overflow-hidden items-end self-end -mb-4">
+      <img src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExbG5uaXVwc3ZvY3A0Z2Nvenk0YWZqcWV4amtydHIyOHp4eHNrd2N4ZiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/CPsnRKLWN0XS9DO4Ej/giphy.gif"
+        alt="Cookie consent" class="w-full h-auto object-contain max-h-[110%] origin-bottom scale-110" loading="lazy" />
+    </div>
+    <div class="flex-1 flex flex-col gap-3">
+      <div>
+        <h4 class="text-sm font-bold text-gray-900 mb-1">
+          {lang === 'it' ? 'Uso dei Cookie' : 'Uso de Cookies'}
+        </h4>
+        <p class="text-xs text-gray-500 leading-relaxed m-0 text-left">
+          {lang === 'it'
+            ? 'Utilizziamo cookie propri e di terze parti per analizzare le prestazioni del sito e migliorare la tua esperienza. Puoi accettare tutti i cookie o rifiutarli.'
+            : 'Utilizamos cookies propias y de terceros para analizar el rendimiento de la web y mejorar tu experiencia. Puedes aceptar todas las cookies o rechazarlas.'}
+          <a href="https://raulmguerrero.com/terms" target="_blank" rel="noopener"
+            class="text-blue-600 font-bold underline hover:opacity-80 transition-opacity">
+            {lang === 'it' ? 'termini di utilizzo' : 'términos de uso'}
+          </a>
+          {lang === 'it' ? ' e ' : ' y '}
+          <a href="https://raulmguerrero.com/privacy" target="_blank" rel="noopener"
+            class="text-blue-600 font-bold underline hover:opacity-80 transition-opacity">
+            {lang === 'it' ? 'informativa sulla privacy' : 'política de privacidad'}
+          </a>.
+        </p>
+      </div>
+      <div class="flex items-center gap-2 self-end sm:self-start w-full sm:w-auto">
+        <button id="accept-privacy"
+          class="flex-1 sm:flex-initial text-center cursor-pointer bg-blue-600 text-white text-xs font-semibold py-2 px-4 rounded-lg shadow-sm hover:brightness-110 transition-all">
+          {lang === 'it' ? 'Accetta tutto' : 'Aceptar todo'}
+        </button>
+        <button id="deny-privacy"
+          class="flex-1 sm:flex-initial text-center cursor-pointer bg-transparent text-gray-500 border border-gray-200 text-xs font-semibold py-2 px-4 rounded-lg hover:bg-gray-50 transition-all">
+          {lang === 'it' ? 'Rifiuta tutto' : 'Rechazar todo'}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script is:inline>
+    (function() {
+      var banner = document.getElementById('privacy-banner');
+      var btnAccept = document.getElementById('accept-privacy');
+      var btnDeny = document.getElementById('deny-privacy');
+      if (!banner || !btnAccept || !btnDeny) return;
+
+      var consent = localStorage.getItem('cookie-consent');
+      if (!consent) {
+        setTimeout(function() {
+          banner.classList.remove('opacity-0', 'translate-y-8', 'pointer-events-none');
+        }, 300);
+      }
+
+      btnAccept.addEventListener('click', function() {
+        localStorage.setItem('cookie-consent', 'accepted');
+        banner.classList.add('opacity-0', 'translate-y-8', 'pointer-events-none');
+        window.location.reload();
+      });
+
+      btnDeny.addEventListener('click', function() {
+        localStorage.setItem('cookie-consent', 'denied');
+        banner.classList.add('opacity-0', 'translate-y-8', 'pointer-events-none');
+      });
     })();
   </script>
 </body>
