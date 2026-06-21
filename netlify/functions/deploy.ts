@@ -10,7 +10,7 @@
 
 /// <reference lib="es2022" />
 import { Octokit } from "@octokit/rest";
-import * as path from "path";
+// no imports from 'path' to avoid requiring node types here; use a small helper
 
 // Evitar errores de tipado en el entorno TS del editor (process/Buffer son globals en Node)
 declare const process: any;
@@ -39,6 +39,12 @@ function parseDataUrl(dataUrl: string) {
   const base64 = match[2];
   const ext = mime === 'image/jpeg' ? 'jpg' : mime.split('/')[1] || 'jpg';
   return { ext, buffer: Buffer.from(base64, 'base64') };
+}
+
+function basename(p: string) {
+  if (!p) return p;
+  const parts = p.split('/');
+  return parts[parts.length - 1];
 }
 
 function buildPackageJson() {
@@ -118,7 +124,8 @@ function buildSelectedLayoutAstro(templateId: string) {
       .profile-image { width: 128px; height: 128px; object-fit: cover; border-radius: 1.5rem; border: 1px solid #fde2b6; }`
   };
 
-  const styles = themeStyles[templateId] || themeStyles.minimalist;
+  type TemplateId = keyof typeof themeStyles;
+  const styles = themeStyles[(templateId as TemplateId)] ?? themeStyles.minimalist;
 
   return `---
 const { resume, availableLangs, currentLang } = Astro.props;
@@ -317,7 +324,7 @@ jobs:
 `;
 }
 
-async function createOrUpdateFile(octokit: Octokit, owner: string, repo: string, filePath: string, content: string | Buffer, message: string) {
+async function createOrUpdateFile(octokit: Octokit, owner: string, repo: string, filePath: string, content: string | typeof Buffer, message: string) {
   const base64 = typeof content === 'string' ? Buffer.from(content).toString('base64') : content.toString('base64');
   let sha: string | undefined;
   try {
@@ -331,20 +338,27 @@ async function createOrUpdateFile(octokit: Octokit, owner: string, repo: string,
     }
   }
 
-  await octokit.repos.createOrUpdateFileContents({
-    owner,
-    repo,
-    path: filePath,
-    message,
-    content: base64,
-    sha
-  } as any);
+  try {
+    await octokit.repos.createOrUpdateFileContents({
+      owner,
+      repo,
+      path: filePath,
+      message,
+      content: base64,
+      sha
+    } as any);
+  } catch (err: any) {
+    // Añadir contexto útil para depuración y re-lanzar
+    err.message = `Error escribiendo ${filePath}: ${err.message}`;
+    throw err;
+  }
 }
 
 async function listRepoFiles(octokit: Octokit, owner: string, repo: string, dir = ''): Promise<string[]> {
   const result: string[] = [];
   try {
-    const response = await octokit.repos.getContent({ owner, repo, path: dir || '.' });
+    // Evitar usar '.' como path raíz; pasar undefined para la raíz
+    const response = await octokit.repos.getContent({ owner, repo, path: dir || undefined } as any);
     if (Array.isArray(response.data)) {
       for (const item of response.data) {
         if (item.type === 'file') {
@@ -463,14 +477,24 @@ export const handler = async (event: any) => {
           auto_init: true,
         } as any);
         targetRepo = { owner: username, repo: created.data.name };
+        // Esperar un poco para que GitHub propague la rama inicial
+        await new Promise((r) => setTimeout(r, 3000));
       } else {
         throw repoError;
       }
     }
 
+    // Log básico para depuración: usuario y repo objetivo
+    try {
+      const repoCheck = await octokit.repos.get({ owner: username, repo: repoName });
+      console.log('Publishing to repo:', repoCheck.data.full_name, 'default_branch:', repoCheck.data.default_branch);
+    } catch (e) {
+      console.log('Repo check failed (will attempt writes):', e && e.message ? e.message : e);
+    }
+
     const imagePath = '/profile';
     let profileFileName: string | null = null;
-    let profileFileBuffer: Buffer | null = null;
+    let profileFileBuffer: typeof Buffer | null = null;
 
     for (const lang of filteredLangs) {
       const resume = resumeByLang[lang];
@@ -487,7 +511,7 @@ export const handler = async (event: any) => {
     if (profileFileName) {
       filteredLangs.forEach((lang) => {
         if (resumeByLang[lang]?.basics) {
-          resumeByLang[lang].basics.image = `/${path.basename(profileFileName)}`;
+          resumeByLang[lang].basics.image = `/${basename(profileFileName)}`;
         }
       });
     }
@@ -501,7 +525,7 @@ export const handler = async (event: any) => {
     ]);
     filteredLangs.forEach(lang => allowedFiles.add(`src/data/resume.${lang}.json`));
     if (profileFileName) {
-      allowedFiles.add(`public/${path.basename(profileFileName)}`);
+      allowedFiles.add(`public/${basename(profileFileName)}`);
     }
 
     const allFiles = await listRepoFiles(octokit, username, repoName);
@@ -513,12 +537,19 @@ export const handler = async (event: any) => {
 
     await createOrUpdateFile(octokit, username, repoName, 'package.json', buildPackageJson(), 'Publish CV: package.json');
     await createOrUpdateFile(octokit, username, repoName, 'astro.config.mjs', buildAstroConfig(), 'Publish CV: astro.config.mjs');
-    await createOrUpdateFile(octokit, username, repoName, '.github/workflows/deploy.yml', buildGhPagesWorkflow(), 'Publish CV: GitHub Pages workflow');
+    // Intentar escribir el workflow; si el token no tiene permiso para workflows, no fallar entero
+    try {
+      console.log('Writing workflow file .github/workflows/deploy.yml');
+      await createOrUpdateFile(octokit, username, repoName, '.github/workflows/deploy.yml', buildGhPagesWorkflow(), 'Publish CV: GitHub Pages workflow');
+    } catch (err: any) {
+      console.warn('Could not write workflow file; skipping. Reason:', err && err.message ? err.message : err);
+    }
+    console.log('Writing core site files');
     await createOrUpdateFile(octokit, username, repoName, 'src/pages/index.astro', buildIndexAstro(), 'Publish CV: index.astro');
     await createOrUpdateFile(octokit, username, repoName, 'src/layouts/SelectedLayout.astro', buildSelectedLayoutAstro(template), 'Publish CV: SelectedLayout');
 
     if (profileFileBuffer && profileFileName) {
-      await createOrUpdateFile(octokit, username, repoName, `public/${path.basename(profileFileName)}`, profileFileBuffer, 'Publish CV: profile image');
+      await createOrUpdateFile(octokit, username, repoName, `public/${basename(profileFileName)}`, profileFileBuffer, 'Publish CV: profile image');
     }
 
     const results = [];
