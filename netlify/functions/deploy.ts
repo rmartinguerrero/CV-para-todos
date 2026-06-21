@@ -460,7 +460,7 @@ export const handler = async (event: any) => {
           name: repoName,
           description: 'CV para Todos - repositorio minimal desplegado en GitHub Pages',
           private: false,
-          auto_init: false
+          auto_init: true,
         } as any);
         targetRepo = { owner: username, repo: created.data.name };
       } else {
