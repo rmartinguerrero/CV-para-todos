@@ -432,6 +432,7 @@ export const handler = async (event: any) => {
     const allowedFiles = new Set<string>([
       'index.html',
       'style.css',
+      '.nojekyll',
     ]);
     filteredLangs.forEach(lang => {
       allowedFiles.add(`${lang}/index.html`);
@@ -458,6 +459,10 @@ export const handler = async (event: any) => {
     console.log('Writing index.html (language redirect)');
     await createOrUpdateFile(octokit, username, PUBLISHED_REPO_NAME, 'index.html', renderRootIndex(filteredLangs), 'Publish CV: root redirect');
 
+    // .nojekyll desactiva Jekyll y asegura que GitHub Pages sirva los archivos tal cual
+    console.log('Writing .nojekyll');
+    await createOrUpdateFile(octokit, username, PUBLISHED_REPO_NAME, '.nojekyll', '', 'Publish CV: disable Jekyll');
+
     if (profileFileBuffer && profileFileName) {
       console.log(`Writing ${profileFileName}`);
       await createOrUpdateFile(octokit, username, PUBLISHED_REPO_NAME, profileFileName, profileFileBuffer, 'Publish CV: profile image');
@@ -476,18 +481,67 @@ export const handler = async (event: any) => {
       results.push({ lang, success: true });
     }
 
-    // Habilitar GitHub Pages desde la rama principal
+    // =====================================================================
+    // Configurar GitHub Pages y forzar build
+    // =====================================================================
+    // Pequeña pausa para que GitHub propague los archivos
+    await new Promise(r => setTimeout(r, 3000));
+
+    // Primero intentamos actualizar la configuración de Pages (si ya existe)
+    let pagesConfigured = false;
     try {
-      await octokit.repos.createPagesSite({
+      await octokit.repos.updateInformationAboutPagesSite({
         owner: username,
         repo: PUBLISHED_REPO_NAME,
         source: { branch: 'main', path: '/' }
       } as any);
-    } catch (pagesError: any) {
-      // Si ya está habilitado, puede dar error 409 — lo ignoramos
-      if (pagesError.status !== 409) {
-        console.warn('No se pudo habilitar GitHub Pages automáticamente:', pagesError.message || pagesError);
+      pagesConfigured = true;
+      console.log('GitHub Pages source updated to main branch');
+    } catch (updateError: any) {
+      if (updateError.status !== 404) {
+        console.warn('Error updating Pages config:', updateError.message || updateError);
       }
+    }
+
+    // Si no existía, la creamos desde cero
+    if (!pagesConfigured) {
+      try {
+        await octokit.repos.createPagesSite({
+          owner: username,
+          repo: PUBLISHED_REPO_NAME,
+          source: { branch: 'main', path: '/' }
+        } as any);
+        console.log('GitHub Pages created successfully');
+      } catch (createError: any) {
+        console.warn('No se pudo habilitar GitHub Pages automáticamente:', createError.message || createError);
+      }
+    }
+
+    // Forzar un build de Pages para que la URL esté disponible lo antes posible
+    try {
+      await octokit.repos.requestPagesBuild({
+        owner: username,
+        repo: PUBLISHED_REPO_NAME,
+      } as any);
+      console.log('Pages build requested');
+    } catch (buildError: any) {
+      console.warn('No se pudo solicitar build de Pages:', buildError.message || buildError);
+    }
+
+    // Esperar hasta 60 segundos a que el build de Pages se complete
+    const maxWait = Date.now() + 60000;
+    while (Date.now() < maxWait) {
+      try {
+        const buildStatus = await octokit.repos.getLatestPagesBuild({
+          owner: username,
+          repo: PUBLISHED_REPO_NAME,
+        } as any);
+        if (buildStatus.data.status === 'built') {
+          console.log('Pages build completed');
+          break;
+        }
+      } catch (_err) { /* build aun no disponible */ }
+      await new Promise(r => setTimeout(r, 3000));
     }
 
     const repoUrl = `https://github.com/${username}/${PUBLISHED_REPO_NAME}`;
