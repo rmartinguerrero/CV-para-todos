@@ -142,21 +142,21 @@ function dateRange(start: string, end: string | null, present: string): string {
 // =========================================================================
 // Generadores de HTML
 // =========================================================================
-function renderRootIndex(langs: string[]): string {
+function renderRootIndex(langs: string[], basePath: string): string {
   const json = JSON.stringify(langs);
   const fallback = langs[0] || 'en';
   return `<!DOCTYPE html>
 <html lang="es">
 <head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>CV</title>
-<script>(function(){var a=${json};var p=(navigator.languages||[navigator.language]).map(function(l){return l.split('-')[0]}).find(function(l){return a.indexOf(l)!==-1})||'${fallback}';window.location.replace('/'+p+'/')})()</script>
-</head><body><p>Redirecting to <a href="/${fallback}/">/${fallback}/</a></p></body></html>`;
+<script>(function(){var a=${json};var p=(navigator.languages||[navigator.language]).map(function(l){return l.split('-')[0]}).find(function(l){return a.indexOf(l)!==-1})||'${fallback}';window.location.replace('${basePath}/'+p+'/')})()</script>
+</head><body><p>Redirecting to <a href="${basePath}/${fallback}/">${basePath}/${fallback}/</a></p></body></html>`;
 }
 
-function renderCvPage(resume: any, lang: string, template: string, langs: string[]): string {
+function renderCvPage(resume: any, lang: string, template: string, langs: string[], basePath: string): string {
   const b = resume?.basics || {};
   const title = b.name ? `${h(b.name)} — ${h(b.label || 'CV')}` : 'Curriculum Vitae';
   const hasImg = !!b.image;
-  const langNav = langs.map(l => `<a href="/${l}/" class="${l===lang?'lang-btn-active':'lang-btn-inactive'}">${l.toUpperCase()}</a>`).join('\n');
+  const langNav = langs.map(l => `<a href="${basePath}/${l}/" class="${l===lang?'lang-btn-active':'lang-btn-inactive'}">${l.toUpperCase()}</a>`).join('\n');
 
   const contacts: string[] = [];
   if (b.email) contacts.push(`<div><strong>Email</strong><br/>${h(b.email)}</div>`);
@@ -223,7 +223,7 @@ function renderCvPage(resume: any, lang: string, template: string, langs: string
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>${h(title)}</title>
   <meta name="description" content="${h(b.summary||'Curriculum Vitae')}" />
-  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="${basePath}/style.css" />
 </head>
 <body class="theme-${template}">
   <div class="page">
@@ -235,7 +235,7 @@ function renderCvPage(resume: any, lang: string, template: string, langs: string
           ${b.summary?`<p class="panel-summary">${h(b.summary)}</p>`:''}
           ${contacts.length?`<div class="panel-contact">${contacts.join('\n        ')}</div>`:''}
         </div>
-        ${hasImg?'<div><img class="profile-image" src="/profile.jpg" alt="Profile photo" loading="lazy" /></div>':''}
+        ${hasImg?`<div><img class="profile-image" src="${basePath}/profile.jpg" alt="Profile photo" loading="lazy" /></div>`:''}
       </header>
       <nav class="panel-nav">${langNav}</nav>
       <div class="panel-main">
@@ -426,6 +426,9 @@ export const handler = async (event: any) => {
       });
     }
 
+    const isUserSite = PUBLISHED_REPO_NAME === `${username}.github.io`;
+    const basePath = isUserSite ? '' : `/${PUBLISHED_REPO_NAME}`;
+
     // =====================================================================
     // Definir los archivos permitidos (todo lo demás se limpia)
     // =====================================================================
@@ -457,7 +460,7 @@ export const handler = async (event: any) => {
     await createOrUpdateFile(octokit, username, PUBLISHED_REPO_NAME, 'style.css', STYLE_CSS, 'Publish CV: stylesheet');
 
     console.log('Writing index.html (language redirect)');
-    await createOrUpdateFile(octokit, username, PUBLISHED_REPO_NAME, 'index.html', renderRootIndex(filteredLangs), 'Publish CV: root redirect');
+    await createOrUpdateFile(octokit, username, PUBLISHED_REPO_NAME, 'index.html', renderRootIndex(filteredLangs, basePath), 'Publish CV: root redirect');
 
     // .nojekyll desactiva Jekyll y asegura que GitHub Pages sirva los archivos tal cual
     console.log('Writing .nojekyll');
@@ -476,7 +479,7 @@ export const handler = async (event: any) => {
       await createOrUpdateFile(octokit, username, PUBLISHED_REPO_NAME, `resume.${lang}.json`, renderJsonStringify(resumeData), `Publish CV: resume.${lang}.json`);
 
       // Escribir página HTML del idioma
-      await createOrUpdateFile(octokit, username, PUBLISHED_REPO_NAME, `${lang}/index.html`, renderCvPage(resumeData, lang, template, filteredLangs), `Publish CV: ${lang}/index.html`);
+      await createOrUpdateFile(octokit, username, PUBLISHED_REPO_NAME, `${lang}/index.html`, renderCvPage(resumeData, lang, template, filteredLangs, basePath), `Publish CV: ${lang}/index.html`);
 
       results.push({ lang, success: true });
     }
@@ -514,8 +517,8 @@ export const handler = async (event: any) => {
       }
     }
 
+    const pagePath = isUserSite ? '' : `${PUBLISHED_REPO_NAME}/`;
     const repoUrl = `https://github.com/${username}/${PUBLISHED_REPO_NAME}`;
-    const pagePath = PUBLISHED_REPO_NAME === `${username}.github.io` ? '' : `${PUBLISHED_REPO_NAME}/`;
     const webUrl = `https://${username}.github.io/${pagePath}`;
 
     return {
