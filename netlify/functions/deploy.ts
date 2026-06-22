@@ -30,7 +30,7 @@ interface GithubRepo {
   repo: string;
 }
 
-const PUBLISHED_REPO_NAME = process.env.PUBLISHED_REPO_NAME || 'cv-para-todos';
+const PUBLISHED_REPO_NAME = process.env.PUBLISHED_REPO_NAME || 'personal-resume';
 const DEFAULT_TEMPLATE = 'minimalist';
 const SUPPORTED_LANGS = ['es', 'it', 'en'];
 
@@ -482,11 +482,8 @@ export const handler = async (event: any) => {
     }
 
     // =====================================================================
-    // Configurar GitHub Pages y forzar build
+    // Configurar GitHub Pages
     // =====================================================================
-    // Pequeña pausa para que GitHub propague los archivos
-    await new Promise(r => setTimeout(r, 3000));
-
     // Primero intentamos actualizar la configuración de Pages (si ya existe)
     let pagesConfigured = false;
     try {
@@ -515,33 +512,6 @@ export const handler = async (event: any) => {
       } catch (createError: any) {
         console.warn('No se pudo habilitar GitHub Pages automáticamente:', createError.message || createError);
       }
-    }
-
-    // Forzar un build de Pages para que la URL esté disponible lo antes posible
-    try {
-      await octokit.repos.requestPagesBuild({
-        owner: username,
-        repo: PUBLISHED_REPO_NAME,
-      } as any);
-      console.log('Pages build requested');
-    } catch (buildError: any) {
-      console.warn('No se pudo solicitar build de Pages:', buildError.message || buildError);
-    }
-
-    // Esperar hasta 60 segundos a que el build de Pages se complete
-    const maxWait = Date.now() + 60000;
-    while (Date.now() < maxWait) {
-      try {
-        const buildStatus = await octokit.repos.getLatestPagesBuild({
-          owner: username,
-          repo: PUBLISHED_REPO_NAME,
-        } as any);
-        if (buildStatus.data.status === 'built') {
-          console.log('Pages build completed');
-          break;
-        }
-      } catch (_err) { /* build aun no disponible */ }
-      await new Promise(r => setTimeout(r, 3000));
     }
 
     const repoUrl = `https://github.com/${username}/${PUBLISHED_REPO_NAME}`;

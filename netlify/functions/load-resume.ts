@@ -69,7 +69,7 @@ export const handler = async (event: any) => {
 
     // Instanciar Octokit con el token del usuario
     const octokit = new Octokit({ auth: userToken });
-    const repoName = 'cv-para-todos';
+    const repoName = 'personal-resume';
     const path = `src/data/resume.${lang}.json`;
 
     try {
