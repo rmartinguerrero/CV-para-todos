@@ -49,42 +49,47 @@ img{display:block;max-width:100%;height:auto}
 a{color:inherit;text-decoration:none}
 a:hover{opacity:.85}
 h1,h2,h3,strong{font-family:'Inter',system-ui,sans-serif}
+ul{list-style:none}
 
+/* ===== TEMA MINIMALIST ===== */
 .theme-minimalist{background:#f8fafc;color:#111827}
 .theme-minimalist .page{max-width:900px;margin:0 auto;padding:3rem 1.5rem}
 .theme-minimalist .panel{background:#fff;border:1px solid #e5e7eb;border-radius:1.25rem;box-shadow:0 24px 80px rgba(15,23,42,.06)}
-.theme-minimalist .tag{display:inline-flex;gap:.5rem;padding:.5rem 1rem;background:#eff6ff;border-radius:9999px;font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
 .theme-minimalist .section-title{color:#111827;font-size:1rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:1rem}
 .theme-minimalist .profile-image{width:128px;height:128px;object-fit:cover;border-radius:1rem;border:1px solid #e5e7eb}
-.theme-minimalist .lang-btn-active{background:#2563eb!important;color:#fff!important}
-.theme-minimalist .lang-btn-inactive{background:rgba(0,0,0,.06)!important;color:inherit!important}
+.theme-minimalist .panel-label{color:#6b7280;font-size:1.125rem;font-weight:500;margin-top:.25rem}
+.theme-minimalist .lang-link-active{background:#2563eb!important;color:#fff!important}
+.theme-minimalist .lang-link-inactive{background:rgba(0,0,0,.06)!important;color:inherit!important}
 
+/* ===== TEMA TECHY ===== */
 .theme-techy{background:#0f172a;color:#e2e8f0}
 .theme-techy .page{max-width:1000px;margin:0 auto;padding:3rem 1.5rem}
 .theme-techy .panel{background:rgba(15,23,42,0.96);border:1px solid rgba(148,163,184,.18);border-radius:1.5rem;box-shadow:0 30px 80px rgba(15,23,42,.3)}
-.theme-techy .tag{display:inline-flex;gap:.5rem;padding:.5rem 1rem;background:rgba(56,189,248,.12);border-radius:9999px;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#c7d2fe}
 .theme-techy .section-title{color:#cbd5e1;font-size:1rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:1rem}
-.theme-techy .profile-image{width:128px;height:128px;object-fit:cover;border-radius:1rem;border:1px solid rgba(148,163,184,.2)}
-.theme-techy .lang-btn-active{background:#38bdf8!important;color:#0f172a!important}
-.theme-techy .lang-btn-inactive{background:rgba(255,255,255,.1)!important;color:inherit!important}
+.theme-techy .profile-image{width:128px;height:128px;object-fit:cover;border:2px solid #6366f1!important;border-radius:8px!important}
+.theme-techy .panel-label{color:#94a3b8;font-size:1.125rem;font-weight:500;margin-top:.25rem}
+.theme-techy .lang-link-active{background:#38bdf8!important;color:#0f172a!important}
+.theme-techy .lang-link-inactive{background:rgba(255,255,255,.1)!important;color:inherit!important}
 
+/* ===== TEMA ARTISTIC ===== */
 .theme-artistic{background:#fdf2e9;color:#17212b}
 .theme-artistic .page{max-width:900px;margin:0 auto;padding:3rem 1.5rem}
 .theme-artistic .panel{background:#fff;border:1px solid #f1e4d3;border-radius:1.75rem;box-shadow:0 25px 90px rgba(15,23,42,.08)}
-.theme-artistic .tag{display:inline-flex;gap:.5rem;padding:.5rem 1rem;background:#fff7ed;border-radius:9999px;font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#92400e}
-.theme-artistic .section-title{color:#7c2d12;font-size:1rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:1rem}
-.theme-artistic .profile-image{width:128px;height:128px;object-fit:cover;border-radius:1.5rem;border:1px solid #fde2b6}
-.theme-artistic .lang-btn-active{background:#d97706!important;color:#fff!important}
-.theme-artistic .lang-btn-inactive{background:rgba(0,0,0,.06)!important;color:inherit!important}
+.theme-artistic .section-title{color:#7c2d12;font-size:1rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:1rem;font-family:'Playfair Display',Georgia,serif!important}
+.theme-artistic .profile-image{width:128px;height:128px;object-fit:cover;border:2px solid #8c7864!important;border-radius:60% 40% 60% 40% / 40% 60% 40% 60%!important;padding:3px;background:#fff}
+.theme-artistic .panel-label{color:#8c7864;font-size:1.125rem;font-weight:500;margin-top:.25rem;font-family:'Playfair Display',Georgia,serif!important;font-style:italic}
+.theme-artistic .lang-link-active{background:#d97706!important;color:#fff!important}
+.theme-artistic .lang-link-inactive{background:rgba(0,0,0,.06)!important;color:inherit!important}
 
+/* ===== LAYOUT COMPARTIDO ===== */
 .panel-header{display:flex;flex-wrap:wrap;gap:1.5rem;align-items:flex-start;justify-content:space-between}
 .panel-header-content{flex:1;min-width:220px}
 .panel-name{font-size:clamp(2rem,3vw,3rem);margin:.75rem 0 .5rem;line-height:1.05}
-.panel-summary{max-width:40rem;line-height:1.8}
-.panel-contact{display:grid;gap:.75rem;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin-top:1.5rem}
-.panel-contact strong{display:block;font-size:.875rem}
-.panel-nav{display:flex;flex-wrap:wrap;gap:.75rem;margin:2rem 0 1rem}
-.panel-nav a{padding:.65rem 1rem;border-radius:9999px;text-decoration:none;font-weight:700;font-size:.875rem}
+.panel-label{margin:.25rem 0 .75rem}
+.panel-summary{max-width:40rem;line-height:1.8;margin-bottom:1rem}
+.panel-contact{display:flex;flex-wrap:wrap;gap:1rem;font-size:.875rem;margin-top:1rem}
+.panel-contact a{color:inherit;text-decoration:none}
+.panel-contact a:hover{opacity:.8}
 .panel-main{display:grid;gap:2rem}
 .card{padding:1.25rem;border:1px solid rgba(148,163,184,.16);border-radius:1rem}
 .card-header{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
@@ -93,6 +98,7 @@ h1,h2,h3,strong{font-family:'Inter',system-ui,sans-serif}
 .card-date{opacity:.75;font-size:.85rem}
 .cards-grid{display:grid;gap:1.25rem}
 .skills-wrap{display:flex;flex-wrap:wrap;gap:.6rem}
+.tag{display:inline-flex;padding:.35rem .85rem;border-radius:9999px;font-size:.8rem;font-weight:600;background:rgba(148,163,184,.12)}
 .extra-grid{display:grid;gap:1.5rem}
 .cert-item,.lang-item{padding:.95rem;border:1px solid rgba(148,163,184,.16);border-radius:1rem}
 .cert-name{font-weight:700}
@@ -100,22 +106,72 @@ h1,h2,h3,strong{font-family:'Inter',system-ui,sans-serif}
 .lang-item{display:flex;justify-content:space-between;gap:1rem}
 .lang-fluency{font-weight:700}
 
+/* ===== NAVBAR SUPERIOR ===== */
+.top-nav{display:flex;justify-content:space-between;align-items:center;padding:1rem 1.5rem;background:inherit;border-bottom:1px solid rgba(148,163,184,.15)}
+.top-nav-langs{display:flex;flex-wrap:wrap;gap:.5rem}
+.lang-link{padding:.4rem .85rem;border-radius:9999px;text-decoration:none;font-weight:700;font-size:.8rem;transition:opacity .15s}
+.lang-link:hover{opacity:.7}
+.top-nav-print{padding:.4rem .85rem;border-radius:9999px;font-size:.8rem;font-weight:600;cursor:pointer;background:rgba(148,163,184,.1);border:1px solid rgba(148,163,184,.2);color:inherit;transition:background .15s}
+.top-nav-print:hover{background:rgba(148,163,184,.2)}
+
+/* ===== RESPONSIVE ===== */
 @media(max-width:640px){
   .page{padding:1.5rem 1rem!important}
   .panel-header{flex-direction:column-reverse;align-items:stretch}
   .panel-name{font-size:1.75rem!important}
-  .panel-contact{grid-template-columns:1fr!important}
+  .panel-contact{flex-direction:column;gap:.5rem}
   .card-header{flex-direction:column;gap:.25rem}
   .profile-image{width:96px!important;height:96px!important}
+  .top-nav{flex-direction:column;gap:.5rem;padding:.75rem 1rem}
 }
 
+/* ===== PRINT ===== */
 @media print{
+  .top-nav{display:none!important}
   body{background:#fff!important;color:#000!important}
   .page{padding:0!important;margin:0!important}
   .panel{box-shadow:none!important;border:none!important;border-radius:0!important}
-  .panel-nav{display:none!important}
   @page{size:A4;margin:10mm}
 }`;
+
+// =========================================================================
+// Traducciones de secciones para el deploy (espejo de i18n/ui.ts)
+// =========================================================================
+const SECTION_TITLES: Record<string, Record<string, string>> = {
+  es: {
+    experience: 'Experiencia',
+    education: 'Formación',
+    skills: 'Habilidades',
+    projects: 'Proyectos',
+    certificates: 'Certificados',
+    languages: 'Idiomas',
+    profile: 'Perfil',
+    present: 'Presente',
+    print: 'Imprimir PDF',
+  },
+  it: {
+    experience: 'Esperienza',
+    education: 'Formazione',
+    skills: 'Competenze',
+    projects: 'Progetti',
+    certificates: 'Certificati',
+    languages: 'Lingue',
+    profile: 'Profilo',
+    present: 'Presente',
+    print: 'Stampa PDF',
+  },
+  en: {
+    experience: 'Experience',
+    education: 'Education',
+    skills: 'Skills',
+    projects: 'Projects',
+    certificates: 'Certificates',
+    languages: 'Languages',
+    profile: 'Profile',
+    present: 'Present',
+    print: 'Print PDF',
+  },
+};
 
 // =========================================================================
 // Helpers
@@ -153,36 +209,44 @@ function renderRootIndex(langs: string[], basePath: string): string {
 }
 
 function renderCvPage(resume: any, lang: string, template: string, langs: string[], basePath: string): string {
+  const dict = SECTION_TITLES[lang] || SECTION_TITLES.en;
   const b = resume?.basics || {};
   const title = b.name ? `${h(b.name)} — ${h(b.label || 'CV')}` : 'Curriculum Vitae';
   const hasImg = !!b.image;
-  const langNav = langs.map(l => `<a href="${basePath}/${l}/" class="${l===lang?'lang-btn-active':'lang-btn-inactive'}">${l.toUpperCase()}</a>`).join('\n');
 
+  // Navbar superior: selector de idiomas + botón imprimir
+  const langLinks = langs.map(l =>
+    `<a href="${basePath}/${l}/" class="${l===lang?'lang-link lang-link-active':'lang-link lang-link-inactive'}">${l.toUpperCase()}</a>`
+  ).join('\n');
+  const topNav = `<nav class="top-nav"><div class="top-nav-langs">${langLinks}</div><button class="top-nav-print" onclick="window.print()">${h(dict.print)}</button></nav>`;
+
+  // Contacto: <ul> con <li>, sin emojis (coincide con Header.astro)
+  const contactUrl = b.url || '';
   const contacts: string[] = [];
-  if (b.email) contacts.push(`<div><strong>Email</strong><br/>${h(b.email)}</div>`);
-  if (b.phone) contacts.push(`<div><strong>Phone</strong><br/>${h(b.phone)}</div>`);
-  if (b.url) contacts.push(`<div><strong>Website</strong><br/><a href="${h(b.url)}" target="_blank" rel="noreferrer">${h(b.url)}</a></div>`);
+  if (b.email) contacts.push(`<li><a href="mailto:${h(b.email)}">${h(b.email)}</a></li>`);
+  if (b.phone) contacts.push(`<li><a href="tel:${h(b.phone)}">${h(b.phone)}</a></li>`);
+  if (contactUrl) contacts.push(`<li><a href="${h(contactUrl)}" target="_blank" rel="noopener noreferrer">${h(contactUrl)}</a></li>`);
 
   let workHtml = '';
   if (resume.work?.length) {
     const items = resume.work.filter((w:any)=>w.name).map((w:any) =>
-      `<article class="card"><div class="card-header"><strong class="card-title">${h(w.position||w.name)}</strong><span class="card-date">${dateRange(w.startDate,w.endDate,'Present')}</span></div><div style="margin-top:.75rem;opacity:.85">${h(w.name)}</div>${w.summary?`<p class="card-body">${h(w.summary)}</p>`:''}</article>`
+      `<article class="card"><div class="card-header"><strong class="card-title">${h(w.position||w.name)}</strong><span class="card-date">${dateRange(w.startDate,w.endDate,dict.present)}</span></div><div style="margin-top:.75rem;opacity:.85">${h(w.name)}</div>${w.summary?`<p class="card-body">${h(w.summary)}</p>`:''}</article>`
     ).join('\n');
-    workHtml = `<section><h2 class="section-title">Experience</h2><div class="cards-grid">${items}</div></section>`;
+    workHtml = `<section><h2 class="section-title">${h(dict.experience)}</h2><div class="cards-grid">${items}</div></section>`;
   }
 
   let eduHtml = '';
   if (resume.education?.length) {
     const items = resume.education.filter((e:any)=>e.institution).map((e:any) =>
-      `<article class="card"><div class="card-header"><strong class="card-title">${h(e.area||'')}</strong><span class="card-date">${dateRange(e.startDate,e.endDate,'Present')}</span></div><p style="margin-top:.75rem">${h(e.institution)}</p></article>`
+      `<article class="card"><div class="card-header"><strong class="card-title">${h(e.area||'')}</strong><span class="card-date">${dateRange(e.startDate,e.endDate,dict.present)}</span></div><p style="margin-top:.75rem">${h(e.institution)}</p></article>`
     ).join('\n');
-    eduHtml = `<section><h2 class="section-title">Education</h2><div class="cards-grid">${items}</div></section>`;
+    eduHtml = `<section><h2 class="section-title">${h(dict.education)}</h2><div class="cards-grid">${items}</div></section>`;
   }
 
   let skillsHtml = '';
   if (resume.skills?.length) {
     const tags = resume.skills.filter((s:any)=>s.name).map((s:any)=>`<span class="tag">${h(s.name)}</span>`).join('\n');
-    skillsHtml = `<section><h2 class="section-title">Skills</h2><div class="skills-wrap">${tags}</div></section>`;
+    skillsHtml = `<section><h2 class="section-title">${h(dict.skills)}</h2><div class="skills-wrap">${tags}</div></section>`;
   }
 
   let projHtml = '';
@@ -190,7 +254,7 @@ function renderCvPage(resume: any, lang: string, template: string, langs: string
     const items = resume.projects.filter((p:any)=>p.name).map((p:any) =>
       `<article class="card"><div class="card-header"><strong class="card-title">${h(p.name)}</strong>${p.startDate?`<span class="card-date">${fmtDate(p.startDate)}</span>`:''}</div>${p.description?`<p class="card-body">${h(p.description)}</p>`:''}</article>`
     ).join('\n');
-    projHtml = `<section><h2 class="section-title">Projects</h2><div class="cards-grid">${items}</div></section>`;
+    projHtml = `<section><h2 class="section-title">${h(dict.projects)}</h2><div class="cards-grid">${items}</div></section>`;
   }
 
   let extraHtml = '';
@@ -199,7 +263,7 @@ function renderCvPage(resume: any, lang: string, template: string, langs: string
   if (hasCerts || hasLangs) {
     extraHtml = '<section class="extra-grid">';
     if (hasCerts) {
-      extraHtml += '<div><h2 class="section-title">Certificates</h2>';
+      extraHtml += `<div><h2 class="section-title">${h(dict.certificates)}</h2>`;
       resume.certificates.forEach((c:any) => {
         const meta = [c.issuer,c.date].filter(Boolean).join(' • ');
         extraHtml += `<div class="cert-item" style="margin-bottom:.8rem"><div class="cert-name">${h(c.name||'')}</div>${meta?`<div class="cert-meta">${h(meta)}</div>`:''}</div>`;
@@ -207,7 +271,7 @@ function renderCvPage(resume: any, lang: string, template: string, langs: string
       extraHtml += '</div>';
     }
     if (hasLangs) {
-      extraHtml += '<div><h2 class="section-title">Languages</h2>';
+      extraHtml += `<div><h2 class="section-title">${h(dict.languages)}</h2>`;
       resume.languages.forEach((l:any) => {
         extraHtml += `<div class="lang-item" style="margin-bottom:.6rem"><span>${h(l.language||'')}</span><strong class="lang-fluency">${h(l.fluency||'')}</strong></div>`;
       });
@@ -226,18 +290,18 @@ function renderCvPage(resume: any, lang: string, template: string, langs: string
   <link rel="stylesheet" href="${basePath}/style.css" />
 </head>
 <body class="theme-${template}">
+  ${topNav}
   <div class="page">
     <div class="panel" style="padding:2.5rem">
       <header class="panel-header">
         <div class="panel-header-content">
-          <p class="tag">${h(b.label||'Curriculum Vitae')}</p>
           <h1 class="panel-name">${h(b.name||'Your Name')}</h1>
+          ${b.label ? `<p class="panel-label">${h(b.label)}</p>` : ''}
           ${b.summary?`<p class="panel-summary">${h(b.summary)}</p>`:''}
-          ${contacts.length?`<div class="panel-contact">${contacts.join('\n        ')}</div>`:''}
+          ${contacts.length?`<ul class="panel-contact">${contacts.join('\n        ')}</ul>`:''}
         </div>
-        ${hasImg?`<div><img class="profile-image" src="${basePath}/profile.jpg" alt="Profile photo" loading="lazy" /></div>`:''}
+        ${hasImg?`<img class="profile-image" src="${basePath}${h(b.image)}" alt="Profile photo" loading="lazy" />`:''}
       </header>
-      <nav class="panel-nav">${langNav}</nav>
       <div class="panel-main">
         ${workHtml}
         ${eduHtml}
@@ -426,6 +490,14 @@ export const handler = async (event: any) => {
       });
     }
 
+    // Normalizar website: aceptar basics.web o basics.url
+    for (const lang of filteredLangs) {
+      const basics = resumeByLang[lang]?.basics;
+      if (basics) {
+        basics.url = basics.url || basics.web || '';
+      }
+    }
+
     const isUserSite = PUBLISHED_REPO_NAME === `${username}.github.io`;
     const basePath = isUserSite ? '' : `/${PUBLISHED_REPO_NAME}`;
 
@@ -443,14 +515,6 @@ export const handler = async (event: any) => {
     });
     if (profileFileName) {
       allowedFiles.add(profileFileName);
-    }
-
-    // Limpiar archivos obsoletos del repo
-    const allFiles = await listRepoFiles(octokit, username, PUBLISHED_REPO_NAME);
-    for (const file of allFiles) {
-      if (!allowedFiles.has(file)) {
-        await deleteFileIfNeeded(octokit, username, PUBLISHED_REPO_NAME, file);
-      }
     }
 
     // =====================================================================
@@ -482,6 +546,14 @@ export const handler = async (event: any) => {
       await createOrUpdateFile(octokit, username, PUBLISHED_REPO_NAME, `${lang}/index.html`, renderCvPage(resumeData, lang, template, filteredLangs, basePath), `Publish CV: ${lang}/index.html`);
 
       results.push({ lang, success: true });
+    }
+
+    // Limpiar archivos obsoletos del repo (después de escribir, para no dejar el repo inconsistente)
+    const allFiles = await listRepoFiles(octokit, username, PUBLISHED_REPO_NAME);
+    for (const file of allFiles) {
+      if (!allowedFiles.has(file)) {
+        await deleteFileIfNeeded(octokit, username, PUBLISHED_REPO_NAME, file);
+      }
     }
 
     // =====================================================================

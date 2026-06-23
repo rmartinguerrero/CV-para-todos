@@ -783,7 +783,8 @@ const templates = Object.entries(layoutModules)
         let html = '';
         if (state.basics.email) html += `<span>📧 ${state.basics.email}</span>`;
         if (state.basics.phone) html += `<span>📞 ${state.basics.phone}</span>`;
-        if (state.basics.web) html += `<span>🔗 <a href="${state.basics.web}" target="_blank" rel="noopener noreferrer">${state.basics.web}</a></span>`;
+        const website = state.basics.web || state.basics.url || '';
+      if (website) html += `<span>🔗 <a href="${website}" target="_blank" rel="noopener noreferrer">${website}</a></span>`;
         contactEl.innerHTML = html;
       }
 
