@@ -1051,7 +1051,7 @@ const templates = Object.entries(layoutModules)
           body: JSON.stringify({
             langs: Object.keys(resumeDataByLang),
             resumeDataByLang,
-            template: savedTemplate
+            template: state.meta?.template || localStorage.getItem(TEMPLATE_KEY) || 'minimalist'
           })
         });
 
