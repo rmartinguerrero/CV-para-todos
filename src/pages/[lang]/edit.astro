@@ -46,6 +46,11 @@ const templates = Object.entries(layoutModules)
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{t('edit.title')}</title>
 
+  <!-- Google Fonts for theme layouts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+
   <!-- Cookie Consent + Google Analytics (RGPD) -->
   <script is:inline>
     (() => {
@@ -288,42 +293,42 @@ const templates = Object.entries(layoutModules)
         <img id="view-image" class="w-24 h-24 rounded-xl object-cover border border-gray-200 hidden" alt="Foto" />
       </header>
       
-      <section class="mt-6">
+      <section id="section-summary" class="mt-6">
         <h3 class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2 pb-1 border-b border-gray-100">
           {lang === 'es' ? 'Perfil' : lang === 'it' ? 'Profilo' : 'Profile'}
         </h3>
         <p id="view-summary" class="text-sm text-gray-600 leading-relaxed whitespace-pre-line"></p>
       </section>
       
-      <section class="mt-6">
+      <section id="section-experience" class="mt-6">
         <h3 class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3 pb-1 border-b border-gray-100">
           {lang === 'es' ? 'Experiencia' : lang === 'it' ? 'Esperienza' : 'Experience'}
         </h3>
         <div id="view-experience" class="space-y-4"></div>
       </section>
       
-      <section class="mt-6">
+      <section id="section-education" class="mt-6">
         <h3 class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3 pb-1 border-b border-gray-100">
           {lang === 'es' ? 'Formación' : lang === 'it' ? 'Formazione' : 'Education'}
         </h3>
         <div id="view-education" class="space-y-4"></div>
       </section>
       
-      <section class="mt-6">
+      <section id="section-certificates" class="mt-6">
         <h3 class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3 pb-1 border-b border-gray-100">
           {lang === 'es' ? 'Certificados' : lang === 'it' ? 'Certificati' : 'Certificates'}
         </h3>
         <div id="view-certificates" class="space-y-4"></div>
       </section>
 
-      <section class="mt-6">
+      <section id="section-languages" class="mt-6">
         <h3 class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3 pb-1 border-b border-gray-100">
           {lang === 'es' ? 'Idiomas' : lang === 'it' ? 'Lingue' : 'Languages'}
         </h3>
         <div id="view-languages" class="space-y-2"></div>
       </section>
       
-      <section class="mt-6">
+      <section id="section-skills" class="mt-6">
         <h3 class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2 pb-1 border-b border-gray-100">
           {lang === 'es' ? 'Habilidades' : lang === 'it' ? 'Competenze' : 'Skills'}
         </h3>
@@ -346,6 +351,99 @@ const templates = Object.entries(layoutModules)
     /* Active tab underline style (ensure visible on all sizes) */
     .tab-btn { border-bottom-width: 2px; }
     .tab-btn.border-blue-600 { border-bottom-color: #2563eb; }
+
+    /* ===== LAYOUT: MINIMALIST ===== */
+    [data-template="minimalist"] #preview-header {
+      display: flex !important;
+      align-items: start !important;
+      justify-content: flex-start !important;
+      gap: 1.5rem !important;
+    }
+    [data-template="minimalist"] #preview-header img {
+      order: -1 !important;
+    }
+
+    /* ===== LAYOUT: TECHY ===== */
+    [data-template="techy"] {
+      background-color: #f1f5f9 !important;
+      background-image: radial-gradient(#cbd5e1 1px, transparent 1px) !important;
+      background-size: 16px 16px !important;
+      color: #0f172a !important;
+    }
+    [data-template="techy"] #preview-header {
+      display: flex !important;
+      align-items: start !important;
+      justify-content: flex-start !important;
+      gap: 1.5rem !important;
+    }
+    [data-template="techy"] #preview-header img {
+      order: -1 !important;
+      border-radius: 8px !important;
+      border: 2px solid #6366f1 !important;
+    }
+    [data-template="techy"] #view-name {
+      font-family: 'JetBrains Mono', monospace !important;
+      color: #1e1b4b !important;
+      font-weight: 700 !important;
+    }
+    [data-template="techy"] h3::before {
+      content: "</> " !important;
+      color: #6366f1 !important;
+      font-family: 'JetBrains Mono', monospace !important;
+    }
+    [data-template="techy"] h3 {
+      font-family: 'JetBrains Mono', monospace !important;
+      color: #4338ca !important;
+      border-bottom: 1px dashed #cbd5e1 !important;
+    }
+    [data-template="techy"] .badge-item-live {
+      background-color: #e0e7ff !important;
+      color: #4338ca !important;
+      border: 1px solid #c7d2fe !important;
+      font-family: 'JetBrains Mono', monospace !important;
+      border-radius: 4px !important;
+      font-size: 0.7rem !important;
+    }
+
+    /* ===== LAYOUT: ARTISTIC ===== */
+    [data-template="artistic"] {
+      background-color: #faf6f0 !important;
+      color: #443e38 !important;
+    }
+    [data-template="artistic"] #preview-header {
+      display: flex !important;
+      align-items: start !important;
+      justify-content: flex-start !important;
+      gap: 1.75rem !important;
+    }
+    [data-template="artistic"] #preview-header img {
+      order: -1 !important;
+      border-radius: 60% 40% 60% 40% / 40% 60% 40% 60% !important;
+      border: 2px solid #8c7864 !important;
+      padding: 3px !important;
+      background-color: #ffffff;
+    }
+    [data-template="artistic"] #view-name {
+      font-family: 'Playfair Display', Georgia, serif !important;
+      color: #2e2924 !important;
+      font-size: 2.1rem !important;
+      font-style: italic !important;
+    }
+    [data-template="artistic"] h3 {
+      font-family: 'Playfair Display', Georgia, serif !important;
+      color: #8c7864 !important;
+      font-size: 1rem !important;
+      letter-spacing: 0.025em !important;
+      border-bottom: 1px solid #e3dac9 !important;
+    }
+    [data-template="artistic"] .badge-item-live {
+      background-color: #f1eae1 !important;
+      color: #6e5d4f !important;
+      border: 1px solid #e3dac9 !important;
+      border-radius: 9999px !important;
+      font-style: italic !important;
+      font-size: 0.75rem !important;
+    }
 
     /* Print adjustments to avoid extra blank pages */
     @media print {
@@ -769,6 +867,11 @@ const templates = Object.entries(layoutModules)
       }
     });
 
+    function toggleSection(id, hasContent) {
+      const el = document.getElementById(id);
+      if (el) el.classList.toggle('hidden', !hasContent);
+    }
+
     function renderPreview() {
       const nameEl = document.getElementById('view-name');
       const labelEl = document.getElementById('view-label');
@@ -778,6 +881,7 @@ const templates = Object.entries(layoutModules)
       if (nameEl) nameEl.textContent = state.basics.name.trim() || translationsUI.defaultName;
       if (labelEl) labelEl.textContent = state.basics.label.trim() || translationsUI.defaultLabel;
       if (summaryEl) summaryEl.textContent = state.basics.summary || '';
+      toggleSection('section-summary', !!state.basics.summary);
 
       if (contactEl) {
         let html = '';
@@ -813,6 +917,7 @@ const templates = Object.entries(layoutModules)
           `;
           expEl.appendChild(div);
         });
+        toggleSection('section-experience', state.work.length > 0);
       }
 
       const eduEl = document.getElementById('view-education');
@@ -829,6 +934,7 @@ const templates = Object.entries(layoutModules)
           `;
           eduEl.appendChild(div);
         });
+        toggleSection('section-education', state.education.length > 0);
       }
 
       const certEl = document.getElementById('view-certificates');
@@ -845,6 +951,7 @@ const templates = Object.entries(layoutModules)
           `;
           certEl.appendChild(div);
         });
+        toggleSection('section-certificates', state.certificates.length > 0);
       }
 
       const langEl = document.getElementById('view-languages');
@@ -856,6 +963,7 @@ const templates = Object.entries(layoutModules)
           div.innerHTML = `<span>${l.language || ''}</span><span class="text-gray-500">${l.fluency || ''}</span>`;
           langEl.appendChild(div);
         });
+        toggleSection('section-languages', state.languages.length > 0);
       }
 
       const badgesEl = document.getElementById('view-skills-badges');
@@ -868,6 +976,7 @@ const templates = Object.entries(layoutModules)
           span.textContent = s.name;
           badgesEl.appendChild(span);
         });
+        toggleSection('section-skills', state.skills.length > 0);
       }
     }
 
