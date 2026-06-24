@@ -14,6 +14,7 @@
 
 /// <reference lib="es2022" />
 import { Octokit } from "@octokit/rest";
+import { SECTION_TITLES, escapeHtml, renderCvContent } from "../../src/lib/cv-renderer.js";
 
 declare const process: any;
 declare const Buffer: any;
@@ -135,67 +136,6 @@ ul{list-style:none}
 }`;
 
 // =========================================================================
-// Traducciones de secciones para el deploy (espejo de i18n/ui.ts)
-// =========================================================================
-const SECTION_TITLES: Record<string, Record<string, string>> = {
-  es: {
-    experience: 'Experiencia',
-    education: 'Formación',
-    skills: 'Habilidades',
-    projects: 'Proyectos',
-    certificates: 'Certificados',
-    languages: 'Idiomas',
-    profile: 'Perfil',
-    present: 'Presente',
-    print: 'Imprimir PDF',
-  },
-  it: {
-    experience: 'Esperienza',
-    education: 'Formazione',
-    skills: 'Competenze',
-    projects: 'Progetti',
-    certificates: 'Certificati',
-    languages: 'Lingue',
-    profile: 'Profilo',
-    present: 'Presente',
-    print: 'Stampa PDF',
-  },
-  en: {
-    experience: 'Experience',
-    education: 'Education',
-    skills: 'Skills',
-    projects: 'Projects',
-    certificates: 'Certificates',
-    languages: 'Languages',
-    profile: 'Profile',
-    present: 'Present',
-    print: 'Print PDF',
-  },
-};
-
-// =========================================================================
-// Helpers
-// =========================================================================
-function h(s: string): string {
-  if (!s) return '';
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-function fmtDate(d: string): string {
-  if (!d) return '';
-  try {
-    const dt = new Date(d);
-    return isNaN(dt.getTime()) ? d : dt.toLocaleDateString('en',{year:'numeric',month:'short'});
-  } catch { return d; }
-}
-
-function dateRange(start: string, end: string | null, present: string): string {
-  const f = start ? fmtDate(start.slice(0,7)) : '';
-  const t = end ? fmtDate(end.slice(0,7)) : present;
-  return f && t ? `${f} — ${t}` : t || f || '';
-}
-
-// =========================================================================
 // Generadores de HTML
 // =========================================================================
 function renderRootIndex(langs: string[], basePath: string): string {
@@ -211,104 +151,29 @@ function renderRootIndex(langs: string[], basePath: string): string {
 function renderCvPage(resume: any, lang: string, template: string, langs: string[], basePath: string): string {
   const dict = SECTION_TITLES[lang] || SECTION_TITLES.en;
   const b = resume?.basics || {};
-  const title = b.name ? `${h(b.name)} — ${h(b.label || 'CV')}` : 'Curriculum Vitae';
-  const hasImg = !!b.image;
+  const title = b.name ? `${escapeHtml(b.name)} — ${escapeHtml(b.label || 'CV')}` : 'Curriculum Vitae';
+  const cvContent = renderCvContent(resume, lang, basePath);
 
   // Navbar superior: selector de idiomas + botón imprimir
   const langLinks = langs.map(l =>
     `<a href="${basePath}/${l}/" class="${l===lang?'lang-link lang-link-active':'lang-link lang-link-inactive'}">${l.toUpperCase()}</a>`
   ).join('\n');
-  const topNav = `<nav class="top-nav"><div class="top-nav-langs">${langLinks}</div><button class="top-nav-print" onclick="window.print()">${h(dict.print)}</button></nav>`;
-
-  // Contacto: <ul> con <li>, sin emojis (coincide con Header.astro)
-  const contactUrl = b.url || '';
-  const contacts: string[] = [];
-  if (b.email) contacts.push(`<li><a href="mailto:${h(b.email)}">${h(b.email)}</a></li>`);
-  if (b.phone) contacts.push(`<li><a href="tel:${h(b.phone)}">${h(b.phone)}</a></li>`);
-  if (contactUrl) contacts.push(`<li><a href="${h(contactUrl)}" target="_blank" rel="noopener noreferrer">${h(contactUrl)}</a></li>`);
-
-  let workHtml = '';
-  if (resume.work?.length) {
-    const items = resume.work.filter((w:any)=>w.name).map((w:any) =>
-      `<article class="card"><div class="card-header"><strong class="card-title">${h(w.position||w.name)}</strong><span class="card-date">${dateRange(w.startDate,w.endDate,dict.present)}</span></div><div style="margin-top:.75rem;opacity:.85">${h(w.name)}</div>${w.summary?`<p class="card-body">${h(w.summary)}</p>`:''}</article>`
-    ).join('\n');
-    workHtml = `<section><h2 class="section-title">${h(dict.experience)}</h2><div class="cards-grid">${items}</div></section>`;
-  }
-
-  let eduHtml = '';
-  if (resume.education?.length) {
-    const items = resume.education.filter((e:any)=>e.institution).map((e:any) =>
-      `<article class="card"><div class="card-header"><strong class="card-title">${h(e.area||'')}</strong><span class="card-date">${dateRange(e.startDate,e.endDate,dict.present)}</span></div><p style="margin-top:.75rem">${h(e.institution)}</p></article>`
-    ).join('\n');
-    eduHtml = `<section><h2 class="section-title">${h(dict.education)}</h2><div class="cards-grid">${items}</div></section>`;
-  }
-
-  let skillsHtml = '';
-  if (resume.skills?.length) {
-    const tags = resume.skills.filter((s:any)=>s.name).map((s:any)=>`<span class="tag">${h(s.name)}</span>`).join('\n');
-    skillsHtml = `<section><h2 class="section-title">${h(dict.skills)}</h2><div class="skills-wrap">${tags}</div></section>`;
-  }
-
-  let projHtml = '';
-  if (resume.projects?.length) {
-    const items = resume.projects.filter((p:any)=>p.name).map((p:any) =>
-      `<article class="card"><div class="card-header"><strong class="card-title">${h(p.name)}</strong>${p.startDate?`<span class="card-date">${fmtDate(p.startDate)}</span>`:''}</div>${p.description?`<p class="card-body">${h(p.description)}</p>`:''}</article>`
-    ).join('\n');
-    projHtml = `<section><h2 class="section-title">${h(dict.projects)}</h2><div class="cards-grid">${items}</div></section>`;
-  }
-
-  let extraHtml = '';
-  const hasCerts = resume.certificates?.length;
-  const hasLangs = resume.languages?.length;
-  if (hasCerts || hasLangs) {
-    extraHtml = '<section class="extra-grid">';
-    if (hasCerts) {
-      extraHtml += `<div><h2 class="section-title">${h(dict.certificates)}</h2>`;
-      resume.certificates.forEach((c:any) => {
-        const meta = [c.issuer,c.date].filter(Boolean).join(' • ');
-        extraHtml += `<div class="cert-item" style="margin-bottom:.8rem"><div class="cert-name">${h(c.name||'')}</div>${meta?`<div class="cert-meta">${h(meta)}</div>`:''}</div>`;
-      });
-      extraHtml += '</div>';
-    }
-    if (hasLangs) {
-      extraHtml += `<div><h2 class="section-title">${h(dict.languages)}</h2>`;
-      resume.languages.forEach((l:any) => {
-        extraHtml += `<div class="lang-item" style="margin-bottom:.6rem"><span>${h(l.language||'')}</span><strong class="lang-fluency">${h(l.fluency||'')}</strong></div>`;
-      });
-      extraHtml += '</div>';
-    }
-    extraHtml += '</section>';
-  }
+  const topNav = `<nav class="top-nav"><div class="top-nav-langs">${langLinks}</div><button class="top-nav-print" onclick="window.print()">${escapeHtml(dict.print)}</button></nav>`;
 
   return `<!DOCTYPE html>
 <html lang="${lang}">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-  <title>${h(title)}</title>
-  <meta name="description" content="${h(b.summary||'Curriculum Vitae')}" />
+  <title>${escapeHtml(title)}</title>
+  <meta name="description" content="${escapeHtml(b.summary||'Curriculum Vitae')}" />
   <link rel="stylesheet" href="${basePath}/style.css" />
 </head>
 <body class="theme-${template}">
   ${topNav}
   <div class="page">
     <div class="panel" style="padding:2.5rem">
-      <header class="panel-header">
-        <div class="panel-header-content">
-          <h1 class="panel-name">${h(b.name||'Your Name')}</h1>
-          ${b.label ? `<p class="panel-label">${h(b.label)}</p>` : ''}
-          ${b.summary?`<p class="panel-summary">${h(b.summary)}</p>`:''}
-          ${contacts.length?`<ul class="panel-contact">${contacts.join('\n        ')}</ul>`:''}
-        </div>
-        ${hasImg?`<img class="profile-image" src="${basePath}${h(b.image)}" alt="Profile photo" loading="lazy" />`:''}
-      </header>
-      <div class="panel-main">
-        ${workHtml}
-        ${eduHtml}
-        ${skillsHtml}
-        ${projHtml}
-        ${extraHtml}
-      </div>
+      ${cvContent}
     </div>
   </div>
 </body>
