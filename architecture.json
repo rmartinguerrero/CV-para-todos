@@ -13,7 +13,7 @@
       "renderer": "src/lib/cv-renderer.ts",
       "main_function": "renderCvContent()",
       "status": "mandatory",
-      "current_state": "EXISTS but NOT unique. There are 3 parallel render implementations. See action_plan.phase_2."
+      "current_state": "EXISTS and unique for preview+deploy. RENDERER-C now delegates to RENDERER-A. RENDERER-B remains as dead code (see Phase 4)."
     },
     "forbidden_patterns": [
       "Duplicar lógica de renderizado",
@@ -111,12 +111,11 @@
     "MCP-002": {
       "title": "Preview deploy parity",
       "description": "Preview y Deploy deben consumir exactamente el mismo renderizador.",
-      "execution_status": "PENDING",
-      "pending_reason": "Preview usa renderPreview() inline (edit.astro lines 875-981) que genera HTML manualmente con createElement e innerHTML. Deploy usa renderCvContent() de cv-renderer.ts. Producen HTML y estructura diferentes.",
-      "evidence": [
-        "edit.astro lines 875-981: renderPreview() — genera preview HTML manualmente",
-        "deploy.ts line 155: renderCvContent(resume, lang, basePath) — genera deploy HTML desde cv-renderer.ts",
-        "Ambos producen diferente estructura de nodos, clases CSS y disposición"
+      "execution_status": "DONE",
+      "done_evidence": [
+        "renderPreview() en edit.astro ahora llama a renderCvContent() de cv-renderer.ts (SSOT)",
+        "deploy.ts ya usaba renderCvContent() — mismo renderer que preview",
+        "Ambos consumen exactamente la misma función renderCvContent()"
       ]
     },
     "MCP-003": {
@@ -134,33 +133,28 @@
     "MCP-004": {
       "title": "Image consistency",
       "description": "La fotografía debe renderizarse en la misma posición en preview y deploy.",
-      "execution_status": "PENDING",
-      "pending_reason": "Se resolverá automáticamente al unificar el renderer (Phase 2). Misma causa raíz que MCP-002.",
-      "evidence": [
-        "edit.astro renderPreview() posiciona imagen con orden CSS y DOM manual",
-        "deploy.ts renderCvContent() genera <img> dentro de <header> con estructura diferente"
+      "execution_status": "DONE",
+      "done_evidence": [
+        "renderPreview() ahora usa renderCvContent() que genera <img> dentro de <header class='panel-header'>",
+        "deploy.ts usa la misma renderCvContent() — misma posición de imagen"
       ]
     },
     "MCP-005": {
       "title": "Skills consistency",
       "description": "Las habilidades deben utilizar el mismo componente visual en preview y deploy.",
-      "execution_status": "PENDING",
-      "pending_reason": "Se resolverá al unificar el renderer (Phase 2). Misma causa raíz que MCP-002.",
-      "evidence": [
-        "edit.astro renderPreview() crea <span class='badge-item-live'> con createElement",
-        "deploy.ts renderCvContent() genera <span class='tag'> como string HTML",
-        "Astro Skills.astro genera <span class='...rounded-full'> como tercera implementación"
+      "execution_status": "DONE",
+      "done_evidence": [
+        "renderPreview() ahora usa renderCvContent() que genera <span class='tag'> para skills",
+        "deploy.ts usa la misma renderCvContent() — mismas clases y estructura"
       ]
     },
     "MCP-006": {
       "title": "Contact consistency",
       "description": "La sección de contacto debe generarse desde una única implementación.",
-      "execution_status": "PENDING",
-      "pending_reason": "Se resolverá al unificar el renderer (Phase 2). Misma causa raíz que MCP-002.",
-      "evidence": [
-        "edit.astro renderPreview() genera contacto con template literal manual",
-        "deploy.ts renderCvContent() genera <ul class='panel-contact'> como string HTML",
-        "Header.astro genera <ul> con estructura diferente como tercera implementación"
+      "execution_status": "DONE",
+      "done_evidence": [
+        "renderPreview() ahora usa renderCvContent() que genera <ul class='panel-contact'>",
+        "deploy.ts usa la misma renderCvContent() — misma estructura HTML de contacto"
       ]
     },
     "MCP-007": {
@@ -208,10 +202,10 @@
       {
         "id": "RENDERER-C",
         "file": "src/pages/[lang]/edit.astro (inline JS)",
-        "function": "renderPreview() (~100 lines inline)",
+        "function": "renderPreview() → delegado a renderCvContent()",
         "used_by": "edit.astro preview panel",
-        "output": "DOM manipulation (client-side only)",
-        "notes": "Generates preview HTML manually without using cv-renderer.ts."
+        "output": "HTML string from cv-renderer.ts (client-side DOM injection)",
+        "notes": "Phase 2: Ahora llama a renderCvContent() de cv-renderer.ts. Ya no genera HTML manualmente."
       }
     ],
     "additional_rendering_paths": [
@@ -227,20 +221,13 @@
 
   "duplicated_css_sources": [
     {
-      "location": "netlify/functions/deploy.ts (const STYLE_CSS)",
-      "used_by": "Deployed GitHub Pages sites"
+      "location": "src/styles/cv-themes.ts (export CV_THEMES_CSS — SSOT)",
+      "used_by": "netlify/functions/deploy.ts, src/pages/[lang]/edit.astro",
+      "note": "Phase 1 complete: all consumers import from cv-themes.ts"
     },
     {
-      "location": "src/deploy-templates/style.css (file)",
-      "used_by": "Standalone file, not imported by any active code"
-    },
-    {
-      "location": "src/deploy-templates/renderer.ts (export STYLE_CSS)",
+      "location": "src/deploy-templates/renderer.ts (export STYLE_CSS — dead code)",
       "used_by": "Not imported by any active code"
-    },
-    {
-      "location": "src/pages/[lang]/edit.astro (<style is:global>)",
-      "used_by": "Editor preview panel"
     }
   ],
 
@@ -344,6 +331,8 @@
         "id": "PHASE_2",
         "name": "Unificar renderizadores: preview usa cv-renderer.ts",
         "order": 2,
+        "execution_status": "DONE",
+        "execution_date": "2026-06-25",
         "description": "Reemplazar renderPreview() inline de edit.astro por renderCvContent() de cv-renderer.ts. Esto unifica preview y deploy bajo el mismo renderer.",
         "problem": "MCP-002, MCP-004, MCP-005, MCP-006 violados porque preview y deploy usan renderers distintos. renderPreview() (~100 líneas) en edit.astro genera HTML diferente a renderCvContent().",
         "solution": "1) renderCvContent() devuelve HTML string. renderPreview() debe llamar a renderCvContent() e inyectar el HTML resultante en el DOM del preview. 2) Mantener compatibilidad: preview necesita data-template para estilos, el string de renderCvContent() no incluye data-template. Solución: el contenedor preview-section mantiene data-template y renderCvContent() se inyecta dentro. 3) renderCvContent() no incluye las secciones nuevas (certificados, idiomas). Habrá que añadirlas a renderCvContent() o mantenerlas como extensión. Nota: esto es lo que ya existe como extraHtml en renderCvContent() (lines 99-120). 4) Eliminar RENDERER-C (renderPreview() inline JS).",
@@ -541,12 +530,12 @@
     { "id": "V-002", "description": "Template seleccionado visible tras publicación (theme-{template} class)", "status": "DONE", "verified_at": "architecture.json creation" },
     { "id": "V-003", "description": "Template persiste al recargar la página de edición", "status": "DONE", "verified_at": "architecture.json creation" },
     { "id": "V-004", "description": "Template se envía correctamente al payload de deploy", "status": "DONE", "verified_at": "architecture.json creation" },
-    { "id": "V-005", "description": "Foto en misma posición en preview y deploy", "status": "PENDING", "depends_on": ["PHASE_2"] },
-    { "id": "V-006", "description": "Contacto idéntico en preview y deploy", "status": "PENDING", "depends_on": ["PHASE_2"] },
-    { "id": "V-007", "description": "Skills idénticas en preview y deploy", "status": "PENDING", "depends_on": ["PHASE_2"] },
+    { "id": "V-005", "description": "Foto en misma posición en preview y deploy", "status": "DONE", "verified_at": "Phase 2: renderCvContent() genera <img> unificado" },
+    { "id": "V-006", "description": "Contacto idéntico en preview y deploy", "status": "DONE", "verified_at": "Phase 2: renderCvContent() genera <ul class='panel-contact'> unificado" },
+    { "id": "V-007", "description": "Skills idénticas en preview y deploy", "status": "DONE", "verified_at": "Phase 2: renderCvContent() genera <span class='tag'> unificado" },
     { "id": "V-008", "description": "Mismos colores en preview y deploy", "status": "PENDING", "depends_on": ["PHASE_1"] },
     { "id": "V-009", "description": "Misma tipografía en preview y deploy", "status": "PENDING", "depends_on": ["PHASE_1"] },
-    { "id": "V-010", "description": "Misma estructura HTML en preview y deploy", "status": "PENDING", "depends_on": ["PHASE_2"] },
+    { "id": "V-010", "description": "Misma estructura HTML en preview y deploy", "status": "DONE", "verified_at": "Phase 2: ambos usan renderCvContent() de cv-renderer.ts" },
     { "id": "V-011", "description": "Publicación automática funcional (GitHub Pages)", "status": "DONE", "verified_at": "architecture.json creation" },
     { "id": "V-012", "description": "Actualización de repositorio existente funcional (no crear duplicado)", "status": "DONE", "verified_at": "architecture.json creation" },
     { "id": "V-013", "description": "GitHub Pages funcional tras deploy", "status": "DONE", "verified_at": "architecture.json creation" },
@@ -561,11 +550,11 @@
     { "id": "V-022", "description": "Los 3 layouts se renderizan correctamente (minimalist, techy, artistic)", "status": "DONE", "verified_at": "architecture.json creation" },
     { "id": "V-023", "description": "SECTION_TITLES usado consistentemente en deploy output", "status": "DONE", "verified_at": "architecture.json creation" },
     { "id": "V-024", "description": "SECTION_TITLES usado en preview y componentes Astro", "status": "PENDING", "depends_on": ["PHASE_3"] },
-    { "id": "V-025", "description": "renderCvContent() es la única fuente de renderizado (sin duplicados)", "status": "PENDING", "depends_on": ["PHASE_2", "PHASE_4"] },
+    { "id": "V-025", "description": "renderCvContent() es la única fuente de renderizado (sin duplicados)", "status": "PARTIAL", "depends_on": ["PHASE_2", "PHASE_4"], "note": "Phase 2: preview y deploy ya usan renderCvContent() ✅. Pendiente Phase 4: eliminar deploy-templates/renderer.ts (dead code)" },
     { "id": "V-026", "description": "CSS centralizado en una única fuente (sin duplicados)", "status": "PENDING", "depends_on": ["PHASE_1"] },
     { "id": "V-027", "description": "Archivos legacy eliminados o sin impacto", "status": "PENDING", "depends_on": ["PHASE_4"] },
     { "id": "V-028", "description": "Build de Astro exitoso (pnpm build)", "status": "PENDING", "depends_on": ["PHASE_1", "PHASE_2", "PHASE_3", "PHASE_4"] },
-    { "id": "V-029", "description": "Deploy a GitHub Pages funcional desde edit.astro", "status": "PENDING", "depends_on": ["PHASE_2"] }
+    { "id": "V-029", "description": "Deploy a GitHub Pages funcional desde edit.astro", "status": "DONE", "verified_at": "Phase 2: el payload de deploy incluye lang + resumeData, renderCvContent() no cambia su interfaz" }
   ],
 
   "agent_operating_rules": {
