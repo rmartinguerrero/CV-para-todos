@@ -2,7 +2,75 @@
 
 **Session ID:** ses_1147665eaffe7Sfcl2xkD3Gn3c
 **Created:** 6/21/2026, 8:55:24 PM
-**Updated:** 6/24/2026, 6:02:35 PM
+**Updated:** 6/23/2026, 9:58:56 PM
+
+---
+
+## Assistant
+
+**Tool: read**
+
+**Tool: read**
+
+---
+
+## Assistant
+
+**Tool: grep**
+
+**Tool: read**
+
+---
+
+## Assistant
+
+**Tool: read**
+
+**Tool: grep**
+
+**Tool: grep**
+
+---
+
+## Assistant
+
+**Tool: read**
+
+**Tool: grep**
+
+---
+
+## Assistant
+
+**Tool: read**
+
+**Tool: read**
+
+---
+
+## Assistant
+
+**Tool: grep**
+
+**Tool: read**
+
+---
+
+## Assistant
+
+**Tool: read**
+
+---
+
+## Assistant
+
+**Tool: read**
+
+---
+
+## Assistant
+
+**Tool: todowrite**
 
 ---
 
@@ -2448,553 +2516,6 @@ Reglas `.theme-artistic` (líneas 74-82):
 - **Contacto con emojis** en Preview (`📧`, `📞`, `🔗`) - pero sin emojis en Deploy (`<ul><li>`)
 - **Sin navbar** en Preview - con navbar en Deploy
 - **Skills** usan clase `badge-item-live` en Preview, `.tag` en Deploy (sin variante por tema)
-
----
-
-## User
-
-Corrige el problema raiz para que cv live y la pagina final html sea un espejo, colores, tipografias, fondo, caracteres, etc deben coincidir. No rompas la funcionalidad y lo que ya funciona.IMPORTANTE:
-- NO refactorizar el sistema
-- NO modificar UI, estilos, ni layout
-- NO tocar netlify/functions/deploy.ts
-- NO cambiar lógica de preview 
-
----
-
-## Assistant
-
-El problema raíz es que `savedTemplate` (línea 1079) es una `const` que se evalúa UNA VEZ al cargar la página. El handler de publicar (línea 1054) la usa estancada. La solución más quirúrgica: leer el valor actual en el momento de publicar.
-
-**Tool: edit**
-
----
-
-## Assistant
-
-**Tool: read**
-
----
-
-## Assistant
-
-La corrección está aplicada. Línea 1054 ahora lee el template actual en tiempo real:
-
-```
-Antes:  template: savedTemplate                          ← const evaluada una vez al cargar
-Después: template: state.meta?.template || localStorage... ← valor actual al publicar
-```
-
-**¿Por qué funciona?**
-- `state.meta.template` se actualiza en `applyTemplate()` línea 575 cuando el usuario elige un layout
-- `localStorage` se actualiza en `applyTemplate()` línea 576
-- Al publicar, se lee el valor fresco, no el de la const estancada
-- La `const savedTemplate` línea 1079 sigue existiendo para `applyTemplate(savedTemplate)` en la inicialización (línea ~1127) — sin romper nada
-
-Con esto, el deploy recibirá `"techy"` si el usuario seleccionó techy, y generará `<body class="theme-techy">` activando las reglas CSS correctas (fondo oscuro, tipografía JetBrains Mono, foto con borde indigo, etc.), haciendo que el CV publicado refleje el layout seleccionado.
-
----
-
-## User
-
-AUDITORÍA DE ARQUITECTURA DE RENDERIZADO
-
-NO MODIFICAR NINGÚN ARCHIVO.
-
-NO HACER FIXES.
-
-NO CREAR CÓDIGO.
-
-SOLO ANALIZAR.
-
-Necesito identificar exactamente qué sistema genera el HTML final publicado.
-
-Responder con evidencias y rutas de archivos.
-
-1. Buscar todas las definiciones de:
-
-- renderCvPage
-- renderPreview
-- STYLE_CSS
-
-2. Mostrar:
-
-- archivo
-- línea
-- quién lo importa
-- quién lo ejecuta
-
-3. Determinar si existen múltiples renderizadores.
-
-4. Seguir el flujo completo:
-
-Usuario pulsa Publicar
-↓
-fetch(...)
-↓
-Netlify Function
-↓
-Generación HTML
-↓
-Creación repositorio
-↓
-Commit
-↓
-GitHub Pages
-
-5. Indicar exactamente qué función genera:
-
-- la foto
-- el contacto
-- experiencia
-- educación
-- skills
-- idiomas
-- certificados
-
-del HTML final publicado.
-
-6. Responder con una tabla:
-
-Componente | Preview | Deploy final | Archivo responsable
-
-7. Conclusión final:
-
-¿Cuál es actualmente la única fuente de verdad?
-
-A) edit.astro
-B) deploy.ts
-C) deploy-templates/renderer.ts
-D) combinación de varios
-
-NO HACER CAMBIOS.
-
-SOLO AUDITORÍA. 
-
----
-
-## Assistant
-
-**Tool: task**
-
----
-
-## Assistant
-
-## INFORME DE ARQUITECTURA DE RENDERIZADO
-
-### 1. Definiciones de `renderCvPage`, `renderPreview`, `STYLE_CSS`
-
-| Función | Archivo | Línea | Exportada | Quién la llama |
-|---|---|---|---|---|
-| `renderCvPage()` | `netlify/functions/deploy.ts` | 211 | No (solo uso interno) | `handler()` línea 546 |
-| `renderCvPage()` | `src/deploy-templates/renderer.ts` | 148 | Sí | **NADIE** (código muerto) |
-| `renderPreview()` | `src/pages/[lang]/edit.astro` | 875 | No (función global JS) | `saveState()` línea 559, `renderSkillsTags()` línea 851 |
-| `STYLE_CSS` | `netlify/functions/deploy.ts` | 40 | No (solo uso interno) | `handler()` línea 524 |
-| `STYLE_CSS` | `src/deploy-templates/renderer.ts` | 241 | Sí | **NADIE** (código muerto) |
-
----
-
-### 2. ¿Existen múltiples renderizadores?
-
-**Sí, pero solo UNO está vivo.**
-
-| Renderizador | Archivo | Estado | ¿Se ejecuta? |
-|---|---|---|---|
-| `deploy.ts:renderCvPage()` | `netlify/functions/deploy.ts:211` | **VIVO** | Sí — genera el HTML público |
-| `renderer.ts:renderCvPage()` | `src/deploy-templates/renderer.ts:148` | **MUERTO** | No — 0 imports en todo el código |
-| `edit.astro:renderPreview()` | `src/pages/[lang]/edit.astro:875` | **VIVO** | Sí — solo afecta al DOM del preview |
-
-**Prueba de que `renderer.ts` es código muerto:**
-- `grep -r "deploy-templates" src/ netlify/ --include="*.ts" --include="*.astro"` → **0 resultados** (excepto el propio archivo)
-- `grep -r "renderer" src/ netlify/ --include="*.ts" --include="*.astro"` → **0 resultados** (excepto el propio archivo)
-- `src/deploy-templates/style.css` → **0 referencias** en todo el código
-
----
-
-### 3. Flujo completo: usuario publica
-
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│  edit.astro (NAVEGADOR)                                             │
-│                                                                     │
-│  Usuario hace clic en "Artistic"                                    │
-│    → applyTemplate('artistic')               línea 575              │
-│      → state.meta.template = 'artistic'                             │
-│      → localStorage.setItem(TEMPLATE_KEY, 'artistic')               │
-│      → preview.setAttribute('data-template', 'artistic')            │
-│      → CSS inyectado activa colores/fuentes/foto                    │
-│                                                                     │
-│  Usuario hace clic en "Publicar"                                    │
-│    → btn-publish handler                     línea 1000             │
-│      → Lee datos de localStorage para es, it, en                    │
-│      → Construye payload con template actual                        │
-│      → fetch POST /.netlify/functions/deploy  línea 1047            │
-└───────────────────────┬─────────────────────────────────────────────┘
-                        │
-                        ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│  deploy.ts (NETLIFY FUNCTION - SERVIDOR)                            │
-│                                                                     │
-│  handler(event)                              línea 397              │
-│    → Extrae body.template                    línea 427              │
-│    → Autentica con GitHub                                           │
-│    → Obtiene o crea repo del usuario                                │
-│    → Extrae foto de data: URI                                       │
-│    → Normaliza campos (image, url)                                  │
-│    →                                                      ┌─────┐   │
-│    → createOrUpdateFile('style.css', STYLE_CSS) línea 524 │ 40  │   │
-│    → createOrUpdateFile('index.html', renderRootIndex)     │ 201 │   │
-│    → createOrUpdateFile('.nojekyll')                       │ 531 │   │
-│    → createOrUpdateFile('profile.jpg', buffer)             │ 535 │   │
-│    → Por cada idioma:                                     │     │   │
-│      → resume.{lang}.json (renderJsonStringify)                     │
-│      → {lang}/index.html (renderCvPage) línea 546         │ 211 │   │
-│    → Limpia archivos obsoletos                           └─────┘   │
-│    → Configura GitHub Pages                                         │
-│    → Responde con webUrl                                            │
-│                                                                     │
-│  createOrUpdateFile()                       línea 339               │
-│    → octokit.repos.getContent → obtiene SHA                         │
-│    → octokit.repos.createOrUpdateFileContents → escribe/actualiza   │
-└───────────────────────┬─────────────────────────────────────────────┘
-                        │
-                        ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│  GitHub Pages (SERVIDOR PÚBLICO)                                    │
-│                                                                     │
-│  Repositorio: {username}/personal-resume                            │
-│    ├── style.css          ← STYLE_CSS (deploy.ts:40)                │
-│    ├── index.html         ← renderRootIndex (deploy.ts:201)         │
-│    ├── .nojekyll                                                      │
-│    ├── profile.jpg                                                    │
-│    ├── es/index.html      ← renderCvPage (deploy.ts:211, template)  │
-│    ├── it/index.html      ← renderCvPage (deploy.ts:211, template)  │
-│    ├── en/index.html      ← renderCvPage (deploy.ts:211, template)  │
-│    ├── resume.es.json                                                │
-│    ├── resume.it.json                                                │
-│    └── resume.en.json                                                │
-└─────────────────────────────────────────────────────────────────────┘
-```
-
----
-
-### 4. ¿Qué función genera cada parte del HTML final?
-
-| Componente | Función generadora | Archivo | Línea(s) |
-|---|---|---|---|
-| **Foto** | `renderCvPage()` | `netlify/functions/deploy.ts` | 303 |
-| **Contacto** | `renderCvPage()` | `netlify/functions/deploy.ts` | 224-228 |
-| **Experiencia** | `renderCvPage()` | `netlify/functions/deploy.ts` | 230-236 |
-| **Educación** | `renderCvPage()` | `netlify/functions/deploy.ts` | 238-244 |
-| **Skills** | `renderCvPage()` | `netlify/functions/deploy.ts` | 246-250 |
-| **Idiomas** | `renderCvPage()` | `netlify/functions/deploy.ts` | 273-279 |
-| **Certificados** | `renderCvPage()` | `netlify/functions/deploy.ts` | 265-272 |
-| **Navbar idiomas** | `renderCvPage()` | `netlify/functions/deploy.ts` | 218-221 |
-| **CSS completo** | `STYLE_CSS` (constante) | `netlify/functions/deploy.ts` | 40-135 |
-| **CSS por tema** | `STYLE_CSS` (`.theme-*` rules) | `netlify/functions/deploy.ts` | 54-82 |
-| **Layout compartido** | `STYLE_CSS` (`.panel-*` rules) | `netlify/functions/deploy.ts` | 84-107 |
-
-**Todo el HTML final publicado es generado exclusivamente por `netlify/functions/deploy.ts`.**
-
----
-
-### 5. Tabla comparativa: Preview vs Deploy
-
-| Componente | Preview (`edit.astro:renderPreview()`) | Deploy final (`deploy.ts:renderCvPage()`) | Archivo responsable |
-|---|---|---|---|
-| **Foto** | `<img id="view-image">` Tailwind classes `w-24 h-24 rounded-xl` | `<img class="profile-image">` CSS classes con tema | `edit.astro:288` vs `deploy.ts:303` |
-| **Contacto** | `<div id="view-contact">` con emojis `📧 📞 🔗`, innerHTML | `<ul class="panel-contact"><li>` sin emojis, string concat | `edit.astro:782-789` vs `deploy.ts:223-228` |
-| **Nombre** | `<h2 id="view-name">` textContent | `<h1 class="panel-name">` string concat | `edit.astro:284` vs `deploy.ts:298` |
-| **Rol** | `<p id="view-label">` textContent | `<p class="panel-label">` string concat | `edit.astro:285` vs `deploy.ts:299` |
-| **Resumen** | `<p id="view-summary">` textContent | `<p class="panel-summary">` string concat | `edit.astro:295` vs `deploy.ts:300` |
-| **Experiencia** | Crea `<div>` con `createElement`, innerHTML flex | String concat `<article class="card">` grid | `edit.astro:801-816` vs `deploy.ts:230-236` |
-| **Educación** | Crea `<div>` con `createElement`, innerHTML flex | String concat `<article class="card">` grid | `edit.astro:818-832` vs `deploy.ts:238-244` |
-| **Skills** | `<span class="badge-item-live">` textContent | `<span class="tag">` string concat | `edit.astro:861-871` vs `deploy.ts:246-250` |
-| **Certificados** | Crea `<div>` con `createElement`, innerHTML flex | String concat `<div class="cert-item">` | `edit.astro:834-848` vs `deploy.ts:265-272` |
-| **Idiomas** | Crea `<div>` con `createElement`, div.className + innerHTML | String concat `<div class="lang-item">` | `edit.astro:850-859` vs `deploy.ts:273-279` |
-| **Navbar** | **NO existe** en preview | `<nav class="top-nav">` sobre .page | `deploy.ts:221,293` |
-| **Botón imprimir** | Botones externos en toolbar | `<button class="top-nav-print">` en navbar | `deploy.ts:221` |
-| **Colores/tema** | CSS inyectado `[data-template="X"]` | CSS `.theme-X` en `<body class="theme-X">` | `edit.astro:355-446` vs `deploy.ts:54-82` |
-| **Tipografía** | `<link href="...Google Fonts...">` en `<head>` | `@import url(...)` en `style.css` | `edit.astro:49-52` vs `deploy.ts:41-43` |
-| **Bordes panel** | No tiene (preview sin panel wrapper) | `.theme-X .panel { border-radius: X }` | `deploy.ts:57,67,77` |
-| **Contenedor gral** | Sin wrapper (`#preview-section` solo es un div) | `.page > .panel > header + .panel-main` | `deploy.ts:294-312` |
-
----
-
-### 6. Conclusión: ¿Cuál es la única fuente de verdad?
-
-**Opción B: `netlify/functions/deploy.ts`**
-
-Es la **única fuente de verdad** para el HTML publicado porque:
-
-1. **No importa nada de `src/`** — tiene su propio `STYLE_CSS`, su propio `renderCvPage()`, sus propias traducciones (`SECTION_TITLES`)
-2. **No depende de `src/deploy-templates/`** — `renderer.ts` y `style.css` son código muerto (0 referencias)
-3. **Se ejecuta en el servidor** — recibe los datos del editor, genera el HTML, y lo escribe al repo vía GitHub API
-4. **Es autocontenido** — 614 líneas con todo lo necesario (escapado HTML, fechas, CSS, creación de archivos, GitHub Pages)
-
-**`edit.astro:renderPreview()`** NO tiene ninguna relación con el HTML final. Es solo una simulación visual en el navegador usando manipulación directa del DOM con clases Tailwind.
-
-**`src/deploy-templates/renderer.ts`** es un renderizador alternativo abandonado. Tiene su propio `renderCvPage()` y `STYLE_CSS` con diferencias sutiles (usa `lang-btn-*` en vez de `lang-link-*`, contacto en grid con labels, cookie consent script), pero nunca se importa ni ejecuta.
-
-**Diferencia fundamental:** El preview está construido con manipulación de DOM + Tailwind, mientras que el deploy usa generación de HTML server-side por string concatenation + CSS plano. Son dos sistemas de renderizado independientes que no comparten código ni estructura visual.
-
----
-
-## User
-
-OBJETIVO
-
-Preparar una migración para que Preview y Deploy compartan el mismo renderizador HTML.
-
-NO IMPLEMENTAR TODAVÍA.
-
-NO MODIFICAR ARCHIVOS.
-
-SOLO DISEÑAR EL PLAN.
-
-Tareas:
-
-1. Analizar renderPreview() en edit.astro.
-
-2. Analizar renderCvPage() en deploy.ts.
-
-3. Identificar qué partes son comunes.
-
-4. Proponer un archivo:
-
-src/lib/cv-renderer.ts
-
-indicando:
-
-* funciones públicas
-* inputs
-* outputs
-* dependencias
-
-5. Indicar exactamente:
-
-* qué código permanecería en edit.astro
-* qué código permanecería en deploy.ts
-* qué código se movería al renderer compartido
-
-6. Estimar complejidad y riesgo.
-
-7. Indicar una estrategia de migración incremental que permita validar cada paso sin romper el deploy actual.
-
-NO GENERAR CÓDIGO.
-
-SOLO DOCUMENTAR EL PLAN DE MIGRACIÓN. 
-
----
-
-## Assistant
-
-## PLAN DE MIGRACIÓN: Renderizador Compartido
-
-### 1. Análisis de `renderPreview()` (edit.astro:875-981)
-
-**Tecnología:** JavaScript del lado del cliente, manipulación directa del DOM.
-
-| Sub-componente | Método | Estilo | Líneas |
-|---|---|---|---|
-| Nombre | `textContent` | Tailwind `text-3xl font-bold` | 881 |
-| Rol | `textContent` | Tailwind `text-base text-gray-600` | 882 |
-| Resumen | `textContent` | Tailwind `text-sm text-gray-600` | 883 |
-| Contacto | `innerHTML` con emojis `📧 📞 🔗` | Tailwind `flex flex-wrap gap-x-4` | 886-893 |
-| Foto | `img.src` + `classList.toggle` | Tailwind `w-24 h-24 rounded-xl` | 895-903 |
-| Experiencia | `createElement` + `innerHTML` | Tailwind en inline styles + clases | 905-921 |
-| Educación | `createElement` + `innerHTML` | Tailwind | 923-938 |
-| Certificados | `createElement` + `innerHTML` | Tailwind | 940-955 |
-| Idiomas | `createElement` + `className` | Tailwind | 957-967 |
-| Skills | `createElement` + `textContent` | Clase propia `badge-item-live` | 969-980 |
-
-**Protección XSS:** Segura — usa `textContent` para datos del usuario. Solo `innerHTML` en HTML fijo sin interpolación de datos del usuario (salvo contacto que interpola en spans).
-
----
-
-### 2. Análisis de `renderCvPage()` (deploy.ts:211-316)
-
-**Tecnología:** TypeScript server-side, concatenación de strings.
-
-| Sub-componente | Método | Estilo | Líneas |
-|---|---|---|---|
-| Nombre | String concat con `h()` (escape) | `<h1 class="panel-name">` | 298 |
-| Rol | String concat con `h()` | `<p class="panel-label">` | 299 |
-| Resumen | String concat con `h()` | `<p class="panel-summary">` | 300 |
-| Contacto | String concat con `h()`, `<ul><li>` sin emojis | `<ul class="panel-contact">` | 224-228 |
-| Foto | String concat | `<img class="profile-image">` | 303 |
-| Experiencia | String concat con `h()`, `dateRange()` | `<article class="card">` | 230-236 |
-| Educación | String concat con `h()` | `<article class="card">` | 238-244 |
-| Skills | String concat con `h()` | `<span class="tag">` | 246-250 |
-| Certificados | String concat con `h()` | `<div class="cert-item">` | 265-272 |
-| Idiomas | String concat con `h()` | `<div class="lang-item">` | 273-279 |
-| Navbar | String concat | `<nav class="top-nav">` | 218-221 |
-| Documento completo | Template literal | `<!DOCTYPE html>` + `<head>` + `<body class="theme-X">` | 283-316 |
-
-**Protección XSS:** Segura — toda interpolación pasa por `h()` (escape HTML).
-
----
-
-### 3. Partes comunes vs divergentes
-
-| Componente | ¿Compatible? | Diferencia |
-|---|---|---|
-| **Nombre** | **SÍ** — mismo texto, distinto tag/clase | `<h2>` vs `<h1>`, clase CSS diferente |
-| **Rol** | **SÍ** — mismo texto | Clase CSS diferente |
-| **Resumen** | **SÍ** — mismo texto | Clase CSS diferente |
-| **Contacto** | **NO** — estructura distinta | Preview usa emojis + `<span>`, Deploy usa `<ul><li>` sin emojis |
-| **Foto** | **SÍ** — misma lógica | Clase CSS diferente |
-| **Experiencia** | **SÍ** — mismo bucle y campos | Preview: flex inline. Deploy: `<article class="card">` + `dateRange()` |
-| **Educación** | **SÍ** — mismo bucle y campos | Preview: flex inline. Deploy: `<article class="card">` + `dateRange()` |
-| **Skills** | **SÍ** — mismo bucle | Preview: `badge-item-live` + `textContent`. Deploy: `<span class="tag">` + `h()` |
-| **Certificados** | **SÍ** — mismo bucle y campos | Misma estructura, clases diferentes |
-| **Idiomas** | **SÍ** — mismo bucle y campos | Misma estructura, clases diferentes |
-| **Navbar** | Solo en Deploy | No existe en Preview |
-| **Wrapper página** | Solo en Deploy | `<!DOCTYPE>`, `<head>`, `<body>`, `.page > .panel` |
-| **Date formatting** | **SÍ** — misma lógica | Preview usa `formatDateRange()`, Deploy usa `dateRange()` — mismas firmas |
-| **HTML escaping** | Solo en Deploy | Preview usa `textContent` (seguro), no necesita escape |
-
----
-
-### 4. Propuesta: `src/lib/cv-renderer.ts`
-
-**Funciones públicas:**
-
-```typescript
-// Genera el HTML del contenido del CV (header + secciones, SIN wrapper de página)
-export function renderCvContent(
-  resume: any,
-  lang: string,
-  template: string,
-  basePath: string
-): string
-
-// Helpers (quizás también públicas para tests)
-export function escapeHtml(s: string): string
-export function formatDate(d: string): string
-export function getSectionTitle(lang: string, section: string): string
-```
-
-**Inputs:**
-- `resume`: Objeto JSON con datos del CV (basics, work, education, skills, projects, certificates, languages)
-- `lang`: Código de idioma (`'es'`, `'it'`, `'en'`)
-- `template`: Nombre del layout (`'minimalist'`, `'techy'`, `'artistic'`)
-- `basePath`: Ruta base para assets (`''` o `'/repo-name'`)
-
-**Outputs:**
-- String HTML del contenido: `<header class="panel-header">...</header><div class="panel-main">...</div>`
-
-**Dependencias:**
-- Ninguna externa. Funciones puras.
-- Copiaría `SECTION_TITLES` (hoy en deploy.ts:140-174)
-- Copiaría `escapeHtml` (hoy `h()` en deploy.ts:179-182)
-- Copiaría `fmtDate` + `dateRange` (hoy en deploy.ts:184-196)
-
-**Lo que NO incluye el renderer compartido:**
-- `<nav class="top-nav">` — lo pone deploy.ts en su wrapper
-- `<!DOCTYPE html>`, `<head>`, `<body class="theme-X">` — lo pone deploy.ts
-- `<link rel="stylesheet">` — lo pone deploy.ts
-- El contenedor `#preview-section` con Tailwind — lo pone edit.astro
-
----
-
-### 5. Distribución del código
-
-| Código | Se queda en edit.astro | Se queda en deploy.ts | Se mueve a cv-renderer.ts |
-|---|---|---|---|
-| Wrapper HTML (`<html>`, `<head>`, `<body>`) | — | `renderCvPage()`:283-294 | — |
-| Navbar (`<nav class="top-nav">`) | — | `renderCvPage()`:218-221 | — |
-| CSS links | — | `renderCvPage()`:290 | — |
-| Header CV (nombre, rol, resumen, contacto, foto) | — | — | ✅ `renderCvContent()` |
-| Experiencia, educación, skills, proyectos, certs, idiomas | — | — | ✅ `renderCvContent()` |
-| Date formatting (`fmtDate`, `dateRange`) | — | — | ✅ compartido |
-| HTML escaping (`h()`) | — | — | ✅ compartido |
-| Traducciones (`SECTION_TITLES`) | — | — | ✅ compartido |
-| Contenedor preview (`#preview-section`, Tailwind) | ✅ `renderPreview()` wrapper | — | — |
-| `renderCvPage()` (invoca shared + añade wrapper) | — | ✅ (refactorizado) | — |
-| `renderPreview()` (invoca shared, asigna al DOM) | ✅ (refactorizado) | — | — |
-| `STYLE_CSS` | — | ✅ se queda | — |
-| `toggleSection()` (preview hide/show) | ✅ se queda | — | — |
-
-**Diagrama después de la migración:**
-
-```
-edit.astro                          deploy.ts
-    │                                   │
-    │ renderPreview()                   │ renderCvPage()
-    │   ↓ innerHTML                     │   ↓ string concat
-    │   #preview-section                │   <html> + <head> + <body class="theme-X">
-    │                                   │   <nav class="top-nav">
-    ├── renderCvContent() ←─────────────┤── renderCvContent()
-    │   (src/lib/cv-renderer.ts)        │   (src/lib/cv-renderer.ts)
-    │                                   │   + STYLE_CSS (inline)
-    │                                   │   + renderRootIndex()
-    │                                   │   + createOrUpdateFile()
-    │                                   │   + listRepoFiles()
-    │                                   │   + deleteFileIfNeeded()
-```
-
----
-
-### 6. Complejidad y riesgo
-
-**Complejidad: Media (5/10)**
-
-| Aspecto | Dificultad | Razón |
-|---|---|---|
-| Mover helpers (`escapeHtml`, `formatDate`, `SECTION_TITLES`) | Baja | Código puro, sin dependencias |
-| Mover secciones (experiencia, educación, skills, etc.) | Baja | Bucles idénticos, solo cambian clases CSS |
-| Unificar estructura de contacto | **Media** | Preview usa emojis, Deploy no. Hay que decidir un formato único |
-| Unificar clases CSS del contenido | **Media** | Preview usa Tailwind, Deploy usa clases propias. Hay que elegir |
-| Navbar | Baja | Solo existe en deploy, no afecta al renderizador compartido |
-| Refactorizar `renderPreview()` para usar string concat | **Media** | Cambia de DOM manipulation a innerHTML. Riesgo de romper eventos |
-| Refactorizar `renderCvPage()` para importar shared | Baja | Solo cambiar la llamada |
-
-**Riesgo: Medio (4/10)**
-
-| Riesgo | Probabilidad | Impacto | Mitigación |
-|---|---|---|---|
-| Preview pierde fidelidad visual | Media | Alto | Validar visualmente cada paso |
-| XSS en preview (al pasar a innerHTML) | Baja | Alto | Usar `escapeHtml()` también en preview |
-| Deploy genera HTML roto | Baja | Crítico | Tests de regresión con ejemplos reales |
-| Traducciones se desincronizan | Baja | Medio | Unificar `SECTION_TITLES` como fuente única |
-| Import falla en deploy.ts (serverless) | Baja | Crítico | Verificar que el path funciona en Netlify Functions |
-
----
-
-### 7. Estrategia de migración incremental (5 fases)
-
-**FASE 1: Crear `src/lib/cv-renderer.ts` con helpers (riesgo: mínimo)**
-- Mover `h()` (escapeHtml), `fmtDate()`, `dateRange()`, `SECTION_TITLES`
-- Verificar que deploy.ts funciona importando desde allí
-- Verificar que edit.astro puede importar desde allí (Astro `define:vars` + import)
-- ✅ Validación: deploy y preview sin cambios visuales
-
-**FASE 2: Mover renderizado de secciones (riesgo: bajo)**
-- Mover experiencia, educación, skills, proyectos, certificados, idiomas a `renderCvContent()`
-- Cada sección devuelve string HTML (con clases del deploy: `.card`, `.section-title`, `.tag`, etc.)
-- Preview adopta estas secciones vía `innerHTML` (reemplaza `createElement`)
-- ✅ Validación: cada sección se ve igual en preview y deploy
-
-**FASE 3: Unificar header (riesgo: medio)**
-- Decidir formato de contacto: **adoptar el del Deploy** (`<ul><li>` sin emojis) porque es más limpio
-- Si se quiere mantener emojis en preview, convertir a CSS (pseudo-elementos o SVG) en vez de caracteres Unicode en HTML
-- Mover header completo (nombre, rol, resumen, contacto, foto) al shared renderer
-- ✅ Validación: preview y deploy tienen header visualmente idéntico
-
-**FASE 4: Unificar clases CSS (riesgo: medio)**
-- El shared renderer usará las clases del deploy (`.panel-name`, `.panel-label`, etc.)
-- Preview: agregar estas clases al `STYLE_CSS` inyectado en edit.astro (ya existe en líneas 355-446)
-- Preview: quitar clases Tailwind redundantes del contenedor
-- Deploy: sin cambios (ya usa estas clases)
-- ✅ Validación: preview y deploy se ven exactamente igual con el mismo template
-
-**FASE 5: Refactorizar wrappers (riesgo: bajo)**
-- `renderPreview()` simplificado a: `document.getElementById('preview-section').innerHTML = renderCvContent(state, lang, savedTemplate, '')`
-- `renderCvPage()` simplificado a: envolver `renderCvContent(resume, lang, template, basePath)` con navbar + wrapper HTML + CSS link
-- ✅ Validación: deploy y preview funcionan idéntico al estado pre-migración
-
-**Regla de oro de cada fase:** después de cada paso, el deploy debe generar HTML 100% idéntico al anterior, y el preview debe verse igual que antes. Si no, revertir y ajustar.
 
 ---
 
