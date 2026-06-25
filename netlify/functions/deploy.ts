@@ -15,6 +15,7 @@
 /// <reference lib="es2022" />
 import { Octokit } from "@octokit/rest";
 import { SECTION_TITLES, escapeHtml, renderCvContent } from "../../src/lib/cv-renderer.js";
+import { CV_THEMES_CSS } from "../../src/styles/cv-themes.js";
 
 declare const process: any;
 declare const Buffer: any;
@@ -35,105 +36,7 @@ const PUBLISHED_REPO_NAME = process.env.PUBLISHED_REPO_NAME || 'personal-resume'
 const DEFAULT_TEMPLATE = 'minimalist';
 const SUPPORTED_LANGS = ['es', 'it', 'en'];
 
-// =========================================================================
-// CSS estático incrustado (3 temas + responsive + print)
-// =========================================================================
-const STYLE_CSS: string = `/* CV para Todos — Static Stylesheet */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
-
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{-webkit-text-size-adjust:100%}
-body{font-family:'Inter',system-ui,sans-serif;line-height:1.6;min-height:100vh;-webkit-font-smoothing:antialiased}
-img{display:block;max-width:100%;height:auto}
-a{color:inherit;text-decoration:none}
-a:hover{opacity:.85}
-h1,h2,h3,strong{font-family:'Inter',system-ui,sans-serif}
-ul{list-style:none}
-
-/* ===== TEMA MINIMALIST ===== */
-.theme-minimalist{background:#f8fafc;color:#111827}
-.theme-minimalist .page{max-width:900px;margin:0 auto;padding:3rem 1.5rem}
-.theme-minimalist .panel{background:#fff;border:1px solid #e5e7eb;border-radius:1.25rem;box-shadow:0 24px 80px rgba(15,23,42,.06)}
-.theme-minimalist .section-title{color:#111827;font-size:1rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:1rem}
-.theme-minimalist .profile-image{width:128px;height:128px;object-fit:cover;border-radius:1rem;border:1px solid #e5e7eb}
-.theme-minimalist .panel-label{color:#6b7280;font-size:1.125rem;font-weight:500;margin-top:.25rem}
-.theme-minimalist .lang-link-active{background:#2563eb!important;color:#fff!important}
-.theme-minimalist .lang-link-inactive{background:rgba(0,0,0,.06)!important;color:inherit!important}
-
-/* ===== TEMA TECHY ===== */
-.theme-techy{background:#0f172a;color:#e2e8f0}
-.theme-techy .page{max-width:1000px;margin:0 auto;padding:3rem 1.5rem}
-.theme-techy .panel{background:rgba(15,23,42,0.96);border:1px solid rgba(148,163,184,.18);border-radius:1.5rem;box-shadow:0 30px 80px rgba(15,23,42,.3)}
-.theme-techy .section-title{color:#cbd5e1;font-size:1rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:1rem}
-.theme-techy .profile-image{width:128px;height:128px;object-fit:cover;border:2px solid #6366f1!important;border-radius:8px!important}
-.theme-techy .panel-label{color:#94a3b8;font-size:1.125rem;font-weight:500;margin-top:.25rem}
-.theme-techy .lang-link-active{background:#38bdf8!important;color:#0f172a!important}
-.theme-techy .lang-link-inactive{background:rgba(255,255,255,.1)!important;color:inherit!important}
-
-/* ===== TEMA ARTISTIC ===== */
-.theme-artistic{background:#fdf2e9;color:#17212b}
-.theme-artistic .page{max-width:900px;margin:0 auto;padding:3rem 1.5rem}
-.theme-artistic .panel{background:#fff;border:1px solid #f1e4d3;border-radius:1.75rem;box-shadow:0 25px 90px rgba(15,23,42,.08)}
-.theme-artistic .section-title{color:#7c2d12;font-size:1rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:1rem;font-family:'Playfair Display',Georgia,serif!important}
-.theme-artistic .profile-image{width:128px;height:128px;object-fit:cover;border:2px solid #8c7864!important;border-radius:60% 40% 60% 40% / 40% 60% 40% 60%!important;padding:3px;background:#fff}
-.theme-artistic .panel-label{color:#8c7864;font-size:1.125rem;font-weight:500;margin-top:.25rem;font-family:'Playfair Display',Georgia,serif!important;font-style:italic}
-.theme-artistic .lang-link-active{background:#d97706!important;color:#fff!important}
-.theme-artistic .lang-link-inactive{background:rgba(0,0,0,.06)!important;color:inherit!important}
-
-/* ===== LAYOUT COMPARTIDO ===== */
-.panel-header{display:flex;flex-wrap:wrap;gap:1.5rem;align-items:flex-start;justify-content:space-between}
-.panel-header-content{flex:1;min-width:220px}
-.panel-name{font-size:clamp(2rem,3vw,3rem);margin:.75rem 0 .5rem;line-height:1.05}
-.panel-label{margin:.25rem 0 .75rem}
-.panel-summary{max-width:40rem;line-height:1.8;margin-bottom:1rem}
-.panel-contact{display:flex;flex-wrap:wrap;gap:1rem;font-size:.875rem;margin-top:1rem}
-.panel-contact a{color:inherit;text-decoration:none}
-.panel-contact a:hover{opacity:.8}
-.panel-main{display:grid;gap:2rem}
-.card{padding:1.25rem;border:1px solid rgba(148,163,184,.16);border-radius:1rem}
-.card-header{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
-.card-title{font-weight:700}
-.card-body{margin-top:.75rem;line-height:1.8;white-space:pre-line;font-size:.9rem}
-.card-date{opacity:.75;font-size:.85rem}
-.cards-grid{display:grid;gap:1.25rem}
-.skills-wrap{display:flex;flex-wrap:wrap;gap:.6rem}
-.tag{display:inline-flex;padding:.35rem .85rem;border-radius:9999px;font-size:.8rem;font-weight:600;background:rgba(148,163,184,.12)}
-.extra-grid{display:grid;gap:1.5rem}
-.cert-item,.lang-item{padding:.95rem;border:1px solid rgba(148,163,184,.16);border-radius:1rem}
-.cert-name{font-weight:700}
-.cert-meta{opacity:.75;font-size:.875rem}
-.lang-item{display:flex;justify-content:space-between;gap:1rem}
-.lang-fluency{font-weight:700}
-
-/* ===== NAVBAR SUPERIOR ===== */
-.top-nav{display:flex;justify-content:space-between;align-items:center;padding:1rem 1.5rem;background:inherit;border-bottom:1px solid rgba(148,163,184,.15)}
-.top-nav-langs{display:flex;flex-wrap:wrap;gap:.5rem}
-.lang-link{padding:.4rem .85rem;border-radius:9999px;text-decoration:none;font-weight:700;font-size:.8rem;transition:opacity .15s}
-.lang-link:hover{opacity:.7}
-.top-nav-print{padding:.4rem .85rem;border-radius:9999px;font-size:.8rem;font-weight:600;cursor:pointer;background:rgba(148,163,184,.1);border:1px solid rgba(148,163,184,.2);color:inherit;transition:background .15s}
-.top-nav-print:hover{background:rgba(148,163,184,.2)}
-
-/* ===== RESPONSIVE ===== */
-@media(max-width:640px){
-  .page{padding:1.5rem 1rem!important}
-  .panel-header{flex-direction:column-reverse;align-items:stretch}
-  .panel-name{font-size:1.75rem!important}
-  .panel-contact{flex-direction:column;gap:.5rem}
-  .card-header{flex-direction:column;gap:.25rem}
-  .profile-image{width:96px!important;height:96px!important}
-  .top-nav{flex-direction:column;gap:.5rem;padding:.75rem 1rem}
-}
-
-/* ===== PRINT ===== */
-@media print{
-  .top-nav{display:none!important}
-  body{background:#fff!important;color:#000!important}
-  .page{padding:0!important;margin:0!important}
-  .panel{box-shadow:none!important;border:none!important;border-radius:0!important}
-  @page{size:A4;margin:10mm}
-}`;
+// CSS importado desde src/styles/cv-themes.ts (single source of truth)
 
 // =========================================================================
 // Generadores de HTML
@@ -386,7 +289,7 @@ export const handler = async (event: any) => {
     // Escribir archivos estáticos
     // =====================================================================
     console.log('Writing style.css');
-    await createOrUpdateFile(octokit, username, PUBLISHED_REPO_NAME, 'style.css', STYLE_CSS, 'Publish CV: stylesheet');
+    await createOrUpdateFile(octokit, username, PUBLISHED_REPO_NAME, 'style.css', CV_THEMES_CSS, 'Publish CV: stylesheet');
 
     console.log('Writing index.html (language redirect)');
     await createOrUpdateFile(octokit, username, PUBLISHED_REPO_NAME, 'index.html', renderRootIndex(filteredLangs, basePath), 'Publish CV: root redirect');

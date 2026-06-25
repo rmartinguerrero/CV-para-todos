@@ -1,0 +1,596 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jsonresume/resume-schema/v1.0.0/schema.json",
+  "_comment": "Architecture context file for CV-para-todos. Portable context for any agent.",
+
+  "project_name": "CV para Todos",
+  "project_version": "0.1.0",
+  "framework": "Astro 5 + Tailwind CSS 3.4",
+  "deployment": "Netlify (static build + serverless functions)",
+  "static_site_url": "https://cv.raulmguerrero.com",
+
+  "architecture_constraints": {
+    "single_source_of_truth": {
+      "renderer": "src/lib/cv-renderer.ts",
+      "main_function": "renderCvContent()",
+      "status": "mandatory",
+      "current_state": "EXISTS but NOT unique. There are 3 parallel render implementations. See action_plan.phase_2."
+    },
+    "forbidden_patterns": [
+      "Duplicar lógica de renderizado",
+      "Crear renderizadores paralelos",
+      "Mantener HTML diferente entre preview y deploy",
+      "Hardcodear templates",
+      "Hardcodear traducciones de secciones fuera de SECTION_TITLES"
+    ],
+    "must_preserve": [
+      "Compatibilidad JSON Resume",
+      "Compatibilidad GitHub Pages",
+      "Compatibilidad OAuth GitHub",
+      "Compatibilidad Netlify Functions",
+      "Compatibilidad multilenguaje"
+    ]
+  },
+
+  "stack": {
+    "frontend": {
+      "framework": "Astro 5 (static output)",
+      "css": "Tailwind CSS 3.4 + @astrojs/tailwind",
+      "templating": "Astro .astro components + inline JS in edit.astro",
+      "i18n": "Custom manual i18n via src/i18n/ui.ts",
+      "fonts": ["Inter", "Playfair Display", "JetBrains Mono"]
+    },
+    "auth": {
+      "provider": "GitHub OAuth",
+      "implementation": "Netlify Functions (auth-login.ts + auth-callback.ts)",
+      "cookie_names": ["github_token (HttpOnly)", "github_user", "github_oauth_state (temporary)"],
+      "csrf_protection": "state parameter validation"
+    },
+    "backend_functions": {
+      "type": "Netlify Functions (not Edge Functions)",
+      "functions": [
+        {
+          "path": "/.netlify/functions/auth-login",
+          "file": "netlify/functions/auth-login.ts",
+          "method": "GET",
+          "purpose": "Initiate GitHub OAuth flow"
+        },
+        {
+          "path": "/.netlify/functions/auth-callback",
+          "file": "netlify/functions/auth-callback.ts",
+          "method": "GET",
+          "purpose": "Handle GitHub OAuth callback, set cookies"
+        },
+        {
+          "path": "/.netlify/functions/deploy",
+          "file": "netlify/functions/deploy.ts",
+          "method": "POST",
+          "purpose": "Create/update GitHub Pages repo with CV static site"
+        },
+        {
+          "path": "/.netlify/functions/load-resume",
+          "file": "netlify/functions/load-resume.ts",
+          "method": "GET",
+          "purpose": "Load user's resume from their GitHub repo"
+        }
+      ]
+    },
+    "data_storage": {
+      "client_side": "localStorage (key: cv_backup_data_{lang})",
+      "template_persistence": "localStorage (key: cv_selected_template_{lang})",
+      "server_side": "GitHub repository 'personal-resume' (created per user)"
+    }
+  },
+
+  "mcp": {
+    "MCP-001": {
+      "title": "Template propagation",
+      "description": "El template seleccionado por el usuario debe mantenerse intacto desde el wizard hasta el HTML publicado.",
+      "execution_status": "DONE",
+      "done_evidence": [
+        "edit.astro line 459: const TEMPLATE_KEY = 'cv_selected_template_${lang}' — clave de persistencia",
+        "edit.astro line 575: state.meta.template = templateId — guarda en estado",
+        "edit.astro line 576: localStorage.setItem(TEMPLATE_KEY, templateId) — persiste en localStorage",
+        "edit.astro line 1079: Restaura template guardado al cargar la página",
+        "edit.astro line 1054: template: state.meta?.template || localStorage.getItem(TEMPLATE_KEY) || 'minimalist' — enviado en payload",
+        "deploy.ts line 293: const template = (body.template || DEFAULT_TEMPLATE).toLowerCase() — recibido",
+        "deploy.ts line 172: <body class='theme-${template}'> — aplicado en HTML final",
+        "[lang]/index.astro line 45: resume?.meta?.template — leído del JSON para la página pública"
+      ],
+      "path": [
+        "UI (template-card click)",
+        "state.meta.template",
+        "localStorage (cv_selected_template_{lang})",
+        "payload (edit.astro fetch to deploy.ts)",
+        "deploy.ts (netlify/functions/deploy.ts)",
+        "renderCvPage() wraps renderCvContent()",
+        "<body class='theme-{template}'> + CSS class",
+        "HTML final"
+      ],
+      "implementation_note": "renderCvContent() is template-agnostic. Template only affects CSS class on <body> in deploy output and [data-template] attribute in preview."
+    },
+    "MCP-002": {
+      "title": "Preview deploy parity",
+      "description": "Preview y Deploy deben consumir exactamente el mismo renderizador.",
+      "execution_status": "PENDING",
+      "pending_reason": "Preview usa renderPreview() inline (edit.astro lines 875-981) que genera HTML manualmente con createElement e innerHTML. Deploy usa renderCvContent() de cv-renderer.ts. Producen HTML y estructura diferentes.",
+      "evidence": [
+        "edit.astro lines 875-981: renderPreview() — genera preview HTML manualmente",
+        "deploy.ts line 155: renderCvContent(resume, lang, basePath) — genera deploy HTML desde cv-renderer.ts",
+        "Ambos producen diferente estructura de nodos, clases CSS y disposición"
+      ]
+    },
+    "MCP-003": {
+      "title": "Localization consistency",
+      "description": "Todos los títulos de sección deben obtenerse desde SECTION_TITLES.",
+      "execution_status": "PENDING",
+      "pending_reason": "edit.astro preview y componentes Astro hardcodean títulos con ternarios inline en vez de usar SECTION_TITLES.",
+      "evidence": [
+        "cv-renderer.ts lines 1-35: SECTION_TITLES existe con es/it/en ✅",
+        "deploy.ts line 152: const dict = SECTION_TITLES[lang] || SECTION_TITLES.en — deploy lo usa ✅",
+        "edit.astro line 298: {lang === 'es' ? 'Perfil' : lang === 'it' ? 'Profilo' : 'Profile'} — hardcodeado ❌",
+        "edit.astro lines 305, 312, 319, 326, 333: mismo patrón hardcodeado ❌"
+      ]
+    },
+    "MCP-004": {
+      "title": "Image consistency",
+      "description": "La fotografía debe renderizarse en la misma posición en preview y deploy.",
+      "execution_status": "PENDING",
+      "pending_reason": "Se resolverá automáticamente al unificar el renderer (Phase 2). Misma causa raíz que MCP-002.",
+      "evidence": [
+        "edit.astro renderPreview() posiciona imagen con orden CSS y DOM manual",
+        "deploy.ts renderCvContent() genera <img> dentro de <header> con estructura diferente"
+      ]
+    },
+    "MCP-005": {
+      "title": "Skills consistency",
+      "description": "Las habilidades deben utilizar el mismo componente visual en preview y deploy.",
+      "execution_status": "PENDING",
+      "pending_reason": "Se resolverá al unificar el renderer (Phase 2). Misma causa raíz que MCP-002.",
+      "evidence": [
+        "edit.astro renderPreview() crea <span class='badge-item-live'> con createElement",
+        "deploy.ts renderCvContent() genera <span class='tag'> como string HTML",
+        "Astro Skills.astro genera <span class='...rounded-full'> como tercera implementación"
+      ]
+    },
+    "MCP-006": {
+      "title": "Contact consistency",
+      "description": "La sección de contacto debe generarse desde una única implementación.",
+      "execution_status": "PENDING",
+      "pending_reason": "Se resolverá al unificar el renderer (Phase 2). Misma causa raíz que MCP-002.",
+      "evidence": [
+        "edit.astro renderPreview() genera contacto con template literal manual",
+        "deploy.ts renderCvContent() genera <ul class='panel-contact'> como string HTML",
+        "Header.astro genera <ul> con estructura diferente como tercera implementación"
+      ]
+    },
+    "MCP-007": {
+      "title": "No regression on publishing",
+      "description": "Ningún cambio visual puede romper publicación automática ni actualización de repositorios existentes.",
+      "execution_status": "DONE",
+      "done_evidence": [
+        "deploy.ts lines 316-332: verifica si el repo existe antes de crear uno nuevo",
+        "deploy.ts lines 416-422: limpia archivos obsoletos del repo existente sin romperlo",
+        "deploy.ts lines 427-455: configura GitHub Pages para el repo existente",
+        "deploy.ts lines 372-383: allowedFiles set garantiza que solo se toquen archivos del CV"
+      ]
+    },
+    "MCP-008": {
+      "title": "Repository update integrity",
+      "description": "Actualizar un CV existente nunca debe generar un repositorio nuevo.",
+      "execution_status": "DONE",
+      "done_evidence": [
+        "deploy.ts line 317: await octokit.repos.get({ owner: username, repo: PUBLISHED_REPO_NAME }) — primero intenta obtener repo existente",
+        "deploy.ts lines 319-332: solo crea repo nuevo si la respuesta es 404 (no existe)",
+        "PUBLISHED_REPO_NAME = 'personal-resume' es constante, siempre mismo repo"
+      ]
+    }
+  },
+
+  "renderers_inventory": {
+    "total_count": 3,
+    "renderers": [
+      {
+        "id": "RENDERER-A",
+        "file": "src/lib/cv-renderer.ts",
+        "function": "renderCvContent()",
+        "used_by": "netlify/functions/deploy.ts",
+        "output": "HTML string (deployed CV pages)",
+        "notes": "The official SSOT renderer. Template-agnostic."
+      },
+      {
+        "id": "RENDERER-B",
+        "file": "src/deploy-templates/renderer.ts",
+        "function": "renderCvPage(), renderExperience(), renderEducation(), renderSkills(), renderProjects(), renderExtra(), renderRootIndex(), renderJsonStringify()",
+        "used_by": "NOT USED by any active code (dead code)",
+        "output": "HTML string (identical structure to RENDERER-A but duplicated)",
+        "notes": "Contains duplications of escapeHtml, formatDate, dateRange. Also contains STYLE_CSS and I18N_LABELS duplicates."
+      },
+      {
+        "id": "RENDERER-C",
+        "file": "src/pages/[lang]/edit.astro (inline JS)",
+        "function": "renderPreview() (~100 lines inline)",
+        "used_by": "edit.astro preview panel",
+        "output": "DOM manipulation (client-side only)",
+        "notes": "Generates preview HTML manually without using cv-renderer.ts."
+      }
+    ],
+    "additional_rendering_paths": [
+      {
+        "id": "PUBLIC-ASTRO-PAGE",
+        "file": "src/pages/[lang]/index.astro + components/*.astro",
+        "components": ["Header.astro", "Experience.astro", "Education.astro", "Skills.astro", "Projects.astro"],
+        "output": "Astro-compiled HTML (static build)",
+        "notes": "Fourth rendering implementation with different HTML structure from deploy output."
+      }
+    ]
+  },
+
+  "duplicated_css_sources": [
+    {
+      "location": "netlify/functions/deploy.ts (const STYLE_CSS)",
+      "used_by": "Deployed GitHub Pages sites"
+    },
+    {
+      "location": "src/deploy-templates/style.css (file)",
+      "used_by": "Standalone file, not imported by any active code"
+    },
+    {
+      "location": "src/deploy-templates/renderer.ts (export STYLE_CSS)",
+      "used_by": "Not imported by any active code"
+    },
+    {
+      "location": "src/pages/[lang]/edit.astro (<style is:global>)",
+      "used_by": "Editor preview panel"
+    }
+  ],
+
+  "adr_additional": [
+    {
+      "id": "ADR-006",
+      "title": "Shared utility functions",
+      "decision": "escapeHtml(), formatDate() y dateRange() deben existir únicamente en el renderer compartido.",
+      "status": "accepted",
+      "execution_status": "PARTIAL",
+      "partial_reason": "Las funciones existen en el SSOT (cv-renderer.ts lines 37-56) ✅ pero están duplicadas en el dead code deploy-templates/renderer.ts lines 4-33 ❌. Se resolverá en Phase 4 (legacy cleanup).",
+      "evidence": [
+        "cv-renderer.ts lines 37-40: function escapeHtml()",
+        "cv-renderer.ts lines 42-50: function formatDate()",
+        "cv-renderer.ts lines 52-56: function dateRange()",
+        "deploy-templates/renderer.ts lines 4-11: function escapeHtml() duplicada",
+        "deploy-templates/renderer.ts lines 14-23: function formatDate() duplicada",
+        "deploy-templates/renderer.ts lines 29-33: renderDateRange() duplicada"
+      ]
+    },
+    {
+      "id": "ADR-007",
+      "title": "Centralized section titles",
+      "decision": "SECTION_TITLES será la única fuente de verdad para títulos traducidos.",
+      "status": "accepted",
+      "execution_status": "PARTIAL",
+      "partial_reason": "SECTION_TITLES existe en cv-renderer.ts lines 1-35 y deploy.ts lo usa ✅. Pero edit.astro preview (lines 298, 305, 312, 319, 326, 333) y componentes Astro (Skills.astro line 15, Experience.astro line 15, etc.) hardcodean títulos ❌. Se resolverá en Phase 3.",
+      "evidence": [
+        "cv-renderer.ts lines 1-35: export const SECTION_TITLES — SSOT existente",
+        "deploy.ts line 152: const dict = SECTION_TITLES[lang] || SECTION_TITLES.en — deploy lo consume",
+        "edit.astro line 298: {lang === 'es' ? 'Perfil' : ...} — hardcodeado en template preview",
+        "edit.astro lines 305, 312, 319, 326, 333: mismo patrón",
+        "Skills.astro line 15: {t('section.skills')} — clave no definida en ui.ts",
+        "Experience.astro line 15: {t('section.experience')} — clave no definida en ui.ts"
+      ]
+    },
+    {
+      "id": "ADR-008",
+      "title": "Preview UX precedence",
+      "decision": "Cuando exista conflicto visual, el deploy debe acercarse al preview y no al revés.",
+      "status": "accepted",
+      "execution_status": "ACCEPTED_NO_ACTION"
+    },
+    {
+      "id": "ADR-009",
+      "title": "Incremental migration safety",
+      "decision": "Cada fase debe ser verificable antes de eliminar código histórico.",
+      "status": "accepted",
+      "execution_status": "ACCEPTED_NO_ACTION",
+      "note": "Principio de proceso. Se aplica en todas las fases del action_plan."
+    },
+    {
+      "id": "ADR-010",
+      "title": "Infrastructure isolation",
+      "decision": "Los cambios visuales no pueden modificar OAuth, GitHub API, Pages ni workflows.",
+      "status": "accepted",
+      "execution_status": "ACCEPTED_NO_ACTION",
+      "note": "Restricción de diseño. OAuth y GitHub API están aislados en netlify/functions/auth-*.ts y no se mezclan con renderizado."
+    }
+  ],
+
+  "action_plan": {
+    "overview": "Plan por fases para unificar el renderizado, centralizar CSS, homogeneizar i18n y limpiar legacy. Cada fase es autónoma y verificable (ADR-009).",
+    "phases": [
+      {
+        "id": "PHASE_1",
+        "name": "Centralizar CSS en fuente única",
+        "order": 1,
+        "description": "CSS está duplicado en 4 sitios. Extraer a un archivo compartido importable por todos los consumidores.",
+        "problem": "duplicated_css_sources enumera 4 fuentes. Modificar un color requiere cambiar en 4 sitios.",
+        "solution": "1) Crear src/styles/cv-themes.css con el CSS de los 3 temas. 2) netlify/functions/deploy.ts importa el CSS desde ahí (o lo lee como string). 3) edit.astro <style is:global> importa desde ahí. 4) Se eliminan las copias inline en deploy.ts y deploy-templates/renderer.ts.",
+        "files_affected": [
+          {
+            "action": "CREATE",
+            "path": "src/styles/cv-themes.css",
+            "content": "CSS actual de deploy.ts STYLE_CSS + edit.astro <style> unificado"
+          },
+          {
+            "action": "MODIFY",
+            "path": "netlify/functions/deploy.ts",
+            "change": "Reemplazar const STYLE_CSS por import/lectura de src/styles/cv-themes.css"
+          },
+          {
+            "action": "MODIFY",
+            "path": "src/pages/[lang]/edit.astro",
+            "change": "Reemplazar <style is:global> por import de src/styles/cv-themes.css (o eliminar si el preview pasa a usar clases inline)"
+          },
+          {
+            "action": "DELETE",
+            "path": "src/deploy-templates/style.css",
+            "change": "Ya no necesaria (reemplazada por src/styles/cv-themes.css)"
+          }
+        ],
+        "risks": "Bajo. CSS es estático. Solo asegurar que los selectores de edit.astro y deploy.ts sigan funcionando.",
+        "mcp_resolved": [],
+        "adr_resolved": [],
+        "verification": "1) Build de Astro no da errores. 2) Deploy genera style.css idéntico al anterior. 3) Preview visualmente idéntico.",
+        "estimated_effort": "pequeño"
+      },
+      {
+        "id": "PHASE_2",
+        "name": "Unificar renderizadores: preview usa cv-renderer.ts",
+        "order": 2,
+        "description": "Reemplazar renderPreview() inline de edit.astro por renderCvContent() de cv-renderer.ts. Esto unifica preview y deploy bajo el mismo renderer.",
+        "problem": "MCP-002, MCP-004, MCP-005, MCP-006 violados porque preview y deploy usan renderers distintos. renderPreview() (~100 líneas) en edit.astro genera HTML diferente a renderCvContent().",
+        "solution": "1) renderCvContent() devuelve HTML string. renderPreview() debe llamar a renderCvContent() e inyectar el HTML resultante en el DOM del preview. 2) Mantener compatibilidad: preview necesita data-template para estilos, el string de renderCvContent() no incluye data-template. Solución: el contenedor preview-section mantiene data-template y renderCvContent() se inyecta dentro. 3) renderCvContent() no incluye las secciones nuevas (certificados, idiomas). Habrá que añadirlas a renderCvContent() o mantenerlas como extensión. Nota: esto es lo que ya existe como extraHtml en renderCvContent() (lines 99-120). 4) Eliminar RENDERER-C (renderPreview() inline JS).",
+        "files_affected": [
+          {
+            "action": "MODIFY",
+            "path": "src/lib/cv-renderer.ts",
+            "change": "Verificar que renderCvContent() cubre todos los campos del preview (name, label, email, phone, website, image, summary, work, education, skills, certificates, languages). Actualmente ya cubre todo menos website (basics.url) — hay que verificar."
+          },
+          {
+            "action": "MODIFY",
+            "path": "src/pages/[lang]/edit.astro",
+            "change": "Reemplazar renderPreview() inline por llamada a renderCvContent(). El HTML de cv-renderer.ts se inyecta en #preview-section. Eliminar ~100 líneas de JS inline."
+          }
+        ],
+        "dependencies": ["PHASE_1: CSS centralizado para que preview use las mismas clases que deploy"],
+        "risks": "Medio. El HTML generado por renderCvContent() tiene estructura diferente al actual renderPreview(). Pueden cambiar posiciones de imagen, orden de secciones, clases CSS. ADR-008 dice que deploy debe acercarse al preview, no al revés — habrá que decidir si se ajusta renderCvContent() o se acepta la nueva estructura.",
+        "mcp_resolved": ["MCP-002", "MCP-004", "MCP-005", "MCP-006"],
+        "adr_resolved": [],
+        "verification": "1) Preview se ve correcto con los 3 templates. 2) Deploy genera HTML (a través de deploy.ts que ya usa cv-renderer.ts) y es visualmente idéntico al preview. 3) Imagen, skills, contacto tienen misma posición y estilo en preview y deploy.",
+        "estimated_effort": "medio"
+      },
+      {
+        "id": "PHASE_3",
+        "name": "SECTION_TITLES en preview y Astro components",
+        "order": 3,
+        "description": "Reemplazar títulos de sección hardcodeados en edit.astro y componentes Astro por SECTION_TITLES de cv-renderer.ts.",
+        "problem": "MCP-003 violado. ADR-007 en estado PARTIAL. edit.astro preview y componentes Astro hardcodean títulos.",
+        "solution": "1) En edit.astro: las secciones del preview (Perfil, Experiencia, Formación, Certificados, Idiomas, Habilidades) actualmente usan ternarios inline. Reemplazar por SECTION_TITLES exportado desde cv-renderer.ts. 2) En los componentes Astro (Skills.astro, Experience.astro, Education.astro, Projects.astro): actualmente usan t('section.skills') etc. — claves que no existen en ui.ts. Añadir esas claves a ui.ts o mejor, usar SECTION_TITLES directamente.",
+        "files_affected": [
+          {
+            "action": "MODIFY",
+            "path": "src/pages/[lang]/edit.astro",
+            "change": "Reemplazar ternarios inline en las etiquetas <h3> del preview por SECTION_TITLES[lang] (importado de cv-renderer.ts o desde el frontmatter Astro)"
+          },
+          {
+            "action": "MODIFY",
+            "path": "src/components/Skills.astro",
+            "change": "Reemplazar t('section.skills') por SECTION_TITLES (importado de cv-renderer.ts) o añadir clave a ui.ts"
+          },
+          {
+            "action": "MODIFY",
+            "path": "src/components/Experience.astro",
+            "change": "Reemplazar t('section.experience') por SECTION_TITLES"
+          },
+          {
+            "action": "MODIFY",
+            "path": "src/components/Education.astro",
+            "change": "Reemplazar t('section.education') por SECTION_TITLES"
+          },
+          {
+            "action": "MODIFY",
+            "path": "src/components/Projects.astro",
+            "change": "Reemplazar t('section.projects') por SECTION_TITLES"
+          },
+          {
+            "action": "MODIFY",
+            "path": "src/i18n/ui.ts",
+            "change": "Opcional: añadir las claves section.* que faltan para mantener compatibilidad con t() existente"
+          }
+        ],
+        "dependencies": ["PHASE_2: Si se unifica el renderer, el preview ya no tendrá títulos hardcodeados separados"],
+        "risks": "Bajo. Solo cambian strings de texto. No afecta estructura ni lógica.",
+        "mcp_resolved": ["MCP-003"],
+        "adr_resolved": ["ADR-007"],
+        "verification": "1) Preview muestra títulos traducidos correctamente para es/it/en. 2) Página pública Astro muestra títulos traducidos. 3) Deploy muestra títulos traducidos.",
+        "estimated_effort": "pequeño"
+      },
+      {
+        "id": "PHASE_4",
+        "name": "Eliminar código legacy verificado",
+        "order": 4,
+        "description": "Eliminar archivos muertos verificados. Cada eliminación requiere confirmación de que ningún código activo lo referencia.",
+        "problem": "HYP-003 identifica 7 archivos legacy. ADR-006 violado por duplicados en dead code.",
+        "solution": "Para cada archivo legacy: 1) Verificar con grep que no hay imports activos. 2) Eliminar archivo. 3) Verificar build sigue funcionando.",
+        "files_to_remove": [
+          {
+            "path": "netlify/edge-functions/auth.ts",
+            "reason": "Reemplazado por netlify/functions/auth-login.ts + auth-callback.ts",
+            "verification": "netlify.toml ya no tiene [[edge_functions]] para auth"
+          },
+          {
+            "path": "netlify/edge-functions/save.ts",
+            "reason": "Reemplazado por netlify/functions/deploy.ts",
+            "verification": "netlify.toml ya no tiene [[edge_functions]] para save"
+          },
+          {
+            "path": "netlify/functions/auth/login.ts",
+            "reason": "Reemplazado por auth-login.ts + auth-callback.ts en /netlify/functions/ raíz"
+          },
+          {
+            "path": "netlify/functions/auth/callback.ts",
+            "reason": "Reemplazado por auth-login.ts + auth-callback.ts en /netlify/functions/ raíz"
+          },
+          {
+            "path": "netlify/functions/save.js",
+            "reason": "Reemplazado por netlify/functions/deploy.ts. No hay referencias activas."
+          },
+          {
+            "path": "src/components/TechLayout.astro",
+            "reason": "No exporta templateMeta, no es detectado por import.meta.glob('../../layouts/*.astro'). El layout real está en src/layouts/TechyLayout.astro."
+          },
+          {
+            "path": "src/components/ArtisticLayout.astro",
+            "reason": "No exporta templateMeta, no es detectado por import.meta.glob. El layout real está en src/layouts/ArtisticLayout.astro."
+          },
+          {
+            "path": "src/deploy-templates/renderer.ts",
+            "reason": "Ningún archivo activo lo importa. deploy.ts importa directamente de cv-renderer.ts. Contiene duplicados de escapeHtml, formatDate, CSS e i18n."
+          },
+          {
+            "path": "src/deploy-templates/style.css",
+            "reason": "Ningún archivo activo lo importa. El CSS usado en deploy está inline en deploy.ts."
+          }
+        ],
+        "dependencies": ["Ninguna. Puede ejecutarse en paralelo con otras fases."],
+        "risks": "Bajo si se verifica cada archivo con grep antes de eliminar. Seguir ADR-009.",
+        "mcp_resolved": [],
+        "adr_resolved": ["ADR-006"],
+        "verification": "1) grep -r 'import.*deploy-templates' src/ netlify/ — sin resultados. 2) grep -r 'TechLayout\\|ArtisticLayout' src/pages/ — sin resultados (solo en import.meta.glob de layouts/). 3) pnpm build exitoso. 4) Deploy funcional.",
+        "estimated_effort": "pequeño"
+      },
+      {
+        "id": "PHASE_5",
+        "name": "Validación final y cierre",
+        "order": 5,
+        "description": "Ejecutar la validation_checklist completa y actualizar este architecture.json a estado DONE.",
+        "problem": "Validación pendiente de todas las correcciones.",
+        "solution": "1) Ejecutar cada item de la validation_checklist. 2) Marcar MCPs y ADRs como DONE. 3) Actualizar architecture.json con estado final.",
+        "files_affected": [
+          {
+            "action": "MODIFY",
+            "path": "architecture.json",
+            "change": "Actualizar execution_status de cada MCP y ADR a DONE. Actualizar current_state del SSOT."
+          }
+        ],
+        "dependencies": ["PHASE_1", "PHASE_2", "PHASE_3", "PHASE_4"],
+        "risks": "Muy bajo.",
+        "mcp_resolved": [],
+        "adr_resolved": [],
+        "verification": "Todos los items de validation_checklist en estado ✅.",
+        "estimated_effort": "pequeño"
+      }
+    ]
+  },
+
+  "known_open_hypotheses": [
+    {
+      "id": "HYP-001",
+      "description": "El renderer compartido (cv-renderer.ts) no está siendo consumido por el preview de edit.astro ni por la página pública Astro.",
+      "evidence": "renderPreview() en edit.astro genera HTML manual. [lang]/index.astro usa componentes Astro separados.",
+      "risk": "high",
+      "addressed_in": "PHASE_2"
+    },
+    {
+      "id": "HYP-002",
+      "description": "src/deploy-templates/renderer.ts es código muerto. Contiene duplicados de escapeHtml, formatDate, CSS e i18n que nadie importa.",
+      "evidence": "Ningún archivo activo importa desde deploy-templates/renderer.ts. netlify/functions/deploy.ts importa directamente desde src/lib/cv-renderer.ts.",
+      "risk": "medium",
+      "addressed_in": "PHASE_4"
+    },
+    {
+      "id": "HYP-003",
+      "description": "Existen archivos legacy que deberían eliminarse tras validación.",
+      "items": [
+        "netlify/edge-functions/auth.ts",
+        "netlify/edge-functions/save.ts",
+        "netlify/functions/auth/login.ts",
+        "netlify/functions/auth/callback.ts",
+        "netlify/functions/save.js",
+        "src/components/TechLayout.astro",
+        "src/components/ArtisticLayout.astro"
+      ],
+      "risk": "low",
+      "addressed_in": "PHASE_4"
+    },
+    {
+      "id": "HYP-004",
+      "description": "El CSS desplegado (en deploy.ts STYLE_CSS) podría no corresponder exactamente con los estilos de preview (en edit.astro <style>).",
+      "evidence": "CSS duplicado en 4 sitios con valores que pueden divergir.",
+      "risk": "high",
+      "addressed_in": "PHASE_1"
+    },
+    {
+      "id": "HYP-005",
+      "description": "La página pública Astro (SSG) y el deploy GitHub Pages generan HTML con estructura diferente, pudiendo dar resultados visuales distintos.",
+      "evidence": "Public page usa componentes Astro anidados. Deploy usa renderCvContent() con HTML plano.",
+      "risk": "medium",
+      "addressed_in": "Post-PHASE_5 (fuera del alcance actual del plan)"
+    }
+  ],
+
+  "validation_checklist": [
+    { "id": "V-001", "description": "Template seleccionado visible en preview (edit.astro [data-template])", "status": "DONE", "verified_at": "architecture.json creation" },
+    { "id": "V-002", "description": "Template seleccionado visible tras publicación (theme-{template} class)", "status": "DONE", "verified_at": "architecture.json creation" },
+    { "id": "V-003", "description": "Template persiste al recargar la página de edición", "status": "DONE", "verified_at": "architecture.json creation" },
+    { "id": "V-004", "description": "Template se envía correctamente al payload de deploy", "status": "DONE", "verified_at": "architecture.json creation" },
+    { "id": "V-005", "description": "Foto en misma posición en preview y deploy", "status": "PENDING", "depends_on": ["PHASE_2"] },
+    { "id": "V-006", "description": "Contacto idéntico en preview y deploy", "status": "PENDING", "depends_on": ["PHASE_2"] },
+    { "id": "V-007", "description": "Skills idénticas en preview y deploy", "status": "PENDING", "depends_on": ["PHASE_2"] },
+    { "id": "V-008", "description": "Mismos colores en preview y deploy", "status": "PENDING", "depends_on": ["PHASE_1"] },
+    { "id": "V-009", "description": "Misma tipografía en preview y deploy", "status": "PENDING", "depends_on": ["PHASE_1"] },
+    { "id": "V-010", "description": "Misma estructura HTML en preview y deploy", "status": "PENDING", "depends_on": ["PHASE_2"] },
+    { "id": "V-011", "description": "Publicación automática funcional (GitHub Pages)", "status": "DONE", "verified_at": "architecture.json creation" },
+    { "id": "V-012", "description": "Actualización de repositorio existente funcional (no crear duplicado)", "status": "DONE", "verified_at": "architecture.json creation" },
+    { "id": "V-013", "description": "GitHub Pages funcional tras deploy", "status": "DONE", "verified_at": "architecture.json creation" },
+    { "id": "V-014", "description": "JSON Resume generado correctamente en el repo publicado", "status": "DONE", "verified_at": "architecture.json creation" },
+    { "id": "V-015", "description": "OAuth login flow completo (login → callback → cookies set)", "status": "DONE", "verified_at": "architecture.json creation" },
+    { "id": "V-016", "description": "OAuth logout: cookies eliminadas correctamente", "status": "DONE", "verified_at": "architecture.json creation" },
+    { "id": "V-017", "description": "Load-resume: datos remotos cargados si autenticado", "status": "DONE", "verified_at": "architecture.json creation" },
+    { "id": "V-018", "description": "Load-resume: datos locales usados si no autenticado", "status": "DONE", "verified_at": "architecture.json creation" },
+    { "id": "V-019", "description": "No hay llamadas a token incorrecto o cookies mal nombradas", "status": "DONE", "verified_at": "architecture.json creation" },
+    { "id": "V-020", "description": "Certificados visibles tanto en editor como en preview", "status": "DONE", "verified_at": "architecture.json creation" },
+    { "id": "V-021", "description": "Idiomas visibles tanto en editor como en preview", "status": "DONE", "verified_at": "architecture.json creation" },
+    { "id": "V-022", "description": "Los 3 layouts se renderizan correctamente (minimalist, techy, artistic)", "status": "DONE", "verified_at": "architecture.json creation" },
+    { "id": "V-023", "description": "SECTION_TITLES usado consistentemente en deploy output", "status": "DONE", "verified_at": "architecture.json creation" },
+    { "id": "V-024", "description": "SECTION_TITLES usado en preview y componentes Astro", "status": "PENDING", "depends_on": ["PHASE_3"] },
+    { "id": "V-025", "description": "renderCvContent() es la única fuente de renderizado (sin duplicados)", "status": "PENDING", "depends_on": ["PHASE_2", "PHASE_4"] },
+    { "id": "V-026", "description": "CSS centralizado en una única fuente (sin duplicados)", "status": "PENDING", "depends_on": ["PHASE_1"] },
+    { "id": "V-027", "description": "Archivos legacy eliminados o sin impacto", "status": "PENDING", "depends_on": ["PHASE_4"] },
+    { "id": "V-028", "description": "Build de Astro exitoso (pnpm build)", "status": "PENDING", "depends_on": ["PHASE_1", "PHASE_2", "PHASE_3", "PHASE_4"] },
+    { "id": "V-029", "description": "Deploy a GitHub Pages funcional desde edit.astro", "status": "PENDING", "depends_on": ["PHASE_2"] }
+  ],
+
+  "agent_operating_rules": {
+    "must_do": [
+      "Buscar referencias antes de eliminar archivos",
+      "Validar flujo completo antes de cerrar una migración",
+      "Comprobar compatibilidad con JSON Resume",
+      "Mantener experiencia no-code",
+      "Mantener enfoque mobile first",
+      "Seguir el plan de fases: PHASE_1 → PHASE_2 → PHASE_3 → PHASE_4 → PHASE_5",
+      "Unificar renderizado en src/lib/cv-renderer.ts como SSOT",
+      "Centralizar CSS en una única fuente (src/styles/cv-themes.css)",
+      "Documentar cambios en este architecture.json tras cada fase",
+      "Usar SECTION_TITLES para todos los títulos de sección, nunca hardcodear"
+    ],
+    "must_not_do": [
+      "Modificar OAuth",
+      "Modificar GitHub Pages config en deploy.ts sin validación",
+      "Modificar deploy.yml (no existe, se usa Netlify Functions)",
+      "Eliminar código histórico sin validación (seguir ADR-009)",
+      "Introducir dependencias innecesarias",
+      "Romper compatibilidad con repositorios existentes",
+      "Añadir un cuarto renderizador paralelo",
+      "Hardcodear traducciones de secciones sin usar SECTION_TITLES",
+      "Saltarse fases del plan o ejecutar en orden incorrecto (ver dependencias)"
+    ]
+  }
+}

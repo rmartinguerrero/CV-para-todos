@@ -4,6 +4,7 @@ import { useTranslations, type Lang, type UIKeys } from '../../i18n/ui';
 import resumeEs from '../../data/resume.es.json';
 import resumeIt from '../../data/resume.it.json';
 import resumeEn from '../../data/resume.en.json';
+import { CV_THEMES_CSS } from '../../styles/cv-themes';
 
 export function getStaticPaths() {
   return [
@@ -342,117 +343,7 @@ const templates = Object.entries(layoutModules)
     <button id="btn-publish" class="w-full sm:w-auto px-5 py-3 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-all">{t('edit.publish')}</button>
   </div>
 
-  <style is:global>
-    #preview-section { font-family: 'Inter', system-ui, sans-serif; color: #111827; }
-    .badge-item-live { background-color: #f3f4f6; color: #374151; font-size: 0.75rem; padding: 0.25rem 0.625rem; border-radius: 9999px; display: inline-block; font-weight: 500; }
-    /* Hide horizontal scrollbar on the tabs nav for all screen sizes */
-    #tab-nav { -ms-overflow-style: none; scrollbar-width: none; }
-    #tab-nav::-webkit-scrollbar { display: none; height: 0; }
-    /* Active tab underline style (ensure visible on all sizes) */
-    .tab-btn { border-bottom-width: 2px; }
-    .tab-btn.border-blue-600 { border-bottom-color: #2563eb; }
-
-    /* ===== LAYOUT: MINIMALIST ===== */
-    [data-template="minimalist"] #preview-header {
-      display: flex !important;
-      align-items: start !important;
-      justify-content: flex-start !important;
-      gap: 1.5rem !important;
-    }
-    [data-template="minimalist"] #preview-header img {
-      order: -1 !important;
-    }
-
-    /* ===== LAYOUT: TECHY ===== */
-    [data-template="techy"] {
-      background-color: #f1f5f9 !important;
-      background-image: radial-gradient(#cbd5e1 1px, transparent 1px) !important;
-      background-size: 16px 16px !important;
-      color: #0f172a !important;
-    }
-    [data-template="techy"] #preview-header {
-      display: flex !important;
-      align-items: start !important;
-      justify-content: flex-start !important;
-      gap: 1.5rem !important;
-    }
-    [data-template="techy"] #preview-header img {
-      order: -1 !important;
-      border-radius: 8px !important;
-      border: 2px solid #6366f1 !important;
-    }
-    [data-template="techy"] #view-name {
-      font-family: 'JetBrains Mono', monospace !important;
-      color: #1e1b4b !important;
-      font-weight: 700 !important;
-    }
-    [data-template="techy"] h3::before {
-      content: "</> " !important;
-      color: #6366f1 !important;
-      font-family: 'JetBrains Mono', monospace !important;
-    }
-    [data-template="techy"] h3 {
-      font-family: 'JetBrains Mono', monospace !important;
-      color: #4338ca !important;
-      border-bottom: 1px dashed #cbd5e1 !important;
-    }
-    [data-template="techy"] .badge-item-live {
-      background-color: #e0e7ff !important;
-      color: #4338ca !important;
-      border: 1px solid #c7d2fe !important;
-      font-family: 'JetBrains Mono', monospace !important;
-      border-radius: 4px !important;
-      font-size: 0.7rem !important;
-    }
-
-    /* ===== LAYOUT: ARTISTIC ===== */
-    [data-template="artistic"] {
-      background-color: #faf6f0 !important;
-      color: #443e38 !important;
-    }
-    [data-template="artistic"] #preview-header {
-      display: flex !important;
-      align-items: start !important;
-      justify-content: flex-start !important;
-      gap: 1.75rem !important;
-    }
-    [data-template="artistic"] #preview-header img {
-      order: -1 !important;
-      border-radius: 60% 40% 60% 40% / 40% 60% 40% 60% !important;
-      border: 2px solid #8c7864 !important;
-      padding: 3px !important;
-      background-color: #ffffff;
-    }
-    [data-template="artistic"] #view-name {
-      font-family: 'Playfair Display', Georgia, serif !important;
-      color: #2e2924 !important;
-      font-size: 2.1rem !important;
-      font-style: italic !important;
-    }
-    [data-template="artistic"] h3 {
-      font-family: 'Playfair Display', Georgia, serif !important;
-      color: #8c7864 !important;
-      font-size: 1rem !important;
-      letter-spacing: 0.025em !important;
-      border-bottom: 1px solid #e3dac9 !important;
-    }
-    [data-template="artistic"] .badge-item-live {
-      background-color: #f1eae1 !important;
-      color: #6e5d4f !important;
-      border: 1px solid #e3dac9 !important;
-      border-radius: 9999px !important;
-      font-style: italic !important;
-      font-size: 0.75rem !important;
-    }
-
-    /* Print adjustments to avoid extra blank pages */
-    @media print {
-      #preview-section { min-height: auto !important; box-shadow: none !important; border: 0 !important; }
-      @page { size: A4; margin: 10mm; }
-      html, body { height: auto !important; }
-      .print\:block { display: block !important; }
-    }
-  </style>
+  <Fragment set:html={`<style>${CV_THEMES_CSS}</style>`} />
 
   <script define:vars={{ lang, initialData, currentTranslation: t('edit.currently') }}>
     const STORAGE_KEY = `cv_backup_data_${lang}`;
