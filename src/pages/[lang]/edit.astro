@@ -295,8 +295,14 @@ const templates = Object.entries(layoutModules)
 
   <Fragment set:html={`<style>${CV_THEMES_CSS}</style>`} />
 
-  <script define:vars={{ lang, initialData, currentTranslation: t('edit.currently') }}>
+  <script>
 import { renderCvContent } from '../../lib/cv-renderer';
+window.__renderCvContent = renderCvContent;
+  </script>
+
+  <div class="hidden"></div>
+
+  <script define:vars={{ lang, initialData, currentTranslation: t('edit.currently') }}>
     const STORAGE_KEY = `cv_backup_data_${lang}`;
     const TEMPLATE_KEY = `cv_selected_template_${lang}`;
 
@@ -713,7 +719,7 @@ import { renderCvContent } from '../../lib/cv-renderer';
     function renderPreview() {
       const preview = document.getElementById('preview-section');
       if (preview) {
-        preview.innerHTML = renderCvContent(state, lang);
+        preview.innerHTML = window.__renderCvContent(state, lang);
       }
     }
 
