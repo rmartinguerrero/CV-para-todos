@@ -69,8 +69,8 @@ export const handler = async (event: any) => {
 
     // Instanciar Octokit con el token del usuario
     const octokit = new Octokit({ auth: userToken });
-    const repoName = 'personal-resume';
-    const path = `src/data/resume.${lang}.json`;
+    const repoName = process.env.PUBLISHED_REPO_NAME || 'personal-resume';
+    const path = `resume.${lang}.json`;
 
     try {
       // Intentar obtener el archivo del repositorio del usuario
