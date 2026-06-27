@@ -248,7 +248,7 @@ const templates = Object.entries(layoutModules)
               {t('templates.subtitle') || (lang === 'es' ? 'Elige el aspecto visual de tu CV' : lang === 'it' ? "Scegli l'aspetto visivo del tuo CV" : 'Choose the visual style of your resume')}
             </label>
             
-            {/* Agregamos sm:grid-cols-3 para que si en pantallas grandes hay 3 plantillas, se vean alineadas */}
+            <!-- sm:grid-cols-3 para 3 plantillas alineadas en pantallas grandes -->
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
               {templates.map((tpl, i) => {
             // 1. Calculamos la clave de traducción
@@ -346,676 +346,601 @@ const templates = Object.entries(layoutModules)
   <Fragment set:html={`<style>${CV_THEMES_CSS}</style>`} />
 
   <script define:vars={{ lang, initialData, currentTranslation: t('edit.currently') }}>
-    const STORAGE_KEY = `cv_backup_data_${lang}`;
-    const TEMPLATE_KEY = `cv_selected_template_${lang}`;
+    (function () {
+      var STORAGE_KEY = 'cv_backup_data_' + lang;
+      var TEMPLATE_KEY = 'cv_selected_template_' + lang;
 
-    // Diccionario de textos de sustitución limpios según el idioma del cliente
-    const translationsUI = {
-      es: { defaultName: "Tu Nombre", defaultLabel: "Tu Profesión u Oficio" },
-      it: { defaultName: "Il Tuo Nome", defaultLabel: "La Tua Professione" },
-      en: { defaultName: "Your Name", defaultLabel: "Your Profession" }
-    }[lang] || { defaultName: "Tu Nombre", defaultLabel: "Tu Profesión" };
+      var translationsUI = {
+        es: { defaultName: 'Tu Nombre', defaultLabel: 'Tu Profesión u Oficio' },
+        it: { defaultName: 'Il Tuo Nome', defaultLabel: 'La Tua Professione' },
+        en: { defaultName: 'Your Name', defaultLabel: 'Your Profession' }
+      }[lang] || { defaultName: 'Tu Nombre', defaultLabel: 'Tu Profesión' };
 
-    // Función para cargar datos del servidor (si está autenticado)
-    async function loadRemoteResume() {
-      try {
-        const response = await fetch(`/.netlify/functions/load-resume?lang=${lang}`, {
-          method: 'GET',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' }
-        });
-
-        if (!response.ok) return null;
-
-        const result = await response.json();
-        
-        if (result.authenticated && result.data) {
-          // Guardar en localStorage y retornar
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(result.data));
-          return result.data;
+      async function loadRemoteResume() {
+        try {
+          var response = await fetch('/.netlify/functions/load-resume?lang=' + lang, {
+            method: 'GET',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' }
+          });
+          if (!response.ok) return null;
+          var result = await response.json();
+          if (result.authenticated && result.data) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(result.data));
+            return result.data;
+          }
+        } catch (err) {
+          console.error('Error cargando resume remoto:', err);
         }
-      } catch (err) {
-        console.error('Error cargando resume remoto:', err);
+        return null;
       }
-      return null;
-    }
 
-    let state = (() => {
-      try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        return saved ? JSON.parse(saved) : initialData;
-      } catch {
-        return initialData;
-      }
-    })();
-
-    if (!state.basics) state.basics = { name: "", label: "", email: "", phone: "", summary: "", image: "" };
-    if (!state.work) state.work = [];
-    if (!state.education) state.education = [];
-    if (!state.certificates) state.certificates = [];
-    if (!state.languages) state.languages = [];
-    if (!state.meta) state.meta = {};
-    if (!state.skills) state.skills = [];
-
-    function normalizeMonthValue(value) {
-      if (!value) return '';
-      return value.slice(0, 7);
-    }
-
-    function normalizeStateDates() {
-      const normalizeDates = (item) => {
-        ['startDate', 'endDate'].forEach((key) => {
-          if (item[key]) item[key] = normalizeMonthValue(item[key]);
-        });
-      };
-      state.work.forEach(normalizeDates);
-      state.education.forEach(normalizeDates);
-      state.certificates.forEach((item) => {
-        if (item.date) item.date = normalizeMonthValue(item.date);
-      });
-    }
-
-    function formatDateRange(start, end) {
-      const from = normalizeMonthValue(start);
-      const to = end ? normalizeMonthValue(end) : currentTranslation;
-      if (from && to) return `${from} — ${to}`;
-      return to || from || '';
-    }
-
-    normalizeStateDates();
-
-    const labels = {
-      es: { company: 'Empresa', position: 'Puesto', start: 'Inicio', end: 'Fin', desc: 'Descripción', inst: 'Institución', area: 'Titulación', remove: 'Eliminar' },
-      it: { company: 'Azienda', position: 'Ruolo', start: 'Inizio', end: 'Fine', desc: 'Descrizione', inst: 'Istituto', area: 'Titolo', remove: 'Elimina' },
-      en: { company: 'Company', position: 'Position', start: 'Start Date', end: 'End Date', desc: 'Description', inst: 'Institution', area: 'Area of Study', remove: 'Remove' }
-    }[lang];
-
-    function setDeepValue(obj, path, value) {
-      const parts = path.split('.');
-      let current = obj;
-      for (let i = 0; i < parts.length - 1; i++) {
-        const key = parts[i];
-        if (!(key in current)) current[key] = isNaN(parts[i + 1]) ? {} : [];
-        current = current[key];
-      }
-      current[parts[parts.length - 1]] = value;
-    }
-
-    function getDeepValue(obj, path) {
-      return path.split('.').reduce((acc, part) => acc && acc[part], obj);
-    }
-
-    function saveState() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      renderPreview();
-    }
-
-    function applyTemplate(templateId) {
-  // 1. Resaltar visualmente la tarjeta seleccionada en el formulario
-  document.querySelectorAll('.template-card').forEach(c => {
-    if (c.dataset.templateId === templateId.toLowerCase()) {
-      c.classList.remove('border-gray-200');
-      c.classList.add('border-blue-600', 'ring-2', 'ring-blue-100');
-    } else {
-      c.classList.remove('border-blue-600', 'ring-2', 'ring-blue-100');
-      c.classList.add('border-gray-200');
-    }
-  });
-
-  // 2. Guardar la selección en el estado local
-  state.meta.template = templateId;
-  localStorage.setItem(TEMPLATE_KEY, templateId);
-
-  // 💥 EL DISPARADOR MÁGICO: Cambiamos el atributo data-template de la preview
-  // Esto activará instantáneamente los estilos globales del Layout cargado sin tocar el formulario
-  const preview = document.getElementById('preview-section');
-  if (preview) {
-    preview.setAttribute('data-template', templateId.toLowerCase());
-  }
-}
-
-    document.querySelectorAll('.template-card').forEach(card => {
-      card.addEventListener('click', () => { applyTemplate(card.dataset.templateId); saveState(); });
-    });
-
-    const fileInput = document.getElementById('photo-file');
-    const photoStatus = document.getElementById('photo-status');
-    const removePhotoBtn = document.getElementById('btn-remove-photo');
-
-    fileInput?.addEventListener('change', (e) => {
-      const file = e.target.files?.[0];
-      if (!file) return;
-      if (photoStatus) photoStatus.textContent = file.name;
-      removePhotoBtn?.classList.remove('hidden');
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          state.basics.image = event.target.result;
-          saveState();
+      var state = (function () {
+        try {
+          var saved = localStorage.getItem(STORAGE_KEY);
+          return saved ? JSON.parse(saved) : initialData;
+        } catch (e) {
+          return initialData;
         }
-      };
-      reader.readAsDataURL(file);
-    });
+      })();
 
-    removePhotoBtn?.addEventListener('click', () => {
-      state.basics.image = "";
-      if (fileInput) fileInput.value = "";
-      if (photoStatus) photoStatus.textContent = lang === 'es' ? 'Sin archivo' : lang === 'it' ? 'Nessun file' : 'No file';
-      removePhotoBtn.classList.add('hidden');
-      saveState();
-    });
+      if (!state.basics) state.basics = { name: '', label: '', email: '', phone: '', summary: '', image: '' };
+      if (!state.work) state.work = [];
+      if (!state.education) state.education = [];
+      if (!state.certificates) state.certificates = [];
+      if (!state.languages) state.languages = [];
+      if (!state.meta) state.meta = {};
+      if (!state.skills) state.skills = [];
 
-    const tabButtons = Array.from(document.querySelectorAll('.tab-btn'));
-    const tabNav = document.getElementById('tab-nav');
-    const tabPrev = document.getElementById('tab-prev');
-    const tabNext = document.getElementById('tab-next');
+      function normalizeMonthValue(value) {
+        if (!value) return '';
+        return value.slice(0, 7);
+      }
 
-    function activateTab(btn) {
-      document.querySelectorAll('.tab-btn').forEach(b => {
-        b.classList.remove('border-blue-600', 'text-blue-600');
-        b.classList.add('border-transparent', 'text-gray-500');
-      });
-      btn.classList.add('border-blue-600', 'text-blue-600');
-      document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
-      document.getElementById(`tab-${btn.dataset.tab}`)?.classList.remove('hidden');
-      btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-    }
+      function normalizeStateDates() {
+        function normalizeDates(item) {
+          ['startDate', 'endDate'].forEach(function (key) {
+            if (item[key]) item[key] = normalizeMonthValue(item[key]);
+          });
+        }
+        state.work.forEach(normalizeDates);
+        state.education.forEach(normalizeDates);
+        state.certificates.forEach(function (item) {
+          if (item.date) item.date = normalizeMonthValue(item.date);
+        });
+      }
 
-    tabButtons.forEach(btn => {
-      btn.addEventListener('click', () => activateTab(btn));
-    });
+      function formatDateRange(start, end) {
+        var from = normalizeMonthValue(start);
+        var to = end ? normalizeMonthValue(end) : currentTranslation;
+        if (from && to) return from + ' — ' + to;
+        return to || from || '';
+      }
 
-    function getActiveTabIndex() {
-      return tabButtons.findIndex(btn => btn.classList.contains('border-blue-600'));
-    }
+      normalizeStateDates();
 
-    tabPrev?.addEventListener('click', () => {
-      const currentIndex = getActiveTabIndex();
-      const prevIndex = currentIndex <= 0 ? tabButtons.length - 1 : currentIndex - 1;
-      activateTab(tabButtons[prevIndex]);
-    });
+      var labels = {
+        es: { company: 'Empresa', position: 'Puesto', start: 'Inicio', end: 'Fin', desc: 'Descripción', inst: 'Institución', area: 'Titulación', remove: 'Eliminar' },
+        it: { company: 'Azienda', position: 'Ruolo', start: 'Inizio', end: 'Fine', desc: 'Descrizione', inst: 'Istituto', area: 'Titolo', remove: 'Elimina' },
+        en: { company: 'Company', position: 'Position', start: 'Start Date', end: 'End Date', desc: 'Description', inst: 'Institution', area: 'Area of Study', remove: 'Remove' }
+      }[lang];
 
-    tabNext?.addEventListener('click', () => {
-      const currentIndex = getActiveTabIndex();
-      const nextIndex = currentIndex === -1 || currentIndex === tabButtons.length - 1 ? 0 : currentIndex + 1;
-      activateTab(tabButtons[nextIndex]);
-    });
+      function setDeepValue(obj, path, value) {
+        var parts = path.split('.');
+        var current = obj;
+        for (var i = 0; i < parts.length - 1; i++) {
+          var key = parts[i];
+          if (!(key in current)) current[key] = isNaN(parts[i + 1]) ? {} : [];
+          current = current[key];
+        }
+        current[parts[parts.length - 1]] = value;
+      }
 
-    tabPrev?.addEventListener('touchstart', () => tabNav?.scrollBy({ left: -150, behavior: 'smooth' }));
-    tabNext?.addEventListener('touchstart', () => tabNav?.scrollBy({ left: 150, behavior: 'smooth' }));
+      function getDeepValue(obj, path) {
+        return path.split('.').reduce(function (acc, part) { return acc && acc[part]; }, obj);
+      }
 
-    function setupInputSync() {
-      document.querySelectorAll('#cv-form input[data-path], #cv-form textarea[data-path]').forEach(input => {
-        input.replaceWith(input.cloneNode(true));
-      });
-      document.querySelectorAll('#cv-form input[data-path], #cv-form textarea[data-path]').forEach(input => {
-        input.addEventListener('input', (e) => {
-          const path = e.target.getAttribute('data-path');
-          if (path) {
-            setDeepValue(state, path, e.target.value);
-            saveState();
+      function saveState() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        renderPreview();
+      }
+
+      function applyTemplate(templateId) {
+        document.querySelectorAll('.template-card').forEach(function (c) {
+          if (c.dataset.templateId === templateId.toLowerCase()) {
+            c.classList.remove('border-gray-200');
+            c.classList.add('border-blue-600', 'ring-2', 'ring-blue-100');
+          } else {
+            c.classList.remove('border-blue-600', 'ring-2', 'ring-blue-100');
+            c.classList.add('border-gray-200');
           }
         });
-      });
-    }
-
-    function populateFormBasics() {
-      document.querySelectorAll('#cv-form input[data-path], #cv-form textarea[data-path]').forEach(input => {
-        const path = input.getAttribute('data-path');
-        if (path) input.value = getDeepValue(state, path) || "";
-      });
-      if (state.basics.image && photoStatus) {
-        photoStatus.textContent = lang === 'es' ? 'Imagen cargada' : lang === 'it' ? 'Immagine caricata' : 'Image loaded';
-        removePhotoBtn?.classList.remove('hidden');
-      }
-    }
-
-    function renderDynamicBlocks() {
-      const workContainer = document.getElementById('work-container');
-      if (workContainer) {
-        workContainer.innerHTML = '';
-        state.work.forEach((item, index) => { workContainer.appendChild(createWorkBlock(item, index)); });
-      }
-      const eduContainer = document.getElementById('education-container');
-      if (eduContainer) {
-        eduContainer.innerHTML = '';
-        state.education.forEach((item, index) => { eduContainer.appendChild(createEduBlock(item, index)); });
-      }
-      const certContainer = document.getElementById('certificates-container');
-      if (certContainer) {
-        certContainer.innerHTML = '';
-        state.certificates.forEach((item, index) => { certContainer.appendChild(createCertificateBlock(item, index)); });
-      }
-      const langContainer = document.getElementById('languages-container');
-      if (langContainer) {
-        langContainer.innerHTML = '';
-        state.languages.forEach((item, index) => { langContainer.appendChild(createLanguageBlock(item, index)); });
-      }
-      setupInputSync();
-    }
-
-    function createWorkBlock(item, index) {
-      const div = document.createElement('div');
-      div.className = "p-4 bg-gray-50 rounded-xl border border-gray-200 relative space-y-3";
-      div.innerHTML = `
-        <button type="button" class="absolute top-2 right-2 text-red-500 text-xs font-medium" onclick="removeWorkBlock(${index})">${labels.remove}</button>
-        <div class="grid sm:grid-cols-2 gap-3 pt-3">
-          <div>
-            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${labels.company}</label>
-            <input type="text" data-path="work.${index}.name" value="${item.name || ''}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" />
-          </div>
-          <div>
-            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${labels.position}</label>
-            <input type="text" data-path="work.${index}.position" value="${item.position || ''}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" />
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${labels.start}</label>
-            <input type="month" data-path="work.${index}.startDate" value="${normalizeMonthValue(item.startDate || '')}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" />
-          </div>
-          <div>
-            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${labels.end}</label>
-            <input type="month" data-path="work.${index}.endDate" value="${normalizeMonthValue(item.endDate || '')}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" />
-          </div>
-        </div>
-        <div>
-          <label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${labels.desc}</label>
-          <textarea data-path="work.${index}.summary" rows="2" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm">${item.summary || ''}</textarea>
-        </div>
-      `;
-      return div;
-    }
-
-    window.removeWorkBlock = (index) => { state.work.splice(index, 1); saveState(); renderDynamicBlocks(); };
-
-    function createEduBlock(item, index) {
-      const div = document.createElement('div');
-      div.className = "p-4 bg-gray-50 rounded-xl border border-gray-200 relative space-y-3";
-      div.innerHTML = `
-        <button type="button" class="absolute top-2 right-2 text-red-500 text-xs font-medium" onclick="removeEduBlock(${index})">${labels.remove}</button>
-        <div class="grid sm:grid-cols-2 gap-3 pt-3">
-          <div>
-            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${labels.inst}</label>
-            <input type="text" data-path="education.${index}.institution" value="${item.institution || ''}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" />
-          </div>
-          <div>
-            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${labels.area}</label>
-            <input type="text" data-path="education.${index}.area" value="${item.area || ''}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" />
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${labels.start}</label>
-            <input type="month" data-path="education.${index}.startDate" value="${normalizeMonthValue(item.startDate || '')}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" />
-          </div>
-          <div>
-            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${labels.end}</label>
-            <input type="month" data-path="education.${index}.endDate" value="${normalizeMonthValue(item.endDate || '')}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" />
-          </div>
-        </div>
-      `;
-      return div;
-    }
-
-    window.removeEduBlock = (index) => { state.education.splice(index, 1); saveState(); renderDynamicBlocks(); };
-
-    function createCertificateBlock(item, index) {
-      const div = document.createElement('div');
-      div.className = "p-4 bg-gray-50 rounded-xl border border-gray-200 relative space-y-3";
-      div.innerHTML = `
-        <button type="button" class="absolute top-2 right-2 text-red-500 text-xs font-medium" onclick="removeCertificateBlock(${index})">${labels.remove}</button>
-        <div>
-          <label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${lang === 'es' ? 'Nombre del certificado' : lang === 'it' ? 'Nome certificato' : 'Certificate name'}</label>
-          <input type="text" data-path="certificates.${index}.name" value="${item.name || ''}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" />
-        </div>
-        <div class="grid sm:grid-cols-2 gap-3">
-          <div>
-            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${lang === 'es' ? 'Emisor' : lang === 'it' ? 'Emittente' : 'Issuer'}</label>
-            <input type="text" data-path="certificates.${index}.issuer" value="${item.issuer || ''}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" />
-          </div>
-          <div>
-            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${lang === 'es' ? 'Fecha' : lang === 'it' ? 'Data' : 'Date'}</label>
-            <input type="month" data-path="certificates.${index}.date" value="${normalizeMonthValue(item.date || '')}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" />
-          </div>
-        </div>
-      `;
-      return div;
-    }
-
-    window.removeCertificateBlock = (index) => { state.certificates.splice(index, 1); saveState(); renderDynamicBlocks(); };
-
-    function createLanguageBlock(item, index) {
-      const div = document.createElement('div');
-      div.className = "p-4 bg-gray-50 rounded-xl border border-gray-200 relative space-y-3";
-      div.innerHTML = `
-        <button type="button" class="absolute top-2 right-2 text-red-500 text-xs font-medium" onclick="removeLanguageBlock(${index})">${labels.remove}</button>
-        <div class="grid sm:grid-cols-2 gap-3">
-          <div>
-            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${lang === 'es' ? 'Idioma' : lang === 'it' ? 'Lingua' : 'Language'}</label>
-            <input type="text" data-path="languages.${index}.language" value="${item.language || ''}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" />
-          </div>
-          <div>
-            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${lang === 'es' ? 'Nivel' : lang === 'it' ? 'Livello' : 'Fluency'}</label>
-            <input type="text" data-path="languages.${index}.fluency" value="${item.fluency || ''}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" />
-          </div>
-        </div>
-      `;
-      return div;
-    }
-
-    window.removeLanguageBlock = (index) => { state.languages.splice(index, 1); saveState(); renderDynamicBlocks(); };
-
-    document.getElementById('btn-add-work')?.addEventListener('click', () => {
-      state.work.push({ name: "", position: "", startDate: "", endDate: "", summary: "" });
-      saveState(); renderDynamicBlocks();
-    });
-
-    document.getElementById('btn-add-edu')?.addEventListener('click', () => {
-      state.education.push({ institution: "", area: "", startDate: "", endDate: "" });
-      saveState(); renderDynamicBlocks();
-    });
-
-    document.getElementById('btn-add-certificate')?.addEventListener('click', () => {
-      state.certificates.push({ name: "", issuer: "", date: "" });
-      saveState(); renderDynamicBlocks();
-    });
-
-    document.getElementById('btn-add-language')?.addEventListener('click', () => {
-      state.languages.push({ language: "", fluency: "" });
-      saveState(); renderDynamicBlocks();
-    });
-
-    const skillsInput = document.getElementById('skills-input');
-    const skillsTagContainer = document.getElementById('skills-tag-container');
-
-    function renderSkillsTags() {
-      if (!skillsTagContainer) return;
-      document.querySelectorAll('.skill-tag-item').forEach(el => el.remove());
-      state.skills.forEach((skillObj, idx) => {
-        if (!skillObj.name) return;
-        const div = document.createElement('div');
-        div.className = "skill-tag-item inline-flex items-center gap-1.5 bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded-lg";
-        div.innerHTML = `<span>${skillObj.name}</span><button type="button" class="text-blue-200 hover:text-white font-extrabold ml-0.5" onclick="removeSkillObj(${idx})">&times;</button>`;
-        skillsTagContainer.appendChild(div);
-      });
-      renderPreview();
-    }
-
-    window.removeSkillObj = (idx) => { state.skills.splice(idx, 1); saveState(); renderSkillsTags(); };
-
-    skillsInput?.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ',') {
-        e.preventDefault();
-        let val = skillsInput.value.replace(/,/g, '').trim();
-        if (val) {
-          if (!state.skills.some(s => s.name.toLowerCase() === val.toLowerCase())) {
-            state.skills.push({ name: val });
-            saveState(); renderSkillsTags();
-          }
-        }
-        skillsInput.value = '';
-      }
-    });
-
-    function toggleSection(id, hasContent) {
-      const el = document.getElementById(id);
-      if (el) el.classList.toggle('hidden', !hasContent);
-    }
-
-    function renderPreview() {
-      const nameEl = document.getElementById('view-name');
-      const labelEl = document.getElementById('view-label');
-      const summaryEl = document.getElementById('view-summary');
-      const contactEl = document.getElementById('view-contact');
-
-      if (nameEl) nameEl.textContent = state.basics.name.trim() || translationsUI.defaultName;
-      if (labelEl) labelEl.textContent = state.basics.label.trim() || translationsUI.defaultLabel;
-      if (summaryEl) summaryEl.textContent = state.basics.summary || '';
-      toggleSection('section-summary', !!state.basics.summary);
-
-      if (contactEl) {
-        let html = '';
-        if (state.basics.email) html += `<span>📧 ${state.basics.email}</span>`;
-        if (state.basics.phone) html += `<span>📞 ${state.basics.phone}</span>`;
-        const website = state.basics.web || state.basics.url || '';
-      if (website) html += `<span>🔗 <a href="${website}" target="_blank" rel="noopener noreferrer">${website}</a></span>`;
-        contactEl.innerHTML = html;
-      }
-
-      const imgEl = document.getElementById('view-image');
-      if (imgEl) {
-        if (state.basics.image) {
-          imgEl.src = state.basics.image;
-          imgEl.classList.remove('hidden');
-        } else {
-          imgEl.classList.add('hidden');
+        state.meta.template = templateId;
+        localStorage.setItem(TEMPLATE_KEY, templateId);
+        var preview = document.getElementById('preview-section');
+        if (preview) {
+          preview.setAttribute('data-template', templateId.toLowerCase());
         }
       }
 
-      const expEl = document.getElementById('view-experience');
-      if (expEl) {
-        expEl.innerHTML = '';
-        state.work.forEach(w => {
-          const div = document.createElement('div');
-          div.innerHTML = `
-            <div class="flex justify-between font-semibold text-sm">
-              <span class="text-gray-900 font-bold">${w.position || ''}</span>
-              <span class="text-gray-500 text-xs">${formatDateRange(w.startDate, w.endDate)}</span>
-            </div>
-            <div class="text-blue-600 text-xs font-medium">${w.name || ''}</div>
-            <p class="text-gray-600 text-xs mt-1 whitespace-pre-line">${w.summary || ''}</p>
-          `;
-          expEl.appendChild(div);
-        });
-        toggleSection('section-experience', state.work.length > 0);
-      }
-
-      const eduEl = document.getElementById('view-education');
-      if (eduEl) {
-        eduEl.innerHTML = '';
-        state.education.forEach(e => {
-          const div = document.createElement('div');
-          div.innerHTML = `
-            <div class="flex justify-between font-semibold text-sm">
-              <span class="text-gray-900 font-bold">${e.area || ''}</span>
-              <span class="text-gray-500 text-xs">${formatDateRange(e.startDate, e.endDate)}</span>
-            </div>
-            <div class="text-gray-500 text-xs font-medium">${e.institution || ''}</div>
-          `;
-          eduEl.appendChild(div);
-        });
-        toggleSection('section-education', state.education.length > 0);
-      }
-
-      const certEl = document.getElementById('view-certificates');
-      if (certEl) {
-        certEl.innerHTML = '';
-        state.certificates.forEach(c => {
-          const div = document.createElement('div');
-          div.innerHTML = `
-            <div class="flex justify-between font-semibold text-sm">
-              <span class="text-gray-900 font-bold">${c.name || ''}</span>
-              <span class="text-gray-500 text-xs">${normalizeMonthValue(c.date || '')}</span>
-            </div>
-            <div class="text-gray-500 text-xs font-medium">${c.issuer || ''}</div>
-          `;
-          certEl.appendChild(div);
-        });
-        toggleSection('section-certificates', state.certificates.length > 0);
-      }
-
-      const langEl = document.getElementById('view-languages');
-      if (langEl) {
-        langEl.innerHTML = '';
-        state.languages.forEach(l => {
-          const div = document.createElement('div');
-          div.className = "flex justify-between text-sm text-gray-700";
-          div.innerHTML = `<span>${l.language || ''}</span><span class="text-gray-500">${l.fluency || ''}</span>`;
-          langEl.appendChild(div);
-        });
-        toggleSection('section-languages', state.languages.length > 0);
-      }
-
-      const badgesEl = document.getElementById('view-skills-badges');
-      if (badgesEl) {
-        badgesEl.innerHTML = '';
-        state.skills.forEach(s => {
-          if (!s.name) return;
-          const span = document.createElement('span');
-          span.className = "badge-item-live border shadow-xs";
-          span.textContent = s.name;
-          badgesEl.appendChild(span);
-        });
-        toggleSection('section-skills', state.skills.length > 0);
-      }
-    }
-
-    document.querySelectorAll('.btn-print-control').forEach(btn => {
-      btn.addEventListener('click', () => {
-        window.print();
+      document.querySelectorAll('.template-card').forEach(function (card) {
+        card.addEventListener('click', function () { applyTemplate(card.dataset.templateId); saveState(); });
       });
-    });
 
-    document.querySelectorAll('.btn-download-json-control').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
-        const anchor = document.createElement('a');
-        anchor.setAttribute("href", dataStr);
-        anchor.setAttribute("download", `resume.${lang}.json`);
-        document.body.appendChild(anchor);
-        anchor.click(); anchor.remove();
-      });
-    });
+      var fileInput = document.getElementById('photo-file');
+      var photoStatus = document.getElementById('photo-status');
+      var removePhotoBtn = document.getElementById('btn-remove-photo');
 
-    document.getElementById('btn-publish')?.addEventListener('click', async () => {
-      const btn = document.getElementById('btn-publish');
-      if (!btn) return;
-      
-      // Verificar si está autenticado (cookie github_user disponible)
-      const isAuthenticated = document.cookie.includes('github_user=');
-      
-      if (!isAuthenticated) {
-        const confirmLogin = confirm(
-          lang === 'es' 
-            ? '¿Conectar tu GitHub para publicar tu CV en tu propia web?'
-            : lang === 'it'
-            ? 'Vuoi collegare il tuo GitHub per pubblicare il tuo CV sul tuo sito web?'
-            : 'Do you want to connect your GitHub to publish your CV on your own website?'
-        );
-        
-        if (confirmLogin) {
-          window.location.href = '/.netlify/functions/auth-login';
-        }
-        return;
-      }
-      
-      btn.disabled = true;
-      const originalText = btn.textContent;
-      btn.textContent = lang === 'es' ? 'Publicando...' : lang === 'it' ? 'Pubblicazione...' : 'Publishing...';
-      
-      try {
-        const savedLangs = ['es', 'it', 'en'];
-        const resumeDataByLang = {};
-
-        savedLangs.forEach((code) => {
-          const saved = localStorage.getItem(`cv_backup_data_${code}`);
-          if (!saved) return;
-          try {
-            const parsed = JSON.parse(saved);
-            if (parsed?.basics?.name?.trim()) {
-              resumeDataByLang[code] = parsed;
+      if (fileInput) {
+        fileInput.addEventListener('change', function (e) {
+          var file = e.target.files[0];
+          if (!file) return;
+          if (photoStatus) photoStatus.textContent = file.name;
+          if (removePhotoBtn) removePhotoBtn.classList.remove('hidden');
+          var reader = new FileReader();
+          reader.onload = function (event) {
+            if (event.target.result) {
+              state.basics.image = event.target.result;
+              saveState();
             }
-          } catch {
-            // ignorar entradas corruptas
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      if (removePhotoBtn) {
+        removePhotoBtn.addEventListener('click', function () {
+          state.basics.image = '';
+          if (fileInput) fileInput.value = '';
+          if (photoStatus) photoStatus.textContent = lang === 'es' ? 'Sin archivo' : lang === 'it' ? 'Nessun file' : 'No file';
+          removePhotoBtn.classList.add('hidden');
+          saveState();
+        });
+      }
+
+      var tabButtons = Array.from(document.querySelectorAll('.tab-btn'));
+      var tabNav = document.getElementById('tab-nav');
+      var tabPrev = document.getElementById('tab-prev');
+      var tabNext = document.getElementById('tab-next');
+
+      function activateTab(btn) {
+        document.querySelectorAll('.tab-btn').forEach(function (b) {
+          b.classList.remove('border-blue-600', 'text-blue-600');
+          b.classList.add('border-transparent', 'text-gray-500');
+        });
+        btn.classList.add('border-blue-600', 'text-blue-600');
+        document.querySelectorAll('.tab-content').forEach(function (c) { c.classList.add('hidden'); });
+        var target = document.getElementById('tab-' + btn.dataset.tab);
+        if (target) target.classList.remove('hidden');
+        btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
+
+      tabButtons.forEach(function (btn) {
+        btn.addEventListener('click', function () { activateTab(btn); });
+      });
+
+      function getActiveTabIndex() {
+        return tabButtons.findIndex(function (btn) { return btn.classList.contains('border-blue-600'); });
+      }
+
+      if (tabPrev) {
+        tabPrev.addEventListener('click', function () {
+          var currentIndex = getActiveTabIndex();
+          var prevIndex = currentIndex <= 0 ? tabButtons.length - 1 : currentIndex - 1;
+          activateTab(tabButtons[prevIndex]);
+        });
+        tabPrev.addEventListener('touchstart', function () { if (tabNav) tabNav.scrollBy({ left: -150, behavior: 'smooth' }); });
+      }
+
+      if (tabNext) {
+        tabNext.addEventListener('click', function () {
+          var currentIndex = getActiveTabIndex();
+          var nextIndex = currentIndex === -1 || currentIndex === tabButtons.length - 1 ? 0 : currentIndex + 1;
+          activateTab(tabButtons[nextIndex]);
+        });
+        tabNext.addEventListener('touchstart', function () { if (tabNav) tabNav.scrollBy({ left: 150, behavior: 'smooth' }); });
+      }
+
+      function populateFormBasics() {
+        document.querySelectorAll('#cv-form input[data-path], #cv-form textarea[data-path]').forEach(function (input) {
+          var path = input.getAttribute('data-path');
+          if (path) input.value = getDeepValue(state, path) || '';
+        });
+        if (state.basics.image && photoStatus) {
+          photoStatus.textContent = lang === 'es' ? 'Imagen cargada' : lang === 'it' ? 'Immagine caricata' : 'Image loaded';
+          if (removePhotoBtn) removePhotoBtn.classList.remove('hidden');
+        }
+      }
+
+      function renderDynamicBlocks() {
+        var workContainer = document.getElementById('work-container');
+        if (workContainer) {
+          workContainer.innerHTML = '';
+          state.work.forEach(function (item, index) { workContainer.appendChild(createWorkBlock(item, index)); });
+        }
+        var eduContainer = document.getElementById('education-container');
+        if (eduContainer) {
+          eduContainer.innerHTML = '';
+          state.education.forEach(function (item, index) { eduContainer.appendChild(createEduBlock(item, index)); });
+        }
+        var certContainer = document.getElementById('certificates-container');
+        if (certContainer) {
+          certContainer.innerHTML = '';
+          state.certificates.forEach(function (item, index) { certContainer.appendChild(createCertificateBlock(item, index)); });
+        }
+        var langContainer = document.getElementById('languages-container');
+        if (langContainer) {
+          langContainer.innerHTML = '';
+          state.languages.forEach(function (item, index) { langContainer.appendChild(createLanguageBlock(item, index)); });
+        }
+      }
+
+      function createWorkBlock(item, index) {
+        var div = document.createElement('div');
+        div.className = 'p-4 bg-gray-50 rounded-xl border border-gray-200 relative space-y-3';
+        div.innerHTML = '' +
+          '<button type="button" class="absolute top-2 right-2 text-red-500 text-xs font-medium" data-remove="work" data-index="' + index + '">' + labels.remove + '</button>' +
+          '<div class="grid sm:grid-cols-2 gap-3 pt-3">' +
+            '<div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">' + labels.company + '</label><input type="text" data-path="work.' + index + '.name" value="' + escAttr(item.name || '') + '" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div>' +
+            '<div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">' + labels.position + '</label><input type="text" data-path="work.' + index + '.position" value="' + escAttr(item.position || '') + '" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div>' +
+          '</div>' +
+          '<div class="grid grid-cols-2 gap-3">' +
+            '<div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">' + labels.start + '</label><input type="month" data-path="work.' + index + '.startDate" value="' + escAttr(normalizeMonthValue(item.startDate || '')) + '" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div>' +
+            '<div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">' + labels.end + '</label><input type="month" data-path="work.' + index + '.endDate" value="' + escAttr(normalizeMonthValue(item.endDate || '')) + '" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div>' +
+          '</div>' +
+          '<div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">' + labels.desc + '</label><textarea data-path="work.' + index + '.summary" rows="2" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm">' + escText(item.summary || '') + '</textarea></div>';
+        return div;
+      }
+
+      function createEduBlock(item, index) {
+        var div = document.createElement('div');
+        div.className = 'p-4 bg-gray-50 rounded-xl border border-gray-200 relative space-y-3';
+        div.innerHTML = '' +
+          '<button type="button" class="absolute top-2 right-2 text-red-500 text-xs font-medium" data-remove="education" data-index="' + index + '">' + labels.remove + '</button>' +
+          '<div class="grid sm:grid-cols-2 gap-3 pt-3">' +
+            '<div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">' + labels.inst + '</label><input type="text" data-path="education.' + index + '.institution" value="' + escAttr(item.institution || '') + '" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div>' +
+            '<div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">' + labels.area + '</label><input type="text" data-path="education.' + index + '.area" value="' + escAttr(item.area || '') + '" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div>' +
+          '</div>' +
+          '<div class="grid grid-cols-2 gap-3">' +
+            '<div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">' + labels.start + '</label><input type="month" data-path="education.' + index + '.startDate" value="' + escAttr(normalizeMonthValue(item.startDate || '')) + '" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div>' +
+            '<div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">' + labels.end + '</label><input type="month" data-path="education.' + index + '.endDate" value="' + escAttr(normalizeMonthValue(item.endDate || '')) + '" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div>' +
+          '</div>';
+        return div;
+      }
+
+      function createCertificateBlock(item, index) {
+        var div = document.createElement('div');
+        div.className = 'p-4 bg-gray-50 rounded-xl border border-gray-200 relative space-y-3';
+        div.innerHTML = '' +
+          '<button type="button" class="absolute top-2 right-2 text-red-500 text-xs font-medium" data-remove="certificates" data-index="' + index + '">' + labels.remove + '</button>' +
+          '<div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">' + (lang === 'es' ? 'Nombre del certificado' : lang === 'it' ? 'Nome certificato' : 'Certificate name') + '</label><input type="text" data-path="certificates.' + index + '.name" value="' + escAttr(item.name || '') + '" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div>' +
+          '<div class="grid sm:grid-cols-2 gap-3">' +
+            '<div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">' + (lang === 'es' ? 'Emisor' : lang === 'it' ? 'Emittente' : 'Issuer') + '</label><input type="text" data-path="certificates.' + index + '.issuer" value="' + escAttr(item.issuer || '') + '" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div>' +
+            '<div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">' + (lang === 'es' ? 'Fecha' : lang === 'it' ? 'Data' : 'Date') + '</label><input type="month" data-path="certificates.' + index + '.date" value="' + escAttr(normalizeMonthValue(item.date || '')) + '" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div>' +
+          '</div>';
+        return div;
+      }
+
+      function createLanguageBlock(item, index) {
+        var div = document.createElement('div');
+        div.className = 'p-4 bg-gray-50 rounded-xl border border-gray-200 relative space-y-3';
+        div.innerHTML = '' +
+          '<button type="button" class="absolute top-2 right-2 text-red-500 text-xs font-medium" data-remove="languages" data-index="' + index + '">' + labels.remove + '</button>' +
+          '<div class="grid sm:grid-cols-2 gap-3">' +
+            '<div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">' + (lang === 'es' ? 'Idioma' : lang === 'it' ? 'Lingua' : 'Language') + '</label><input type="text" data-path="languages.' + index + '.language" value="' + escAttr(item.language || '') + '" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div>' +
+            '<div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">' + (lang === 'es' ? 'Nivel' : lang === 'it' ? 'Livello' : 'Fluency') + '</label><input type="text" data-path="languages.' + index + '.fluency" value="' + escAttr(item.fluency || '') + '" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div>' +
+          '</div>';
+        return div;
+      }
+
+      document.getElementById('btn-add-work')?.addEventListener('click', function () {
+        state.work.push({ name: '', position: '', startDate: '', endDate: '', summary: '' });
+        saveState(); renderDynamicBlocks();
+      });
+
+      document.getElementById('btn-add-edu')?.addEventListener('click', function () {
+        state.education.push({ institution: '', area: '', startDate: '', endDate: '' });
+        saveState(); renderDynamicBlocks();
+      });
+
+      document.getElementById('btn-add-certificate')?.addEventListener('click', function () {
+        state.certificates.push({ name: '', issuer: '', date: '' });
+        saveState(); renderDynamicBlocks();
+      });
+
+      document.getElementById('btn-add-language')?.addEventListener('click', function () {
+        state.languages.push({ language: '', fluency: '' });
+        saveState(); renderDynamicBlocks();
+      });
+
+      var skillsInput = document.getElementById('skills-input');
+      var skillsTagContainer = document.getElementById('skills-tag-container');
+
+      function renderSkillsTags() {
+        if (!skillsTagContainer) return;
+        document.querySelectorAll('.skill-tag-item').forEach(function (el) { el.remove(); });
+        state.skills.forEach(function (skillObj, idx) {
+          if (!skillObj.name) return;
+          var div = document.createElement('div');
+          div.className = 'skill-tag-item inline-flex items-center gap-1.5 bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded-lg';
+          div.innerHTML = '<span>' + escText(skillObj.name) + '</span><button type="button" class="text-blue-200 hover:text-white font-extrabold ml-0.5" data-remove="skill" data-index="' + idx + '">&times;</button>';
+          skillsTagContainer.appendChild(div);
+        });
+        renderPreview();
+      }
+
+      if (skillsInput) {
+        skillsInput.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ',') {
+            e.preventDefault();
+            var val = skillsInput.value.replace(/,/g, '').trim();
+            if (val) {
+              if (!state.skills.some(function (s) { return s.name.toLowerCase() === val.toLowerCase(); })) {
+                state.skills.push({ name: val });
+                saveState(); renderSkillsTags();
+              }
+            }
+            skillsInput.value = '';
           }
         });
-
-        if (!resumeDataByLang[lang]) {
-          resumeDataByLang[lang] = state;
-        }
-
-        const response = await fetch('/.netlify/functions/deploy', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({
-            langs: Object.keys(resumeDataByLang),
-            resumeDataByLang,
-            template: state.meta?.template || localStorage.getItem(TEMPLATE_KEY) || 'minimalist'
-          })
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-          const successMsg = lang === 'es'
-            ? `¡Publicado! Tu CV está en: ${data.webUrl}`
-            : lang === 'it'
-            ? `Pubblicato! Il tuo CV è su: ${data.webUrl}`
-            : `Published! Your CV is at: ${data.webUrl}`;
-          alert(successMsg);
-        } else {
-          alert(data.error || (lang === 'es' ? 'Error al publicar.' : lang === 'it' ? 'Errore nella pubblicazione.' : 'Error publishing.'));
-        }
-      } catch (err) {
-        console.error('Error:', err);
-        alert(lang === 'es' ? 'Error de conexión.' : lang === 'it' ? 'Errore di connessione.' : 'Connection error.');
-      } finally {
-        btn.disabled = false;
-        btn.textContent = originalText;
       }
-    });
 
-    const savedTemplate = state.meta?.template || localStorage.getItem(TEMPLATE_KEY) || 'minimalist';
-    
-    // Configurar botón de autenticación de GitHub
-    const githubBtns = Array.from(document.querySelectorAll('.btn-github-auth-control'));
-    const statusTexts = Array.from(document.querySelectorAll('.github-status-text'));
-    
-    function updateGitHubAuthStatus() {
-      const isAuthenticated = document.cookie.includes('github_user=');
-      const username = document.cookie.split('github_user=')[1]?.split(';')[0] || '';
-      githubBtns.forEach(btn => {
-        if (isAuthenticated) {
-          btn.classList.remove('bg-gray-800', 'hover:bg-gray-900');
-          btn.classList.add('bg-green-600', 'hover:bg-green-700');
-        } else {
-          btn.classList.remove('bg-green-600', 'hover:bg-green-700');
-          btn.classList.add('bg-gray-800', 'hover:bg-gray-900');
+      function toggleSection(id, hasContent) {
+        var el = document.getElementById(id);
+        if (el) el.classList.toggle('hidden', !hasContent);
+      }
+
+      function renderPreview() {
+        var nameEl = document.getElementById('view-name');
+        var labelEl = document.getElementById('view-label');
+        var summaryEl = document.getElementById('view-summary');
+        var contactEl = document.getElementById('view-contact');
+
+        if (nameEl) nameEl.textContent = state.basics.name.trim() || translationsUI.defaultName;
+        if (labelEl) labelEl.textContent = state.basics.label.trim() || translationsUI.defaultLabel;
+        if (summaryEl) summaryEl.textContent = state.basics.summary || '';
+        toggleSection('section-summary', !!state.basics.summary);
+
+        if (contactEl) {
+          var html = '';
+          if (state.basics.email) html += '<span>📧 ' + escText(state.basics.email) + '</span>';
+          if (state.basics.phone) html += '<span>📞 ' + escText(state.basics.phone) + '</span>';
+          var website = state.basics.web || state.basics.url || '';
+          if (website) html += '<span>🔗 <a href="' + escAttr(website) + '" target="_blank" rel="noopener noreferrer">' + escText(website) + '</a></span>';
+          contactEl.innerHTML = html;
         }
-      });
-      statusTexts.forEach(el => {
-        el.textContent = isAuthenticated ? `✓ ${username}` : (lang === 'es' ? 'Conectar' : lang === 'it' ? 'Collegare' : 'Connect');
-      });
-    }
-    
-    githubBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const isAuthenticated = document.cookie.includes('github_user=');
-        if (isAuthenticated) {
-          const logout = confirm(lang === 'es' ? '¿Desconectar de GitHub?' : lang === 'it' ? 'Disconnettere da GitHub?' : 'Disconnect from GitHub?');
-          if (logout) {
-            document.cookie = 'github_token=; Max-Age=0; Path=/';
-            document.cookie = 'github_user=; Max-Age=0; Path=/';
-            updateGitHubAuthStatus();
+
+        var imgEl = document.getElementById('view-image');
+        if (imgEl) {
+          if (state.basics.image) {
+            imgEl.src = state.basics.image;
+            imgEl.classList.remove('hidden');
+          } else {
+            imgEl.classList.add('hidden');
           }
-        } else {
-          window.location.href = '/.netlify/functions/auth-login';
+        }
+
+        var expEl = document.getElementById('view-experience');
+        if (expEl) {
+          expEl.innerHTML = '';
+          state.work.forEach(function (w) {
+            var div = document.createElement('div');
+            div.innerHTML = '<div class="flex justify-between font-semibold text-sm"><span class="text-gray-900 font-bold">' + escText(w.position || '') + '</span><span class="text-gray-500 text-xs">' + escText(formatDateRange(w.startDate, w.endDate)) + '</span></div><div class="text-blue-600 text-xs font-medium">' + escText(w.name || '') + '</div><p class="text-gray-600 text-xs mt-1 whitespace-pre-line">' + escText(w.summary || '') + '</p>';
+            expEl.appendChild(div);
+          });
+          toggleSection('section-experience', state.work.length > 0);
+        }
+
+        var eduEl = document.getElementById('view-education');
+        if (eduEl) {
+          eduEl.innerHTML = '';
+          state.education.forEach(function (e) {
+            var div = document.createElement('div');
+            div.innerHTML = '<div class="flex justify-between font-semibold text-sm"><span class="text-gray-900 font-bold">' + escText(e.area || '') + '</span><span class="text-gray-500 text-xs">' + escText(formatDateRange(e.startDate, e.endDate)) + '</span></div><div class="text-gray-500 text-xs font-medium">' + escText(e.institution || '') + '</div>';
+            eduEl.appendChild(div);
+          });
+          toggleSection('section-education', state.education.length > 0);
+        }
+
+        var certEl = document.getElementById('view-certificates');
+        if (certEl) {
+          certEl.innerHTML = '';
+          state.certificates.forEach(function (c) {
+            var div = document.createElement('div');
+            div.innerHTML = '<div class="flex justify-between font-semibold text-sm"><span class="text-gray-900 font-bold">' + escText(c.name || '') + '</span><span class="text-gray-500 text-xs">' + escText(normalizeMonthValue(c.date || '')) + '</span></div><div class="text-gray-500 text-xs font-medium">' + escText(c.issuer || '') + '</div>';
+            certEl.appendChild(div);
+          });
+          toggleSection('section-certificates', state.certificates.length > 0);
+        }
+
+        var langEl = document.getElementById('view-languages');
+        if (langEl) {
+          langEl.innerHTML = '';
+          state.languages.forEach(function (l) {
+            var div = document.createElement('div');
+            div.className = 'flex justify-between text-sm text-gray-700';
+            div.innerHTML = '<span>' + escText(l.language || '') + '</span><span class="text-gray-500">' + escText(l.fluency || '') + '</span>';
+            langEl.appendChild(div);
+          });
+          toggleSection('section-languages', state.languages.length > 0);
+        }
+
+        var badgesEl = document.getElementById('view-skills-badges');
+        if (badgesEl) {
+          badgesEl.innerHTML = '';
+          state.skills.forEach(function (s) {
+            if (!s.name) return;
+            var span = document.createElement('span');
+            span.className = 'badge-item-live border shadow-xs';
+            span.textContent = s.name;
+            badgesEl.appendChild(span);
+          });
+          toggleSection('section-skills', state.skills.length > 0);
+        }
+      }
+
+      document.querySelectorAll('.btn-print-control').forEach(function (btn) {
+        btn.addEventListener('click', function () { window.print(); });
+      });
+
+      document.querySelectorAll('.btn-download-json-control').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(state, null, 2));
+          var anchor = document.createElement('a');
+          anchor.setAttribute('href', dataStr);
+          anchor.setAttribute('download', 'resume.' + lang + '.json');
+          document.body.appendChild(anchor);
+          anchor.click(); anchor.remove();
+        });
+      });
+
+      document.getElementById('btn-publish')?.addEventListener('click', async function () {
+        var btn = document.getElementById('btn-publish');
+        if (!btn) return;
+        var isAuthenticated = document.cookie.indexOf('github_user=') !== -1;
+        if (!isAuthenticated) {
+          var confirmLogin = confirm(lang === 'es' ? '¿Conectar tu GitHub para publicar tu CV en tu propia web?' : lang === 'it' ? 'Vuoi collegare il tuo GitHub per pubblicare il tuo CV sul tuo sito web?' : 'Do you want to connect your GitHub to publish your CV on your own website?');
+          if (confirmLogin) window.location.href = '/.netlify/functions/auth-login';
+          return;
+        }
+        btn.disabled = true;
+        var originalText = btn.textContent;
+        btn.textContent = lang === 'es' ? 'Publicando...' : lang === 'it' ? 'Pubblicazione...' : 'Publishing...';
+        try {
+          var savedLangs = ['es', 'it', 'en'];
+          var resumeDataByLang = {};
+          savedLangs.forEach(function (code) {
+            var saved = localStorage.getItem('cv_backup_data_' + code);
+            if (!saved) return;
+            try {
+              var parsed = JSON.parse(saved);
+              if (parsed && parsed.basics && parsed.basics.name && parsed.basics.name.trim()) {
+                resumeDataByLang[code] = parsed;
+              }
+            } catch (e) {}
+          });
+          if (!resumeDataByLang[lang]) resumeDataByLang[lang] = state;
+          var response = await fetch('/.netlify/functions/deploy', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+              langs: Object.keys(resumeDataByLang),
+              resumeDataByLang: resumeDataByLang,
+              template: state.meta ? state.meta.template : localStorage.getItem(TEMPLATE_KEY) || 'minimalist'
+            })
+          });
+          var data = await response.json();
+          if (response.ok) {
+            alert(lang === 'es' ? '¡Publicado! Tu CV está en: ' + data.webUrl : lang === 'it' ? 'Pubblicato! Il tuo CV è su: ' + data.webUrl : 'Published! Your CV is at: ' + data.webUrl);
+          } else {
+            alert(data.error || (lang === 'es' ? 'Error al publicar.' : lang === 'it' ? 'Errore nella pubblicazione.' : 'Error publishing.'));
+          }
+        } catch (err) {
+          console.error('Error:', err);
+          alert(lang === 'es' ? 'Error de conexión.' : lang === 'it' ? 'Errore di connessione.' : 'Connection error.');
+        } finally {
+          btn.disabled = false;
+          btn.textContent = originalText;
         }
       });
-    });
-    
-    updateGitHubAuthStatus();
-    (async () => {
-      const remoteData = await loadRemoteResume();
-      if (remoteData) {
-        state = remoteData;
+
+      var savedTemplate = (state.meta && state.meta.template) || localStorage.getItem(TEMPLATE_KEY) || 'minimalist';
+
+      var githubBtns = Array.from(document.querySelectorAll('.btn-github-auth-control'));
+      var statusTexts = Array.from(document.querySelectorAll('.github-status-text'));
+
+      function updateGitHubAuthStatus() {
+        var isAuthenticated = document.cookie.indexOf('github_user=') !== -1;
+        var username = '';
+        var match = document.cookie.match(/github_user=([^;]+)/);
+        if (match) username = match[1];
+        githubBtns.forEach(function (btn) {
+          if (isAuthenticated) {
+            btn.classList.remove('bg-gray-800', 'hover:bg-gray-900');
+            btn.classList.add('bg-green-600', 'hover:bg-green-700');
+          } else {
+            btn.classList.remove('bg-green-600', 'hover:bg-green-700');
+            btn.classList.add('bg-gray-800', 'hover:bg-gray-900');
+          }
+        });
+        statusTexts.forEach(function (el) {
+          el.textContent = isAuthenticated ? '✓ ' + username : (lang === 'es' ? 'Conectar' : lang === 'it' ? 'Collegare' : 'Connect');
+        });
       }
-      populateFormBasics();
-      renderDynamicBlocks();
-      renderSkillsTags();
-      applyTemplate(savedTemplate);
+
+      githubBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var isAuthenticated = document.cookie.indexOf('github_user=') !== -1;
+          if (isAuthenticated) {
+            var logout = confirm(lang === 'es' ? '¿Desconectar de GitHub?' : lang === 'it' ? 'Disconnettere da GitHub?' : 'Disconnect from GitHub?');
+            if (logout) {
+              document.cookie = 'github_token=; Max-Age=0; Path=/';
+              document.cookie = 'github_user=; Max-Age=0; Path=/';
+              updateGitHubAuthStatus();
+            }
+          } else {
+            window.location.href = '/.netlify/functions/auth-login';
+          }
+        });
+      });
+
+      updateGitHubAuthStatus();
+
+      /* ——— EVENT DELEGATION ——— */
+      function escAttr(s) { return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+      function escText(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+      document.getElementById('cv-form')?.addEventListener('input', function (e) {
+        var target = e.target;
+        var path = target.getAttribute('data-path');
+        if (!path) return;
+        setDeepValue(state, path, target.value);
+        saveState();
+      });
+
+      function removeByType(type, index) {
+        if (type === 'work') { state.work.splice(index, 1); }
+        else if (type === 'education') { state.education.splice(index, 1); }
+        else if (type === 'certificates') { state.certificates.splice(index, 1); }
+        else if (type === 'languages') { state.languages.splice(index, 1); }
+        else if (type === 'skill') { state.skills.splice(index, 1); }
+        else { return; }
+        saveState();
+        if (type === 'skill') { renderSkillsTags(); }
+        else { renderDynamicBlocks(); }
+      }
+
+      document.querySelectorAll('#work-container, #education-container, #certificates-container, #languages-container').forEach(function (container) {
+        container?.addEventListener('click', function (e) {
+          var btn = e.target.closest('[data-remove]');
+          if (!btn) return;
+          e.preventDefault();
+          removeByType(btn.getAttribute('data-remove'), parseInt(btn.getAttribute('data-index'), 10));
+        });
+      });
+
+      document.getElementById('skills-tag-container')?.addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-remove="skill"]');
+        if (!btn) return;
+        e.preventDefault();
+        removeByType('skill', parseInt(btn.getAttribute('data-index'), 10));
+      });
+
+      /* ——— INIT ——— */
+      try {
+        (async function () {
+          var remoteData = await loadRemoteResume();
+          if (remoteData) state = remoteData;
+          populateFormBasics();
+          renderDynamicBlocks();
+          renderSkillsTags();
+          applyTemplate(savedTemplate);
+          renderPreview();
+        })();
+      } catch (e) {
+        console.error('CV Editor init error:', e);
+      }
     })();
   </script>
 
