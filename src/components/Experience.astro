@@ -17,31 +17,31 @@ const { resume, t } = Astro.props;
 
   <ol class="space-y-6">
     {resume.work.filter((job: any) => job.name).map((job: any) => (
-      <li class="grid sm:grid-cols-[1fr_auto] gap-x-6">
-        <div>
+      <li class="grid sm:grid-cols-[1fr_auto] gap-x-6 min-w-0">
+        <div class="min-w-0">
           <div class="flex flex-wrap items-baseline gap-x-2">
-            <h3 class="font-semibold text-gray-900">{job.position}</h3>
+            <h3 class="font-semibold text-gray-900 break-words">{job.position}</h3>
             {job.url ? (
               <a
                 href={job.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="text-sm text-gray-500 hover:text-gray-900 transition-colors"
+                class="text-sm text-gray-500 hover:text-gray-900 transition-colors break-all"
                 aria-label={`${t('label.viewCompany')} ${job.name}`}
               >
                 {job.name} ↗
               </a>
             ) : (
-              <span class="text-sm text-gray-500">{job.name}</span>
+              <span class="text-sm text-gray-500 break-words">{job.name}</span>
             )}
           </div>
           {job.summary && (
-            <p class="mt-1.5 text-sm text-gray-600 leading-relaxed">{job.summary}</p>
+            <p class="mt-1.5 text-sm text-gray-600 leading-relaxed break-words">{job.summary}</p>
           )}
           {job.highlights?.length > 0 && (
-            <ul class="mt-2 space-y-0.5 text-sm text-gray-600 list-disc list-inside">
+            <ul class="mt-2 space-y-0.5 text-sm text-gray-600 list-disc list-inside min-w-0">
               {job.highlights.filter(Boolean).map((h: string) => (
-                <li>{h}</li>
+                <li class="break-words">{h}</li>
               ))}
             </ul>
           )}

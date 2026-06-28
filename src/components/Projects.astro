@@ -17,27 +17,25 @@ const { resume, t } = Astro.props;
 
   <ul class="space-y-5">
     {resume.projects.filter((p: any) => p.name).map((project: any) => (
-      <li>
+      <li class="min-w-0">
         <div class="flex flex-wrap items-baseline gap-x-2">
-          <h3 class="font-semibold text-gray-900">{project.name}</h3>
+          <h3 class="font-semibold text-gray-900 break-words">{project.name}</h3>
           {project.url && (() => {
             try {
-              // Si la URL no es absoluta, new URL() lanzará un error que ahora capturamos
               const parsedUrl = new URL(project.url);
               return (
                 <a 
                   href={project.url} 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  class="text-sm text-gray-500 hover:text-brand-600 transition-colors inline-flex items-center gap-1"
+                  class="text-sm text-gray-500 hover:text-brand-600 transition-colors inline-flex items-center gap-1 break-all"
                 >
                   {parsedUrl.hostname} ↗
                 </a>
               );
             } catch (e) {
-              // Si la URL es inválida o texto plano, se renderiza de forma segura sin romper el Build
               return (
-                <span class="text-sm text-gray-400 italic">
+                <span class="text-sm text-gray-400 italic break-words">
                   {project.url}
                 </span>
               );
@@ -45,12 +43,12 @@ const { resume, t } = Astro.props;
           })()}
         </div>
         {project.description && (
-          <p class="mt-1 text-sm text-gray-600 leading-relaxed">{project.description}</p>
+          <p class="mt-1 text-sm text-gray-600 leading-relaxed break-words">{project.description}</p>
         )}
         {project.keywords?.length > 0 && (
-          <ul class="mt-2 flex flex-wrap gap-1.5" aria-label="Tecnologías">
+          <ul class="mt-2 flex flex-wrap gap-1.5 min-w-0" aria-label="Tecnologías">
             {project.keywords.filter(Boolean).map((kw: string) => (
-              <li class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+              <li class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full max-w-full break-words">
                 {kw}
               </li>
             ))}
