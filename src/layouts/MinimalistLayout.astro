@@ -33,6 +33,8 @@ interface Props {
   t: (key: string) => string;
 }
 
+import Footer from '../components/Footer.astro';
+
 const { title, description, lang, currentLang, availableLangs, resume, t } = Astro.props;
 ---
 <!DOCTYPE html>
@@ -42,12 +44,14 @@ const { title, description, lang, currentLang, availableLangs, resume, t } = Ast
   <meta name="description" content={description} />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{title}</title>
+  <link rel="icon" type="image/png" href="/favicon.png" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body class="bg-white minimalist-layout min-h-screen text-gray-900 antialiased font-sans pdf-page">
   <main class="max-w-3xl mx-auto px-6 py-12 sm:py-16 print:p-0">
     <slot />
   </main>
+  <Footer lang={lang} />
 </body>
 </html>
 

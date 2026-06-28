@@ -1,0 +1,29 @@
+---
+// src/components/Footer.astro
+interface Props {
+  lang: string;
+}
+
+const { lang } = Astro.props;
+const year = new Date().getFullYear();
+---
+
+<footer class="mt-16 border-t border-gray-200 bg-white print:hidden">
+  <div class="max-w-3xl mx-auto px-6 py-8 text-center text-sm text-gray-500">
+    <nav class="flex flex-wrap justify-center gap-x-6 gap-y-2 mb-4">
+      <a href={`/${lang}/cookie-policy`} class="hover:text-gray-700 underline underline-offset-2">
+        {lang === 'it' ? 'Cookie Policy' : 'Política de Cookies'}
+      </a>
+      <span class="text-gray-300 select-none">|</span>
+      <a href={`/${lang}/privacy-policy`} class="hover:text-gray-700 underline underline-offset-2">
+        {lang === 'it' ? 'Informativa sulla Privacy' : 'Política de Privacidad'}
+      </a>
+    </nav>
+    <p class="mb-2">
+      <a href="https://raulmguerrero.com" target="_blank" rel="noopener noreferrer" class="hover:text-gray-700 underline underline-offset-2">
+        {lang === 'it' ? 'Un progetto di RaulMGuerrero' : 'Un proyecto de RaulMGuerrero'}
+      </a>
+    </p>
+    <p>&copy; {lang === 'it' ? 'Tutti i diritti riservati' : 'Derechos reservados'} {year}</p>
+  </div>
+</footer>

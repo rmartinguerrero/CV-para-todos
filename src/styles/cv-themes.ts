@@ -150,7 +150,7 @@ ul{list-style:none}
 }
 
 /* ===== LAYOUT COMPARTIDO ===== */
-.panel-header{display:flex;flex-wrap:wrap;gap:1.5rem;align-items:flex-start;justify-content:space-between}
+.panel-header{display:flex;flex-wrap:wrap;gap:1.5rem;align-items:flex-start;justify-content:space-between}.profile-image{order:-1}
 .panel-header-content{flex:1;min-width:220px}
 .panel-name{font-size:clamp(2rem,3vw,3rem);margin:.75rem 0 .5rem;line-height:1.05}
 .panel-label{margin:.25rem 0 .75rem}
@@ -195,7 +195,7 @@ ul{list-style:none}
 /* ===== RESPONSIVE ===== */
 @media(max-width:640px){
   .page{padding:1.5rem 1rem!important}
-  .panel-header{flex-direction:column-reverse;align-items:stretch}
+  .panel-header{flex-direction:column;align-items:stretch}
   .panel-name{font-size:1.75rem!important}
   .panel-contact{flex-direction:column;gap:.5rem}
   .card-header{flex-direction:column;gap:.25rem}

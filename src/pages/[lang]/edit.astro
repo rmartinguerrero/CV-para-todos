@@ -90,9 +90,9 @@ const templates = Object.entries(layoutModules)
       </a>
 
       <div class="inline-flex rounded-xl bg-gray-100 p-0.5 border border-gray-200 shadow-inner">
-        <button onclick="window.location.href='/es/edit'" class={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all ${lang === 'es' ? 'bg-white text-gray-900 shadow-xs border border-gray-200/60' : 'text-gray-500 hover:text-gray-900'}`}><span class="hidden xl:inline">&#127466;&#127480;&nbsp;</span>ES</button>
-        <button onclick="window.location.href='/it/edit'" class={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all ${lang === 'it' ? 'bg-white text-gray-900 shadow-xs border border-gray-200/60' : 'text-gray-500 hover:text-gray-900'}`}><span class="hidden xl:inline">&#127470;&#127481;&nbsp;</span>IT</button>
-        <button onclick="window.location.href='/en/edit'" class={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all ${lang === 'en' ? 'bg-white text-gray-900 shadow-xs border border-gray-200/60' : 'text-gray-500 hover:text-gray-900'}`}><span class="hidden xl:inline">&#127482;&#127480;&nbsp;</span>EN</button>
+        <button onclick="window.location.href='/es/edit'" class={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all ${lang === 'es' ? 'bg-white text-gray-900 shadow-xs border border-gray-200/60' : 'text-gray-500 hover:text-gray-900'}`}><img src="/flags/es.svg" class="hidden xl:inline w-4 h-3 align-middle mr-1" alt="ES" />ES</button>
+        <button onclick="window.location.href='/it/edit'" class={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all ${lang === 'it' ? 'bg-white text-gray-900 shadow-xs border border-gray-200/60' : 'text-gray-500 hover:text-gray-900'}`}><img src="/flags/it.svg" class="hidden xl:inline w-4 h-3 align-middle mr-1" alt="IT" />IT</button>
+        <button onclick="window.location.href='/en/edit'" class={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all ${lang === 'en' ? 'bg-white text-gray-900 shadow-xs border border-gray-200/60' : 'text-gray-500 hover:text-gray-900'}`}><img src="/flags/en.svg" class="hidden xl:inline w-4 h-3 align-middle mr-1" alt="EN" />EN</button>
       </div>
 
       <div class="flex items-center gap-2">
@@ -133,15 +133,15 @@ const templates = Object.entries(layoutModules)
 
   <div class="grid lg:grid-cols-2 gap-8 items-start min-h-[calc(100vh-4rem)] p-4 sm:p-6 print:block print:p-0">
 
-    <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-6 print:hidden sticky top-20 max-h-[82vh] overflow-y-auto">
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm print:hidden sticky top-20 max-h-[82vh] flex flex-col">
 
-      <div class="flex items-center justify-between border-b border-gray-100 pb-2">
+      <div class="px-6 pt-6 pb-2 flex items-center justify-between border-b border-gray-100">
         <h1 class="text-lg font-bold text-gray-900 tracking-tight">{t('edit.title')}</h1>
       </div>
 
-      <div class="relative">
-        <button id="tab-prev" type="button" class="lg:hidden absolute left-0 top-1/2 z-10 -translate-y-1/2 rounded-full border border-gray-200 bg-white/90 px-2 py-1 text-sm text-gray-600 shadow-sm transition hover:bg-gray-100" aria-label="Anterior sección">&lsaquo;</button>
-        <nav id="tab-nav" class="flex text-xs sm:text-sm overflow-x-auto whitespace-nowrap scroll-smooth px-10" aria-label="Tabs">
+      <div class="px-6 pt-3 relative">
+        <button id="tab-prev" type="button" class="lg:hidden absolute left-4 top-1/2 z-10 -translate-y-1/2 rounded-full border border-gray-200 bg-white/90 px-2 py-1 text-sm text-gray-600 shadow-sm transition hover:bg-gray-100" aria-label="Anterior sección">&lsaquo;</button>
+        <nav id="tab-nav" class="flex text-xs sm:text-sm overflow-x-auto whitespace-nowrap scroll-smooth px-6" aria-label="Tabs">
           <button class="tab-btn px-4 py-2 border-b-2 border-blue-600 font-medium text-blue-600" data-tab="basics">{t('nav.contact')}</button>
           <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="work">{lang === 'es' ? 'Experiencia' : lang === 'it' ? 'Esperienza' : 'Experience'}</button>
           <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="education">{lang === 'es' ? 'Formación' : lang === 'it' ? 'Formazione' : 'Education'}</button>
@@ -149,10 +149,10 @@ const templates = Object.entries(layoutModules)
           <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="skills">{lang === 'es' ? 'Habilidades' : lang === 'it' ? 'Competenze' : 'Skills'}</button>
           <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="templates">{t('templates.title')}</button>
         </nav>
-        <button id="tab-next" type="button" class="lg:hidden absolute right-0 top-1/2 z-10 -translate-y-1/2 rounded-full border border-gray-200 bg-white/90 px-2 py-1 text-sm text-gray-600 shadow-sm transition hover:bg-gray-100" aria-label="Siguiente sección">&rsaquo;</button>
+        <button id="tab-next" type="button" class="lg:hidden absolute right-4 top-1/2 z-10 -translate-y-1/2 rounded-full border border-gray-200 bg-white/90 px-2 py-1 text-sm text-gray-600 shadow-sm transition hover:bg-gray-100" aria-label="Siguiente sección">&rsaquo;</button>
       </div>
 
-      <div id="cv-form" class="space-y-6">
+      <div id="cv-form" class="flex-1 overflow-y-auto px-6 pb-4 space-y-6">
         <div id="tab-basics" class="tab-content space-y-4">
           <div class="grid sm:grid-cols-2 gap-4">
             <div>
@@ -267,6 +267,10 @@ const templates = Object.entries(layoutModules)
         </div>
       </div>
 
+      <div class="print:hidden border-t border-gray-200 px-6 py-4">
+        <button id="btn-publish" class="w-full px-5 py-3 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-all">{t('edit.publish')}</button>
+      </div>
+
     </div>
 
     <div
@@ -325,10 +329,6 @@ const templates = Object.entries(layoutModules)
       </section>
     </div>
 
-  </div>
-
-  <div class="print:hidden p-4 sm:p-6 border-t border-gray-200 bg-white">
-    <button id="btn-publish" class="w-full sm:w-auto px-5 py-3 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-all">{t('edit.publish')}</button>
   </div>
 
 </div>
@@ -821,7 +821,11 @@ const templates = Object.entries(layoutModules)
   (async () => {
     try {
       const remoteData = await loadRemoteResume();
-      if (remoteData) state = remoteData;
+      if (remoteData) {
+        const localImage = state.basics?.image || '';
+        state = remoteData;
+        if (localImage.startsWith('data:')) state.basics.image = localImage;
+      }
       populateFormBasics();
       renderDynamicBlocks();
       renderSkillsTags();
@@ -848,12 +852,12 @@ const templates = Object.entries(layoutModules)
         {lang === 'it'
           ? 'Utilizziamo cookie propri e di terze parti per analizzare le prestazioni del sito e migliorare la tua esperienza. Puoi accettare tutti i cookie o rifiutarli.'
           : 'Utilizamos cookies propias y de terceros para analizar el rendimiento de la web y mejorar tu experiencia. Puedes aceptar todas las cookies o rechazarlas.'}
-        <a href="https://raulmguerrero.com/terms" target="_blank" rel="noopener"
+        <a href={`/${lang}/cookie-policy`} rel="noopener"
           class="text-blue-600 font-bold underline hover:opacity-80 transition-opacity">
-          {lang === 'it' ? 'termini di utilizzo' : 't\u00e9rminos de uso'}
+          {lang === 'it' ? 'Cookie Policy' : 'Pol\u00edtica de Cookies'}
         </a>
         {lang === 'it' ? ' e ' : ' y '}
-        <a href="https://raulmguerrero.com/privacy" target="_blank" rel="noopener"
+        <a href={`/${lang}/privacy-policy`} rel="noopener"
           class="text-blue-600 font-bold underline hover:opacity-80 transition-opacity">
           {lang === 'it' ? 'informativa sulla privacy' : 'pol\u00edtica de privacidad'}
         </a>.
@@ -889,7 +893,18 @@ const templates = Object.entries(layoutModules)
     btnAccept.addEventListener('click', function() {
       localStorage.setItem('cookie-consent', 'accepted');
       banner.classList.add('opacity-0', 'translate-y-8', 'pointer-events-none');
-      window.location.reload();
+      if (!window._gaLoaded) {
+        window._gaLoaded = true;
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){ dataLayer.push(arguments); }
+        window.gtag = gtag;
+        gtag('js', new Date());
+        gtag('config', 'G-R3TG90C8J5', { anonymize_ip: true });
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = "https://www.googletagmanager.com/gtag/js?id=G-R3TG90C8J5";
+        document.head.appendChild(s);
+      }
     });
 
     btnDeny.addEventListener('click', function() {
