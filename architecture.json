@@ -85,36 +85,35 @@
     "MCP-001": {
       "title": "Template propagation",
       "description": "El template seleccionado por el usuario debe mantenerse intacto desde el wizard hasta el HTML publicado.",
-      "execution_status": "DONE",
+      "execution_status": "PARTIAL",
+      "execution_note": "Flujo UI (selección → localStorage → payload) funciona correctamente. Deploy final depende de cv-renderer.ts que no existe — el HTML publicado no puede generarse.",
       "done_evidence": [
-        "edit.astro line 459: const TEMPLATE_KEY = 'cv_selected_template_${lang}' — clave de persistencia",
-        "edit.astro line 575: state.meta.template = templateId — guarda en estado",
-        "edit.astro line 576: localStorage.setItem(TEMPLATE_KEY, templateId) — persiste en localStorage",
-        "edit.astro line 1079: Restaura template guardado al cargar la página",
-        "edit.astro line 1054: template: state.meta?.template || localStorage.getItem(TEMPLATE_KEY) || 'minimalist' — enviado en payload",
+        "edit.astro line 357: const TEMPLATE_KEY = `cv_selected_template_${lang}` — clave de persistencia",
+        "edit.astro line 458: state.meta.template = templateId — guarda en estado",
+        "edit.astro line 459: localStorage.setItem(TEMPLATE_KEY, templateId) — persiste en localStorage",
+        "edit.astro line 780: const savedTemplate = state.meta?.template || localStorage.getItem(TEMPLATE_KEY) || 'minimalist' — restaura al cargar",
+        "edit.astro line 765: template: state.meta?.template || localStorage.getItem(TEMPLATE_KEY) || 'minimalist' — enviado en payload",
         "deploy.ts line 293: const template = (body.template || DEFAULT_TEMPLATE).toLowerCase() — recibido",
         "deploy.ts line 172: <body class='theme-${template}'> — aplicado en HTML final",
         "[lang]/index.astro line 45: resume?.meta?.template — leído del JSON para la página pública"
       ],
+      "broken_reason": "deploy.ts importa de src/lib/cv-renderer.ts (no existe). El HTML con theme-{template} no puede generarse. La página pública Astro y el flujo UI sí funcionan correctamente.",
       "path": [
         "UI (template-card click)",
         "state.meta.template",
         "localStorage (cv_selected_template_{lang})",
         "payload (edit.astro fetch to deploy.ts)",
-        "deploy.ts (netlify/functions/deploy.ts)",
-        "renderCvPage() wraps renderCvContent()",
-        "<body class='theme-{template}'> + CSS class",
-        "HTML final"
+        "deploy.ts (netlify/functions/deploy.ts)"
       ],
-      "implementation_note": "renderCvContent() is template-agnostic. Template only affects CSS class on <body> in deploy output and [data-template] attribute in preview."
+      "implementation_note": "renderCvContent() (en cv-renderer.ts, que no existe) es template-agnostic. Template solo afecta CSS class en <body> del deploy y [data-template] en preview. La página pública Astro ([lang]/index.astro) lee resume.meta.template y selecciona layout dinámicamente."
     },
     "MCP-002": {
       "title": "Preview deploy parity",
       "description": "Preview y Deploy deben consumir exactamente el mismo renderizador.",
       "execution_status": "BROKEN",
-      "broken_reason": "src/lib/cv-renderer.ts no existe. renderPreview() en edit.astro (lines 766-872) genera HTML manualmente. deploy.ts importa de cv-renderer.ts pero fallará porque el archivo no existe. Evidencia: edit.astro line 766-872: renderPreview() sin llamada a renderCvContent().",
+      "broken_reason": "src/lib/cv-renderer.ts no existe. renderPreview() en edit.astro (line 646) genera HTML manualmente. deploy.ts importa de cv-renderer.ts pero fallará porque el archivo no existe.",
       "evidence": [
-        "edit.astro line 766-872: renderPreview() genera HTML manual con template literals ❌",
+        "edit.astro line 646-728: renderPreview() genera HTML manual con template literals y createElement ❌",
         "deploy.ts line 17: import from src/lib/cv-renderer.js — archivo inexistente ❌",
         "src/lib/cv-renderer.ts: FILE NOT FOUND ❌"
       ]
@@ -123,11 +122,11 @@
       "title": "Localization consistency",
       "description": "Todos los títulos de sección deben obtenerse desde SECTION_TITLES.",
       "execution_status": "BROKEN",
-      "broken_reason": "SECTION_TITLES estaba en src/lib/cv-renderer.ts que NO EXISTE. No hay SECTION_TITLES disponible en ningún archivo activo. deploy.ts line 152 referencia SECTION_TITLES que fallaría. edit.astro y componentes hardcodean títulos.",
+      "broken_reason": "SECTION_TITLES estaba en src/lib/cv-renderer.ts que NO EXISTE. No hay SECTION_TITLES disponible en ningún archivo activo. deploy.ts referencia SECTION_TITLES que fallaría. edit.astro y componentes hardcodean títulos.",
       "evidence": [
         "src/lib/cv-renderer.ts: FILE NOT FOUND — SECTION_TITLES no disponible ❌",
         "deploy.ts line 152: import { SECTION_TITLES } from cv-renderer.js — apunta a archivo inexistente ❌",
-        "edit.astro line 298-335: ternarios hardcodeados ❌",
+        "edit.astro lines 289-328: ternarios hardcodeados en <h3> de preview ❌",
         "Skills.astro line 12-16: labels hardcodeados como objeto literal ❌",
         "Experience.astro line 15: {t('section.experience')} — clave 'section.experience' no existe en ui.ts ❌"
       ]
@@ -136,9 +135,9 @@
       "title": "Image consistency",
       "description": "La fotografía debe renderizarse en la misma posición en preview y deploy.",
       "execution_status": "BROKEN",
-      "broken_reason": "No existe renderer compartido. renderPreview() en edit.astro (line 786-794) maneja la imagen manualmente. deploy.ts importa de cv-renderer.ts que no existe.",
+      "broken_reason": "No existe renderer compartido. renderPreview() en edit.astro maneja la imagen manualmente (lines 666-670). deploy.ts importa de cv-renderer.ts que no existe.",
       "evidence": [
-        "edit.astro line 786-794: if (state.basics.image) { imgEl.src = state.basics.image } — manejo manual ❌",
+        "edit.astro lines 666-670: if (state.basics.image) { imgEl.src = state.basics.image } — manejo manual ❌",
         "No hay renderCvContent() disponible en ningún archivo ❌"
       ]
     },
@@ -146,9 +145,9 @@
       "title": "Skills consistency",
       "description": "Las habilidades deben utilizar el mismo componente visual en preview y deploy.",
       "execution_status": "BROKEN",
-      "broken_reason": "No existe renderer compartido. renderPreview() en edit.astro (line 860-871) genera skills manualmente con createElement. deploy.ts importa de cv-renderer.ts que no existe.",
+      "broken_reason": "No existe renderer compartido. renderPreview() en edit.astro genera skills manualmente con createElement (lines 717-727). deploy.ts importa de cv-renderer.ts que no existe.",
       "evidence": [
-        "edit.astro line 860-871: span.className = 'badge-item-live' — generación manual ❌",
+        "edit.astro line 723: span.className = 'badge-item-live' — generación manual ❌",
         "No hay renderCvContent() disponible ❌"
       ]
     },
@@ -156,9 +155,9 @@
       "title": "Contact consistency",
       "description": "La sección de contacto debe generarse desde una única implementación.",
       "execution_status": "BROKEN",
-      "broken_reason": "No existe renderer compartido. renderPreview() en edit.astro (line 777-784) genera contacto manualmente. deploy.ts importa de cv-renderer.ts que no existe.",
+      "broken_reason": "No existe renderer compartido. renderPreview() en edit.astro genera contacto manualmente (lines 658-663). deploy.ts importa de cv-renderer.ts que no existe.",
       "evidence": [
-        "edit.astro line 777-784: if (state.basics.email) html += '<span>...' — generación manual ❌",
+        "edit.astro lines 658-663: if (state.basics.email) html += '<span>...' — generación manual ❌",
         "No hay renderCvContent() disponible ❌"
       ]
     },
@@ -182,6 +181,52 @@
         "deploy.ts lines 319-332: solo crea repo nuevo si la respuesta es 404 (no existe)",
         "PUBLISHED_REPO_NAME = 'personal-resume' es constante, siempre mismo repo"
       ]
+    },
+    "MCP-009": {
+      "title": "Responsive editor UI",
+      "description": "El editor debe ser utilizable en todos los tamaños de pantalla sin scroll horizontal ni layout roto.",
+      "execution_status": "DONE",
+      "done_evidence": [
+        "edit.astro line 80: hidden lg:flex — toolbar desktop solo visible en lg+",
+        "edit.astro line 110: lg:hidden — toolbar mobile independiente",
+        "edit.astro line 134: flex-col lg:grid lg:grid-cols-2 — layout vertical en mobile, grid en desktop",
+        "edit.astro line 136: lg:sticky lg:top-20 lg:max-h-[82vh] — panel formulario sticky solo en desktop",
+        "edit.astro lines 143, 152: tab-prev/tab-next buttons — navegación tabs en mobile",
+        "edit.astro line 144: overflow-x-auto whitespace-nowrap — tabs scrolleables en mobile",
+        "edit.astro line 120-130: btn-print-control, btn-download-json-control, btn-github-auth-control — botones de acción apilados en mobile"
+      ],
+      "path": [
+        "Desktop toolbar (hidden lg:flex de línea 80)",
+        "Mobile toolbar (lg:hidden de línea 110)",
+        "Form panel (lg:sticky en línea 136)",
+        "Tab navigation con scroll (línea 144)"
+      ],
+      "implementation_note": "Estrategia mobile-first: flex-col en mobile, lg:grid en desktop. Toolbars separados con hidden lg:flex / lg:hidden. Tabs con overflow-x-auto y botones de navegación ‹/› en mobile. Botones de acción apilados en mobile con w-full sm:w-auto."
+    },
+    "MCP-010": {
+      "title": "User content overflow safety",
+      "description": "Todo texto introducido por el usuario debe permanecer dentro de su contenedor sin scroll horizontal, independientemente de su longitud.",
+      "execution_status": "DONE",
+      "done_evidence": [
+        "src/styles/cv-themes.ts: overflow-wrap:anywhere añadido a .panel-name, .panel-summary, .card-title, .card-body, .tag, .cert-name, .card-subtitle",
+        "src/layouts/*.astro (3): style=\"overflow-wrap:anywhere\" + min-w-0 en <main>",
+        "src/pages/[lang]/edit.astro: #preview-section, #cv-form { overflow-wrap: anywhere } vía CSS",
+        "src/components/Header.astro: break-words en name/label/summary, break-all en URL, min-w-0 en listas flex",
+        "src/components/Experience.astro: break-words en position/name/summary/highlights",
+        "src/components/Education.astro: break-words en area/institution, max-w-full break-words en courses",
+        "src/components/Projects.astro: break-words en name/description, break-all en URL",
+        "src/components/Skills.astro: max-w-full break-words en skills",
+        "src/components/TechLayout.astro: overflow-wrap:anywhere en container, break-words en textos",
+        "src/components/ArtisticLayout.astro: overflow-wrap:anywhere en container, break-words en textos"
+      ],
+      "path": [
+        "cv-themes.ts (overflow-wrap:anywhere en 8+ clases)",
+        "Layouts (style en <main>)",
+        "edit.astro CSS (#preview-section, #cv-form)",
+        "components/*.astro (break-words en textos, min-w-0 en flex)",
+        "TechLayout/ArtisticLayout (overflow-wrap:anywhere en container)"
+      ],
+      "implementation_note": "Estrategia en cascada: 1) CSS global en cv-themes.ts para deploy y preview, 2) style en <main> de layouts para páginas públicas, 3) break-words/min-w-0 en componentes individuales. Sin overflow:hidden — overflow-wrap:anywhere preserva visibilidad total del contenido."
     }
   },
 
@@ -289,6 +334,43 @@
       "status": "accepted",
       "execution_status": "ACCEPTED_NO_ACTION",
       "note": "Restricción de diseño. OAuth y GitHub API están aislados en netlify/functions/auth-*.ts y no se mezclan con renderizado."
+    },
+    {
+      "id": "ADR-011",
+      "title": "CSS overflow prevention via overflow-wrap:anywhere",
+      "decision": "Usar overflow-wrap:anywhere en cascada desde contenedores principales para prevenir desbordamiento de texto de usuario, en lugar de overflow:hidden o truncation por elemento.",
+      "status": "accepted",
+      "execution_status": "DONE",
+      "done_evidence": [
+        "cv-themes.ts líneas de layout compartido: overflow-wrap:anywhere en .panel-name, .panel-summary, .card-title, .card-body, .tag, .cert-name, .card-subtitle",
+        "3 layouts públicos: style=\"overflow-wrap:anywhere\" en <main>",
+        "edit.astro: #preview-section, #cv-form { overflow-wrap: anywhere }",
+        "TechLayout + ArtisticLayout: overflow-wrap:anywhere en contenedor raíz",
+        "Componentes individuales: break-words en textos, break-all en URLs, max-w-full break-words en badges",
+        "min-w-0 en flex containers para asegurar que overflow-wrap surta efecto"
+      ],
+      "note": "overflow-wrap:anywhere rompe en cualquier carácter si es necesario para evitar desbordamiento. Normal text no se ve afectado. URLs usan break-all (word-break: break-all) por su naturaleza sin espacios. Badges usan max-w-full + break-words para mantenerse dentro del contenedor."
+    },
+    {
+      "id": "ADR-012",
+      "title": "Mobile-first responsive parity between editor and public pages",
+      "decision": "Editor y CV público comparten la misma estrategia responsive: flex-col en mobile, lg:grid en desktop, toolbars separadas con hidden/lg:hidden, padding progresivo (px-4 sm:px-6 lg:px-8).",
+      "status": "accepted",
+      "execution_status": "DONE",
+      "done_evidence": [
+        "edit.astro: flex-col lg:grid lg:grid-cols-2 gap-6 lg:gap-8 — layout principal",
+        "edit.astro: hidden lg:flex (toolbar desktop) + lg:hidden (toolbar mobile) — toolbars separados",
+        "edit.astro: px-4 sm:px-6 en toolbars y paneles — padding progresivo",
+        "MinimalistLayout.astro: px-4 sm:px-6 py-12 sm:py-16 — padding progresivo",
+        "TechyLayout.astro: px-4 sm:px-6 py-12 sm:py-16 — idéntico",
+        "ArtisticLayout.astro: px-4 sm:px-6 py-12 sm:py-16 — idéntico",
+        "Footer.astro: px-4 sm:px-6 — padding progresivo",
+        "Header.astro: flex-col sm:flex-row gap-6 items-start — foto/nombre responsive",
+        "Experience.astro: grid sm:grid-cols-[1fr_auto] — fecha a la derecha en sm+",
+        "Education.astro: grid sm:grid-cols-[1fr_auto] — idéntico patrón",
+        "flex-wrap + min-w-0 en contenedores flex de todos los componentes"
+      ],
+      "note": "Decisión de no usar layouts diferentes para mobile/desktop. Un solo layout con Tailwind breakpoints. Esto garantiza que editor y CV público tengan comportamiento responsive idéntico."
     }
   ],
 
