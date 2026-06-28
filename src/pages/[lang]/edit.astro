@@ -5,6 +5,7 @@ import resumeEs from '../../data/resume.es.json';
 import resumeIt from '../../data/resume.it.json';
 import resumeEn from '../../data/resume.en.json';
 import { CV_THEMES_CSS } from '../../styles/cv-themes';
+import MinimalistLayout from '../../layouts/MinimalistLayout.astro';
 
 export function getStaticPaths() {
   return [
@@ -18,19 +19,14 @@ const { lang } = Astro.params as { lang: Lang };
 const resumes = { es: resumeEs, it: resumeIt, en: resumeEn };
 const initialData = resumes[lang] || resumeEs;
 
-// 🎯 Traducciones estrictas desde tu ui.ts
 const strictT = useTranslations(lang);
 const t = (key: string) => strictT(key as UIKeys);
 
-// 📂 DETECCIÓN AUTOMÁTICA REAL DE PLANTILLAS (Eager Loading desde Vite/Astro)
-// Importamos los archivos cargando su contenido interior en tiempo de compilación
 const layoutModules = import.meta.glob('../../layouts/*.astro', { eager: true });
 
 const templates = Object.entries(layoutModules)
   .map(([path, mod]: [string, any]) => {
-    // Si el layout no exporta metadatos explícitos para el sistema de CVs, lo descartamos elegantemente
     if (!mod.templateMeta) return null;
-
     return {
       id: mod.templateMeta.id,
       displayName: mod.templateMeta.name,
@@ -40,43 +36,47 @@ const templates = Object.entries(layoutModules)
   .filter(Boolean) as { id: string; displayName: string; svg: string }[];
 ---
 
-<!DOCTYPE html>
-<html lang={lang}>
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{t('edit.title')}</title>
+<MinimalistLayout
+  title={t('edit.title')}
+  description="CV Editor"
+  lang={lang}
+  currentLang={lang}
+  availableLangs={['es', 'it', 'en']}
+  resume={initialData}
+  t={t}
+>
 
-  <!-- Google Fonts for theme layouts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+<style is:global>
+  main { max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
+  body.minimalist-layout { background-color: #f9fafb !important; }
+</style>
 
-  <!-- Cookie Consent + Google Analytics (RGPD) -->
-  <script is:inline>
-    (() => {
-      const consent = localStorage.getItem('cookie-consent');
-      if (consent !== 'accepted') return;
+<!-- Google Fonts for theme layouts -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet" />
 
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){ dataLayer.push(arguments); }
-      window.gtag = gtag;
+<!-- Cookie Consent + Google Analytics (RGPD) -->
+<script is:inline>
+  (() => {
+    const consent = localStorage.getItem('cookie-consent');
+    if (consent !== 'accepted') return;
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    window.gtag = gtag;
+    gtag('js', new Date());
+    gtag('config', 'G-R3TG90C8J5', { anonymize_ip: true });
+    const gaScript = document.createElement('script');
+    gaScript.async = true;
+    gaScript.src = "https://www.googletagmanager.com/gtag/js?id=G-R3TG90C8J5";
+    const firstScript = document.getElementsByTagName('script')[0];
+    firstScript.parentNode.insertBefore(gaScript, firstScript);
+  })();
+</script>
 
-      gtag('js', new Date());
-      gtag('config', 'G-R3TG90C8J5', { anonymize_ip: true });
-
-      const gaScript = document.createElement('script');
-      gaScript.async = true;
-      gaScript.src = "https://www.googletagmanager.com/gtag/js?id=G-R3TG90C8J5";
-      const firstScript = document.getElementsByTagName('script')[0];
-      firstScript.parentNode.insertBefore(gaScript, firstScript);
-    })();
-  </script>
-</head>
-<body class="bg-gray-50 min-h-screen text-gray-800 antialiased">
+<div class="bg-gray-50 min-h-screen text-gray-800 antialiased">
 
   <div class="w-full bg-white border-b border-gray-200 sticky top-0 z-50 print:hidden shadow-sm">
-    <!-- Desktop header: mantengo el diseño anterior en pantallas grandes -->
     <div class="hidden lg:flex items-center justify-between gap-4 py-2.5 px-4 sm:px-6">
       <a href={`/${lang}`} class="flex items-center gap-2">
         <div class="bg-blue-600 text-white p-2 rounded-lg shadow-sm">
@@ -91,9 +91,9 @@ const templates = Object.entries(layoutModules)
       </a>
 
       <div class="inline-flex rounded-xl bg-gray-100 p-0.5 border border-gray-200 shadow-inner">
-        <button onclick="window.location.href='/es/edit'" class={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all ${lang === 'es' ? 'bg-white text-gray-900 shadow-xs border border-gray-200/60' : 'text-gray-500 hover:text-gray-900'}`}><span class="hidden xl:inline">🇪🇸&nbsp;</span>ES</button>
-        <button onclick="window.location.href='/it/edit'" class={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all ${lang === 'it' ? 'bg-white text-gray-900 shadow-xs border border-gray-200/60' : 'text-gray-500 hover:text-gray-900'}`}><span class="hidden xl:inline">🇮🇹&nbsp;</span>IT</button>
-        <button onclick="window.location.href='/en/edit'" class={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all ${lang === 'en' ? 'bg-white text-gray-900 shadow-xs border border-gray-200/60' : 'text-gray-500 hover:text-gray-900'}`}><span class="hidden xl:inline">🇺🇸&nbsp;</span>EN</button>
+        <button onclick="window.location.href='/es/edit'" class={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all ${lang === 'es' ? 'bg-white text-gray-900 shadow-xs border border-gray-200/60' : 'text-gray-500 hover:text-gray-900'}`}><span class="hidden xl:inline">&#127466;&#127480;&nbsp;</span>ES</button>
+        <button onclick="window.location.href='/it/edit'" class={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all ${lang === 'it' ? 'bg-white text-gray-900 shadow-xs border border-gray-200/60' : 'text-gray-500 hover:text-gray-900'}`}><span class="hidden xl:inline">&#127470;&#127481;&nbsp;</span>IT</button>
+        <button onclick="window.location.href='/en/edit'" class={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all ${lang === 'en' ? 'bg-white text-gray-900 shadow-xs border border-gray-200/60' : 'text-gray-500 hover:text-gray-900'}`}><span class="hidden xl:inline">&#127482;&#127480;&nbsp;</span>EN</button>
       </div>
 
       <div class="flex items-center gap-2">
@@ -108,7 +108,6 @@ const templates = Object.entries(layoutModules)
       </div>
     </div>
 
-    <!-- Mobile header: dos barras apiladas para smartphone/tablet -->
     <div class="lg:hidden">
       <div class="flex flex-wrap items-center justify-between gap-3 py-2.5 px-4 sm:px-6">
         <a href={`/${lang}`} class="flex items-center gap-2 flex-1 min-w-0">
@@ -134,24 +133,24 @@ const templates = Object.entries(layoutModules)
   </div>
 
   <div class="grid lg:grid-cols-2 gap-8 items-start min-h-[calc(100vh-4rem)] p-4 sm:p-6 print:block print:p-0">
-    
+
     <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-6 print:hidden sticky top-20 max-h-[82vh] overflow-y-auto">
-      
+
       <div class="flex items-center justify-between border-b border-gray-100 pb-2">
         <h1 class="text-lg font-bold text-gray-900 tracking-tight">{t('edit.title')}</h1>
       </div>
 
       <div class="relative">
-        <button id="tab-prev" type="button" class="lg:hidden absolute left-0 top-1/2 z-10 -translate-y-1/2 rounded-full border border-gray-200 bg-white/90 px-2 py-1 text-sm text-gray-600 shadow-sm transition hover:bg-gray-100" aria-label="Anterior sección">‹</button>
+        <button id="tab-prev" type="button" class="lg:hidden absolute left-0 top-1/2 z-10 -translate-y-1/2 rounded-full border border-gray-200 bg-white/90 px-2 py-1 text-sm text-gray-600 shadow-sm transition hover:bg-gray-100" aria-label="Anterior secci&oacute;n">&lsaquo;</button>
         <nav id="tab-nav" class="flex text-xs sm:text-sm overflow-x-auto whitespace-nowrap scroll-smooth px-10" aria-label="Tabs">
           <button class="tab-btn px-4 py-2 border-b-2 border-blue-600 font-medium text-blue-600" data-tab="basics">{t('nav.contact')}</button>
           <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="work">{lang === 'es' ? 'Experiencia' : lang === 'it' ? 'Esperienza' : 'Experience'}</button>
-          <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="education">{lang === 'es' ? 'Formación' : lang === 'it' ? 'Formazione' : 'Education'}</button>
-          <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="extras">{lang === 'es' ? 'Formación extra' : lang === 'it' ? 'Formazione extra' : 'Extra training'}</button>
+          <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="education">{lang === 'es' ? 'Formaci&oacute;n' : lang === 'it' ? 'Formazione' : 'Education'}</button>
+          <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="extras">{lang === 'es' ? 'Formaci&oacute;n extra' : lang === 'it' ? 'Formazione extra' : 'Extra training'}</button>
           <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="skills">{lang === 'es' ? 'Habilidades' : lang === 'it' ? 'Competenze' : 'Skills'}</button>
           <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="templates">{t('templates.title')}</button>
         </nav>
-        <button id="tab-next" type="button" class="lg:hidden absolute right-0 top-1/2 z-10 -translate-y-1/2 rounded-full border border-gray-200 bg-white/90 px-2 py-1 text-sm text-gray-600 shadow-sm transition hover:bg-gray-100" aria-label="Siguiente sección">›</button>
+        <button id="tab-next" type="button" class="lg:hidden absolute right-0 top-1/2 z-10 -translate-y-1/2 rounded-full border border-gray-200 bg-white/90 px-2 py-1 text-sm text-gray-600 shadow-sm transition hover:bg-gray-100" aria-label="Siguiente secci&oacute;n">&rsaquo;</button>
       </div>
 
       <div id="cv-form" class="space-y-6">
@@ -172,7 +171,7 @@ const templates = Object.entries(layoutModules)
               <input type="email" data-path="basics.email" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-blue-500" />
             </div>
             <div>
-              <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">{lang === 'es' ? 'Teléfono' : lang === 'it' ? 'Telefono' : 'Phone'}</label>
+              <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">{lang === 'es' ? 'Tel&eacute;fono' : lang === 'it' ? 'Telefono' : 'Phone'}</label>
               <input type="tel" data-path="basics.phone" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-blue-500" />
             </div>
           </div>
@@ -181,7 +180,7 @@ const templates = Object.entries(layoutModules)
             <input type="url" data-path="basics.web" placeholder="https://" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-blue-500" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">{lang === 'es' ? 'Fotografía' : lang === 'it' ? 'Fotografia' : 'Photo'}</label>
+            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">{lang === 'es' ? 'Fotograf&iacute;a' : lang === 'it' ? 'Fotografia' : 'Photo'}</label>
             <div class="flex items-center gap-3 bg-gray-50 p-3 rounded-xl border border-dashed border-gray-300">
               <input type="file" id="photo-file" accept="image/*" class="hidden" />
               <button type="button" onclick="document.getElementById('photo-file').click()" class="px-3 py-1.5 bg-white border border-gray-200 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-50 shadow-sm">
@@ -200,14 +199,14 @@ const templates = Object.entries(layoutModules)
         <div id="tab-work" class="tab-content space-y-4 hidden">
           <div id="work-container" class="space-y-4"></div>
           <button type="button" id="btn-add-work" class="w-full py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-semibold rounded-xl border border-dashed border-blue-200">
-            {lang === 'es' ? '+ Añadir Experiencia' : lang === 'it' ? '+ Aggiungi Esperienza' : '+ Add Experience'}
+            {lang === 'es' ? '+ A&ntilde;adir Experiencia' : lang === 'it' ? '+ Aggiungi Esperienza' : '+ Add Experience'}
           </button>
         </div>
 
         <div id="tab-education" class="tab-content space-y-4 hidden">
           <div id="education-container" class="space-y-4"></div>
           <button type="button" id="btn-add-edu" class="w-full py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-semibold rounded-xl border border-dashed border-blue-200">
-            {lang === 'es' ? '+ Añadir Formación' : lang === 'it' ? '+ Aggiungi Formazione' : '+ Add Education'}
+            {lang === 'es' ? '+ A&ntilde;adir Formaci&oacute;n' : lang === 'it' ? '+ Aggiungi Formazione' : '+ Add Education'}
           </button>
         </div>
 
@@ -218,24 +217,23 @@ const templates = Object.entries(layoutModules)
             </div>
             <div id="certificates-container" class="space-y-4"></div>
             <button type="button" id="btn-add-certificate" class="w-full py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-semibold rounded-xl border border-dashed border-blue-200">
-              {lang === 'es' ? '+ Añadir Certificado' : lang === 'it' ? '+ Aggiungi Certificato' : '+ Add Certificate'}
+              {lang === 'es' ? '+ A&ntilde;adir Certificado' : lang === 'it' ? '+ Aggiungi Certificato' : '+ Add Certificate'}
             </button>
           </div>
-
           <div>
             <div class="flex items-center justify-between border-b border-gray-100 pb-3 mb-3">
               <h2 class="text-sm font-bold text-gray-900">{lang === 'es' ? 'Idiomas' : lang === 'it' ? 'Lingue' : 'Languages'}</h2>
             </div>
             <div id="languages-container" class="space-y-4"></div>
             <button type="button" id="btn-add-language" class="w-full py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-semibold rounded-xl border border-dashed border-blue-200">
-              {lang === 'es' ? '+ Añadir Idioma' : lang === 'it' ? '+ Aggiungi Lingua' : '+ Add Language'}
+              {lang === 'es' ? '+ A&ntilde;adir Idioma' : lang === 'it' ? '+ Aggiungi Lingua' : '+ Add Language'}
             </button>
           </div>
         </div>
 
         <div id="tab-skills" class="tab-content space-y-4 hidden">
           <div class="hidden sm:block bg-blue-50/60 p-3.5 rounded-xl border border-blue-100 text-xs text-blue-800">
-            💡 <strong>{lang === 'es' ? 'Instrucciones:' : lang === 'it' ? 'Istruzioni:' : 'Instructions:'}</strong> {lang === 'es' ? 'Escribe una habilidad y pulsa Enter o coma (,).' : lang === 'it' ? 'Scrivi una competenza e premi Invio o virgola (,).' : 'Type a skill and press Enter or comma (,).'}
+            <strong>{lang === 'es' ? 'Instrucciones:' : lang === 'it' ? 'Istruzioni:' : 'Instructions:'}</strong> {lang === 'es' ? 'Escribe una habilidad y pulsa Enter o coma (,).' : lang === 'it' ? 'Scrivi una competenza e premi Invio o virgola (,).' : 'Type a skill and press Enter or comma (,).'}
           </div>
           <div>
             <input type="text" id="skills-input" placeholder="Ej: JavaScript..." class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none" />
@@ -244,47 +242,38 @@ const templates = Object.entries(layoutModules)
         </div>
 
         <div id="tab-templates" class="tab-content hidden">
-            <label class="block text-xs font-semibold text-gray-500 uppercase mb-3">
-              {t('templates.subtitle') || (lang === 'es' ? 'Elige el aspecto visual de tu CV' : lang === 'it' ? "Scegli l'aspetto visivo del tuo CV" : 'Choose the visual style of your resume')}
-            </label>
-            
-            <!-- sm:grid-cols-3 para 3 plantillas alineadas en pantallas grandes -->
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              {templates.map((tpl, i) => {
-            // 1. Calculamos la clave de traducción
-            const key = `templates.${tpl.id}` as UIKeys;
-            const translated = t(key);
-            
-            // 2. Determinamos qué mostrar: si la traducción es igual a la clave, usamos el displayName, si no, la traducción
-            const displayName = translated !== key ? translated : tpl.displayName;
-
-            return (
-              <div 
-                data-template-id={tpl.id} 
-                class={`template-card border-2 p-3 rounded-xl bg-white shadow-sm cursor-pointer hover:border-blue-300 transition-all group relative ${i === 0 ? 'border-blue-600 ring-2 ring-blue-100' : 'border-gray-200'}`}
-              >
-                <div class="aspect-[4/5] w-full bg-gray-50 rounded-lg p-2 mb-2 border border-gray-100 group-hover:scale-[1.02] transition-transform">
-                  <Fragment set:html={tpl.svg} />
+          <label class="block text-xs font-semibold text-gray-500 uppercase mb-3">
+            {t('templates.subtitle') || (lang === 'es' ? 'Elige el aspecto visual de tu CV' : lang === 'it' ? "Scegli l'aspetto visivo del tuo CV" : 'Choose the visual style of your resume')}
+          </label>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            {templates.map((tpl, i) => {
+              const key = `templates.${tpl.id}` as UIKeys;
+              const translated = t(key);
+              const displayName = translated !== key ? translated : tpl.displayName;
+              return (
+                <div
+                  data-template-id={tpl.id}
+                  class={`template-card border-2 p-3 rounded-xl bg-white shadow-sm cursor-pointer hover:border-blue-300 transition-all group relative ${i === 0 ? 'border-blue-600 ring-2 ring-blue-100' : 'border-gray-200'}`}
+                >
+                  <div class="aspect-[4/5] w-full bg-gray-50 rounded-lg p-2 mb-2 border border-gray-100 group-hover:scale-[1.02] transition-transform">
+                    <Fragment set:html={tpl.svg} />
+                  </div>
+                  <div class="text-sm font-bold text-gray-900 text-center group-hover:text-blue-600 truncate tracking-wide mt-1.5">
+                    {displayName}
+                  </div>
                 </div>
-                
-                {/* Aquí ya no usamos name, usamos displayName y la lógica de traducción corregida */}
-                <div class="text-sm font-bold text-gray-900 text-center group-hover:text-blue-600 truncate tracking-wide mt-1.5">
-                  {displayName}
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </div>
 
-      </div>
     </div>
 
     <div
       id="preview-section"
       class="hidden xl:block bg-white p-8 rounded-2xl border border-gray-200 shadow-lg xl:min-h-[297mm] print:block print:shadow-none print:border-0 print:p-0"
     >
-      
       <header id="preview-header" class="flex justify-between items-start pb-6 border-b border-gray-100">
         <div class="flex-1">
           <h2 id="view-name" class="text-3xl font-bold tracking-tight text-gray-900"></h2>
@@ -293,43 +282,43 @@ const templates = Object.entries(layoutModules)
         </div>
         <img id="view-image" class="w-24 h-24 rounded-xl object-cover border border-gray-200 hidden" alt="Foto" />
       </header>
-      
-      <section id="section-summary" class="mt-6">
+
+      <section id="section-summary" class="mt-6" style="display:none">
         <h3 class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2 pb-1 border-b border-gray-100">
           {lang === 'es' ? 'Perfil' : lang === 'it' ? 'Profilo' : 'Profile'}
         </h3>
         <p id="view-summary" class="text-sm text-gray-600 leading-relaxed whitespace-pre-line"></p>
       </section>
-      
-      <section id="section-experience" class="mt-6">
+
+      <section id="section-experience" class="mt-6" style="display:none">
         <h3 class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3 pb-1 border-b border-gray-100">
           {lang === 'es' ? 'Experiencia' : lang === 'it' ? 'Esperienza' : 'Experience'}
         </h3>
         <div id="view-experience" class="space-y-4"></div>
       </section>
-      
-      <section id="section-education" class="mt-6">
+
+      <section id="section-education" class="mt-6" style="display:none">
         <h3 class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3 pb-1 border-b border-gray-100">
-          {lang === 'es' ? 'Formación' : lang === 'it' ? 'Formazione' : 'Education'}
+          {lang === 'es' ? 'Formaci&oacute;n' : lang === 'it' ? 'Formazione' : 'Education'}
         </h3>
         <div id="view-education" class="space-y-4"></div>
       </section>
-      
-      <section id="section-certificates" class="mt-6">
+
+      <section id="section-certificates" class="mt-6" style="display:none">
         <h3 class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3 pb-1 border-b border-gray-100">
           {lang === 'es' ? 'Certificados' : lang === 'it' ? 'Certificati' : 'Certificates'}
         </h3>
         <div id="view-certificates" class="space-y-4"></div>
       </section>
 
-      <section id="section-languages" class="mt-6">
+      <section id="section-languages" class="mt-6" style="display:none">
         <h3 class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3 pb-1 border-b border-gray-100">
           {lang === 'es' ? 'Idiomas' : lang === 'it' ? 'Lingue' : 'Languages'}
         </h3>
         <div id="view-languages" class="space-y-2"></div>
       </section>
-      
-      <section id="section-skills" class="mt-6">
+
+      <section id="section-skills" class="mt-6" style="display:none">
         <h3 class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2 pb-1 border-b border-gray-100">
           {lang === 'es' ? 'Habilidades' : lang === 'it' ? 'Competenze' : 'Skills'}
         </h3>
@@ -343,673 +332,572 @@ const templates = Object.entries(layoutModules)
     <button id="btn-publish" class="w-full sm:w-auto px-5 py-3 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-all">{t('edit.publish')}</button>
   </div>
 
-  <Fragment set:html={`<style>${CV_THEMES_CSS}</style>`} />
+</div>
 
-  <script define:vars={{ lang, initialData, currentTranslation: t('edit.currently') }}>
-    (function () {
-      var STORAGE_KEY = 'cv_backup_data_' + lang;
-      var TEMPLATE_KEY = 'cv_selected_template_' + lang;
+<Fragment set:html={`<style>${CV_THEMES_CSS}</style>`} />
 
-      var translationsUI = {
-        es: { defaultName: 'Tu Nombre', defaultLabel: 'Tu Profesión u Oficio' },
-        it: { defaultName: 'Il Tuo Nome', defaultLabel: 'La Tua Professione' },
-        en: { defaultName: 'Your Name', defaultLabel: 'Your Profession' }
-      }[lang] || { defaultName: 'Tu Nombre', defaultLabel: 'Tu Profesión' };
+<script define:vars={{ lang, initialData, currentTranslation: t('edit.currently') }}>
+  const STORAGE_KEY = `cv_backup_data_${lang}`;
+  const TEMPLATE_KEY = `cv_selected_template_${lang}`;
 
-      async function loadRemoteResume() {
-        try {
-          var response = await fetch('/.netlify/functions/load-resume?lang=' + lang, {
-            method: 'GET',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' }
-          });
-          if (!response.ok) return null;
-          var result = await response.json();
-          if (result.authenticated && result.data) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(result.data));
-            return result.data;
-          }
-        } catch (err) {
-          console.error('Error cargando resume remoto:', err);
-        }
-        return null;
-      }
+  function escAttr(s) { return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function escText(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
-      var state = (function () {
-        try {
-          var saved = localStorage.getItem(STORAGE_KEY);
-          return saved ? JSON.parse(saved) : initialData;
-        } catch (e) {
-          return initialData;
-        }
-      })();
+  const translationsUI = ({
+    es: { defaultName: 'Tu Nombre', defaultLabel: 'Tu Profesi\u00f3n u Oficio' },
+    it: { defaultName: 'Il Tuo Nome', defaultLabel: 'La Tua Professione' },
+    en: { defaultName: 'Your Name', defaultLabel: 'Your Profession' }
+  })[lang] || { defaultName: 'Tu Nombre', defaultLabel: 'Tu Profesi\u00f3n' };
 
-      if (!state.basics) state.basics = { name: '', label: '', email: '', phone: '', summary: '', image: '' };
-      if (!state.work) state.work = [];
-      if (!state.education) state.education = [];
-      if (!state.certificates) state.certificates = [];
-      if (!state.languages) state.languages = [];
-      if (!state.meta) state.meta = {};
-      if (!state.skills) state.skills = [];
-
-      function normalizeMonthValue(value) {
-        if (!value) return '';
-        return value.slice(0, 7);
-      }
-
-      function normalizeStateDates() {
-        function normalizeDates(item) {
-          ['startDate', 'endDate'].forEach(function (key) {
-            if (item[key]) item[key] = normalizeMonthValue(item[key]);
-          });
-        }
-        state.work.forEach(normalizeDates);
-        state.education.forEach(normalizeDates);
-        state.certificates.forEach(function (item) {
-          if (item.date) item.date = normalizeMonthValue(item.date);
-        });
-      }
-
-      function formatDateRange(start, end) {
-        var from = normalizeMonthValue(start);
-        var to = end ? normalizeMonthValue(end) : currentTranslation;
-        if (from && to) return from + ' — ' + to;
-        return to || from || '';
-      }
-
-      normalizeStateDates();
-
-      var labels = {
-        es: { company: 'Empresa', position: 'Puesto', start: 'Inicio', end: 'Fin', desc: 'Descripción', inst: 'Institución', area: 'Titulación', remove: 'Eliminar' },
-        it: { company: 'Azienda', position: 'Ruolo', start: 'Inizio', end: 'Fine', desc: 'Descrizione', inst: 'Istituto', area: 'Titolo', remove: 'Elimina' },
-        en: { company: 'Company', position: 'Position', start: 'Start Date', end: 'End Date', desc: 'Description', inst: 'Institution', area: 'Area of Study', remove: 'Remove' }
-      }[lang];
-
-      function setDeepValue(obj, path, value) {
-        var parts = path.split('.');
-        var current = obj;
-        for (var i = 0; i < parts.length - 1; i++) {
-          var key = parts[i];
-          if (!(key in current)) current[key] = isNaN(parts[i + 1]) ? {} : [];
-          current = current[key];
-        }
-        current[parts[parts.length - 1]] = value;
-      }
-
-      function getDeepValue(obj, path) {
-        return path.split('.').reduce(function (acc, part) { return acc && acc[part]; }, obj);
-      }
-
-      function saveState() {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-        renderPreview();
-      }
-
-      function applyTemplate(templateId) {
-        document.querySelectorAll('.template-card').forEach(function (c) {
-          if (c.dataset.templateId === templateId.toLowerCase()) {
-            c.classList.remove('border-gray-200');
-            c.classList.add('border-blue-600', 'ring-2', 'ring-blue-100');
-          } else {
-            c.classList.remove('border-blue-600', 'ring-2', 'ring-blue-100');
-            c.classList.add('border-gray-200');
-          }
-        });
-        state.meta.template = templateId;
-        localStorage.setItem(TEMPLATE_KEY, templateId);
-        var preview = document.getElementById('preview-section');
-        if (preview) {
-          preview.setAttribute('data-template', templateId.toLowerCase());
-        }
-      }
-
-      document.querySelectorAll('.template-card').forEach(function (card) {
-        card.addEventListener('click', function () { applyTemplate(card.dataset.templateId); saveState(); });
+  async function loadRemoteResume() {
+    try {
+      const response = await fetch(`/.netlify/functions/load-resume?lang=${lang}`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
       });
-
-      var fileInput = document.getElementById('photo-file');
-      var photoStatus = document.getElementById('photo-status');
-      var removePhotoBtn = document.getElementById('btn-remove-photo');
-
-      if (fileInput) {
-        fileInput.addEventListener('change', function (e) {
-          var file = e.target.files[0];
-          if (!file) return;
-          if (photoStatus) photoStatus.textContent = file.name;
-          if (removePhotoBtn) removePhotoBtn.classList.remove('hidden');
-          var reader = new FileReader();
-          reader.onload = function (event) {
-            if (event.target.result) {
-              state.basics.image = event.target.result;
-              saveState();
-            }
-          };
-          reader.readAsDataURL(file);
-        });
+      if (!response.ok) return null;
+      const result = await response.json();
+      if (result.authenticated && result.data) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(result.data));
+        return result.data;
       }
+    } catch (err) {
+      console.error('Error cargando resume remoto:', err);
+    }
+    return null;
+  }
 
-      if (removePhotoBtn) {
-        removePhotoBtn.addEventListener('click', function () {
-          state.basics.image = '';
-          if (fileInput) fileInput.value = '';
-          if (photoStatus) photoStatus.textContent = lang === 'es' ? 'Sin archivo' : lang === 'it' ? 'Nessun file' : 'No file';
-          removePhotoBtn.classList.add('hidden');
-          saveState();
-        });
+  let state = (() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved ? JSON.parse(saved) : initialData;
+    } catch (e) {
+      return initialData;
+    }
+  })();
+
+  if (!state.basics) state.basics = { name: '', label: '', email: '', phone: '', summary: '', image: '' };
+  if (!state.work) state.work = [];
+  if (!state.education) state.education = [];
+  if (!state.certificates) state.certificates = [];
+  if (!state.languages) state.languages = [];
+  if (!state.meta) state.meta = {};
+  if (!state.skills) state.skills = [];
+
+  function normalizeMonthValue(value) {
+    if (!value) return '';
+    return value.slice(0, 7);
+  }
+
+  (function normalizeStateDates() {
+    state.work.forEach(item => { if (item.startDate) item.startDate = normalizeMonthValue(item.startDate); if (item.endDate) item.endDate = normalizeMonthValue(item.endDate); });
+    state.education.forEach(item => { if (item.startDate) item.startDate = normalizeMonthValue(item.startDate); if (item.endDate) item.endDate = normalizeMonthValue(item.endDate); });
+    state.certificates.forEach(item => { if (item.date) item.date = normalizeMonthValue(item.date); });
+  })();
+
+  function formatDateRange(start, end) {
+    const from = normalizeMonthValue(start);
+    const to = end ? normalizeMonthValue(end) : currentTranslation;
+    if (from && to) return `${from} \u2014 ${to}`;
+    return to || from || '';
+  }
+
+  const labels = ({
+    es: { company: 'Empresa', position: 'Puesto', start: 'Inicio', end: 'Fin', desc: 'Descripci\u00f3n', inst: 'Instituci\u00f3n', area: 'Titulaci\u00f3n', remove: 'Eliminar' },
+    it: { company: 'Azienda', position: 'Ruolo', start: 'Inizio', end: 'Fine', desc: 'Descrizione', inst: 'Istituto', area: 'Titolo', remove: 'Elimina' },
+    en: { company: 'Company', position: 'Position', start: 'Start Date', end: 'End Date', desc: 'Description', inst: 'Institution', area: 'Area of Study', remove: 'Remove' }
+  })[lang];
+
+  function setDeepValue(obj, path, value) {
+    const parts = path.split('.');
+    let current = obj;
+    for (let i = 0; i < parts.length - 1; i++) {
+      const key = parts[i];
+      if (!(key in current)) current[key] = isNaN(parts[i + 1]) ? {} : [];
+      current = current[key];
+    }
+    current[parts[parts.length - 1]] = value;
+  }
+
+  function getDeepValue(obj, path) {
+    return path.split('.').reduce((acc, part) => acc && acc[part], obj);
+  }
+
+  function saveState() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    renderPreview();
+  }
+
+  function applyTemplate(templateId) {
+    document.querySelectorAll('.template-card').forEach(c => {
+      if (c.dataset.templateId === templateId.toLowerCase()) {
+        c.classList.remove('border-gray-200');
+        c.classList.add('border-blue-600', 'ring-2', 'ring-blue-100');
+      } else {
+        c.classList.remove('border-blue-600', 'ring-2', 'ring-blue-100');
+        c.classList.add('border-gray-200');
       }
+    });
+    state.meta.template = templateId;
+    localStorage.setItem(TEMPLATE_KEY, templateId);
+    const preview = document.getElementById('preview-section');
+    if (preview) preview.setAttribute('data-template', templateId.toLowerCase());
+  }
 
-      var tabButtons = Array.from(document.querySelectorAll('.tab-btn'));
-      var tabNav = document.getElementById('tab-nav');
-      var tabPrev = document.getElementById('tab-prev');
-      var tabNext = document.getElementById('tab-next');
+  document.querySelectorAll('.template-card').forEach(card => {
+    card.addEventListener('click', () => { applyTemplate(card.dataset.templateId); saveState(); });
+  });
 
-      function activateTab(btn) {
-        document.querySelectorAll('.tab-btn').forEach(function (b) {
-          b.classList.remove('border-blue-600', 'text-blue-600');
-          b.classList.add('border-transparent', 'text-gray-500');
-        });
-        btn.classList.add('border-blue-600', 'text-blue-600');
-        document.querySelectorAll('.tab-content').forEach(function (c) { c.classList.add('hidden'); });
-        var target = document.getElementById('tab-' + btn.dataset.tab);
-        if (target) target.classList.remove('hidden');
-        btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-      }
+  const fileInput = document.getElementById('photo-file');
+  const photoStatus = document.getElementById('photo-status');
+  const removePhotoBtn = document.getElementById('btn-remove-photo');
 
-      tabButtons.forEach(function (btn) {
-        btn.addEventListener('click', function () { activateTab(btn); });
-      });
+  if (fileInput) {
+    fileInput.addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (photoStatus) photoStatus.textContent = file.name;
+      if (removePhotoBtn) removePhotoBtn.classList.remove('hidden');
+      const reader = new FileReader();
+      reader.onload = event => { if (event.target.result) { state.basics.image = event.target.result; saveState(); } };
+      reader.readAsDataURL(file);
+    });
+  }
 
-      function getActiveTabIndex() {
-        return tabButtons.findIndex(function (btn) { return btn.classList.contains('border-blue-600'); });
-      }
+  if (removePhotoBtn) {
+    removePhotoBtn.addEventListener('click', () => {
+      state.basics.image = '';
+      if (fileInput) fileInput.value = '';
+      if (photoStatus) photoStatus.textContent = lang === 'es' ? 'Sin archivo' : lang === 'it' ? 'Nessun file' : 'No file';
+      removePhotoBtn.classList.add('hidden');
+      saveState();
+    });
+  }
 
-      if (tabPrev) {
-        tabPrev.addEventListener('click', function () {
-          var currentIndex = getActiveTabIndex();
-          var prevIndex = currentIndex <= 0 ? tabButtons.length - 1 : currentIndex - 1;
-          activateTab(tabButtons[prevIndex]);
-        });
-        tabPrev.addEventListener('touchstart', function () { if (tabNav) tabNav.scrollBy({ left: -150, behavior: 'smooth' }); });
-      }
+  const tabButtons = Array.from(document.querySelectorAll('.tab-btn'));
+  const tabNav = document.getElementById('tab-nav');
+  const tabPrev = document.getElementById('tab-prev');
+  const tabNext = document.getElementById('tab-next');
 
-      if (tabNext) {
-        tabNext.addEventListener('click', function () {
-          var currentIndex = getActiveTabIndex();
-          var nextIndex = currentIndex === -1 || currentIndex === tabButtons.length - 1 ? 0 : currentIndex + 1;
-          activateTab(tabButtons[nextIndex]);
-        });
-        tabNext.addEventListener('touchstart', function () { if (tabNav) tabNav.scrollBy({ left: 150, behavior: 'smooth' }); });
-      }
+  function activateTab(btn) {
+    document.querySelectorAll('.tab-btn').forEach(b => {
+      b.classList.remove('border-blue-600', 'text-blue-600');
+      b.classList.add('border-transparent', 'text-gray-500');
+    });
+    btn.classList.add('border-blue-600', 'text-blue-600');
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+    const target = document.getElementById('tab-' + btn.dataset.tab);
+    if (target) target.classList.remove('hidden');
+    btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }
 
-      function populateFormBasics() {
-        document.querySelectorAll('#cv-form input[data-path], #cv-form textarea[data-path]').forEach(function (input) {
-          var path = input.getAttribute('data-path');
-          if (path) input.value = getDeepValue(state, path) || '';
-        });
-        if (state.basics.image && photoStatus) {
-          photoStatus.textContent = lang === 'es' ? 'Imagen cargada' : lang === 'it' ? 'Immagine caricata' : 'Image loaded';
-          if (removePhotoBtn) removePhotoBtn.classList.remove('hidden');
-        }
-      }
+  tabButtons.forEach(btn => btn.addEventListener('click', () => activateTab(btn)));
 
-      function renderDynamicBlocks() {
-        var workContainer = document.getElementById('work-container');
-        if (workContainer) {
-          workContainer.innerHTML = '';
-          state.work.forEach(function (item, index) { workContainer.appendChild(createWorkBlock(item, index)); });
-        }
-        var eduContainer = document.getElementById('education-container');
-        if (eduContainer) {
-          eduContainer.innerHTML = '';
-          state.education.forEach(function (item, index) { eduContainer.appendChild(createEduBlock(item, index)); });
-        }
-        var certContainer = document.getElementById('certificates-container');
-        if (certContainer) {
-          certContainer.innerHTML = '';
-          state.certificates.forEach(function (item, index) { certContainer.appendChild(createCertificateBlock(item, index)); });
-        }
-        var langContainer = document.getElementById('languages-container');
-        if (langContainer) {
-          langContainer.innerHTML = '';
-          state.languages.forEach(function (item, index) { langContainer.appendChild(createLanguageBlock(item, index)); });
-        }
-      }
+  if (tabPrev) {
+    tabPrev.addEventListener('click', () => {
+      const currentIndex = tabButtons.findIndex(b => b.classList.contains('border-blue-600'));
+      const prevIndex = currentIndex <= 0 ? tabButtons.length - 1 : currentIndex - 1;
+      activateTab(tabButtons[prevIndex]);
+    });
+    tabPrev.addEventListener('touchstart', () => tabNav?.scrollBy({ left: -150, behavior: 'smooth' }));
+  }
 
-      function createWorkBlock(item, index) {
-        var div = document.createElement('div');
-        div.className = 'p-4 bg-gray-50 rounded-xl border border-gray-200 relative space-y-3';
-        div.innerHTML = '' +
-          '<button type="button" class="absolute top-2 right-2 text-red-500 text-xs font-medium" data-remove="work" data-index="' + index + '">' + labels.remove + '</button>' +
-          '<div class="grid sm:grid-cols-2 gap-3 pt-3">' +
-            '<div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">' + labels.company + '</label><input type="text" data-path="work.' + index + '.name" value="' + escAttr(item.name || '') + '" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div>' +
-            '<div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">' + labels.position + '</label><input type="text" data-path="work.' + index + '.position" value="' + escAttr(item.position || '') + '" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div>' +
-          '</div>' +
-          '<div class="grid grid-cols-2 gap-3">' +
-            '<div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">' + labels.start + '</label><input type="month" data-path="work.' + index + '.startDate" value="' + escAttr(normalizeMonthValue(item.startDate || '')) + '" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div>' +
-            '<div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">' + labels.end + '</label><input type="month" data-path="work.' + index + '.endDate" value="' + escAttr(normalizeMonthValue(item.endDate || '')) + '" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div>' +
-          '</div>' +
-          '<div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">' + labels.desc + '</label><textarea data-path="work.' + index + '.summary" rows="2" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm">' + escText(item.summary || '') + '</textarea></div>';
-        return div;
-      }
+  if (tabNext) {
+    tabNext.addEventListener('click', () => {
+      const currentIndex = tabButtons.findIndex(b => b.classList.contains('border-blue-600'));
+      const nextIndex = currentIndex === -1 || currentIndex === tabButtons.length - 1 ? 0 : currentIndex + 1;
+      activateTab(tabButtons[nextIndex]);
+    });
+    tabNext.addEventListener('touchstart', () => tabNav?.scrollBy({ left: 150, behavior: 'smooth' }));
+  }
 
-      function createEduBlock(item, index) {
-        var div = document.createElement('div');
-        div.className = 'p-4 bg-gray-50 rounded-xl border border-gray-200 relative space-y-3';
-        div.innerHTML = '' +
-          '<button type="button" class="absolute top-2 right-2 text-red-500 text-xs font-medium" data-remove="education" data-index="' + index + '">' + labels.remove + '</button>' +
-          '<div class="grid sm:grid-cols-2 gap-3 pt-3">' +
-            '<div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">' + labels.inst + '</label><input type="text" data-path="education.' + index + '.institution" value="' + escAttr(item.institution || '') + '" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div>' +
-            '<div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">' + labels.area + '</label><input type="text" data-path="education.' + index + '.area" value="' + escAttr(item.area || '') + '" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div>' +
-          '</div>' +
-          '<div class="grid grid-cols-2 gap-3">' +
-            '<div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">' + labels.start + '</label><input type="month" data-path="education.' + index + '.startDate" value="' + escAttr(normalizeMonthValue(item.startDate || '')) + '" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div>' +
-            '<div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">' + labels.end + '</label><input type="month" data-path="education.' + index + '.endDate" value="' + escAttr(normalizeMonthValue(item.endDate || '')) + '" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div>' +
-          '</div>';
-        return div;
-      }
+  function populateFormBasics() {
+    document.querySelectorAll('#cv-form input[data-path], #cv-form textarea[data-path]').forEach(input => {
+      const path = input.getAttribute('data-path');
+      if (path) input.value = getDeepValue(state, path) || '';
+    });
+    if (state.basics.image && photoStatus) {
+      photoStatus.textContent = lang === 'es' ? 'Imagen cargada' : lang === 'it' ? 'Immagine caricata' : 'Image loaded';
+      if (removePhotoBtn) removePhotoBtn.classList.remove('hidden');
+    }
+  }
 
-      function createCertificateBlock(item, index) {
-        var div = document.createElement('div');
-        div.className = 'p-4 bg-gray-50 rounded-xl border border-gray-200 relative space-y-3';
-        div.innerHTML = '' +
-          '<button type="button" class="absolute top-2 right-2 text-red-500 text-xs font-medium" data-remove="certificates" data-index="' + index + '">' + labels.remove + '</button>' +
-          '<div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">' + (lang === 'es' ? 'Nombre del certificado' : lang === 'it' ? 'Nome certificato' : 'Certificate name') + '</label><input type="text" data-path="certificates.' + index + '.name" value="' + escAttr(item.name || '') + '" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div>' +
-          '<div class="grid sm:grid-cols-2 gap-3">' +
-            '<div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">' + (lang === 'es' ? 'Emisor' : lang === 'it' ? 'Emittente' : 'Issuer') + '</label><input type="text" data-path="certificates.' + index + '.issuer" value="' + escAttr(item.issuer || '') + '" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div>' +
-            '<div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">' + (lang === 'es' ? 'Fecha' : lang === 'it' ? 'Data' : 'Date') + '</label><input type="month" data-path="certificates.' + index + '.date" value="' + escAttr(normalizeMonthValue(item.date || '')) + '" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div>' +
-          '</div>';
-        return div;
-      }
+  function renderDynamicBlocks() {
+    const workContainer = document.getElementById('work-container');
+    if (workContainer) { workContainer.innerHTML = ''; state.work.forEach((item, i) => workContainer.appendChild(createWorkBlock(item, i))); }
+    const eduContainer = document.getElementById('education-container');
+    if (eduContainer) { eduContainer.innerHTML = ''; state.education.forEach((item, i) => eduContainer.appendChild(createEduBlock(item, i))); }
+    const certContainer = document.getElementById('certificates-container');
+    if (certContainer) { certContainer.innerHTML = ''; state.certificates.forEach((item, i) => certContainer.appendChild(createCertificateBlock(item, i))); }
+    const langContainer = document.getElementById('languages-container');
+    if (langContainer) { langContainer.innerHTML = ''; state.languages.forEach((item, i) => langContainer.appendChild(createLanguageBlock(item, i))); }
+  }
 
-      function createLanguageBlock(item, index) {
-        var div = document.createElement('div');
-        div.className = 'p-4 bg-gray-50 rounded-xl border border-gray-200 relative space-y-3';
-        div.innerHTML = '' +
-          '<button type="button" class="absolute top-2 right-2 text-red-500 text-xs font-medium" data-remove="languages" data-index="' + index + '">' + labels.remove + '</button>' +
-          '<div class="grid sm:grid-cols-2 gap-3">' +
-            '<div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">' + (lang === 'es' ? 'Idioma' : lang === 'it' ? 'Lingua' : 'Language') + '</label><input type="text" data-path="languages.' + index + '.language" value="' + escAttr(item.language || '') + '" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div>' +
-            '<div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">' + (lang === 'es' ? 'Nivel' : lang === 'it' ? 'Livello' : 'Fluency') + '</label><input type="text" data-path="languages.' + index + '.fluency" value="' + escAttr(item.fluency || '') + '" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div>' +
-          '</div>';
-        return div;
-      }
+  function createWorkBlock(item, i) {
+    const div = document.createElement('div');
+    div.className = 'p-4 bg-gray-50 rounded-xl border border-gray-200 relative space-y-3';
+    div.innerHTML = `<button type="button" class="absolute top-2 right-2 text-red-500 text-xs font-medium" data-remove="work" data-index="${i}">${labels.remove}</button><div class="grid sm:grid-cols-2 gap-3 pt-3"><div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${labels.company}</label><input type="text" data-path="work.${i}.name" value="${escAttr(item.name || '')}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div><div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${labels.position}</label><input type="text" data-path="work.${i}.position" value="${escAttr(item.position || '')}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div></div><div class="grid grid-cols-2 gap-3"><div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${labels.start}</label><input type="month" data-path="work.${i}.startDate" value="${escAttr(normalizeMonthValue(item.startDate || ''))}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div><div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${labels.end}</label><input type="month" data-path="work.${i}.endDate" value="${escAttr(normalizeMonthValue(item.endDate || ''))}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div></div><div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${labels.desc}</label><textarea data-path="work.${i}.summary" rows="2" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm">${escText(item.summary || '')}</textarea></div>`;
+    return div;
+  }
 
-      document.getElementById('btn-add-work')?.addEventListener('click', function () {
-        state.work.push({ name: '', position: '', startDate: '', endDate: '', summary: '' });
-        saveState(); renderDynamicBlocks();
-      });
+  function createEduBlock(item, i) {
+    const div = document.createElement('div');
+    div.className = 'p-4 bg-gray-50 rounded-xl border border-gray-200 relative space-y-3';
+    div.innerHTML = `<button type="button" class="absolute top-2 right-2 text-red-500 text-xs font-medium" data-remove="education" data-index="${i}">${labels.remove}</button><div class="grid sm:grid-cols-2 gap-3 pt-3"><div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${labels.inst}</label><input type="text" data-path="education.${i}.institution" value="${escAttr(item.institution || '')}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div><div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${labels.area}</label><input type="text" data-path="education.${i}.area" value="${escAttr(item.area || '')}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div></div><div class="grid grid-cols-2 gap-3"><div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${labels.start}</label><input type="month" data-path="education.${i}.startDate" value="${escAttr(normalizeMonthValue(item.startDate || ''))}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div><div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${labels.end}</label><input type="month" data-path="education.${i}.endDate" value="${escAttr(normalizeMonthValue(item.endDate || ''))}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div></div>`;
+    return div;
+  }
 
-      document.getElementById('btn-add-edu')?.addEventListener('click', function () {
-        state.education.push({ institution: '', area: '', startDate: '', endDate: '' });
-        saveState(); renderDynamicBlocks();
-      });
+  function createCertificateBlock(item, i) {
+    const div = document.createElement('div');
+    div.className = 'p-4 bg-gray-50 rounded-xl border border-gray-200 relative space-y-3';
+    const certNameLabel = lang === 'es' ? 'Nombre del certificado' : lang === 'it' ? 'Nome certificato' : 'Certificate name';
+    const issuerLabel = lang === 'es' ? 'Emisor' : lang === 'it' ? 'Emittente' : 'Issuer';
+    const dateLabel = lang === 'es' ? 'Fecha' : lang === 'it' ? 'Data' : 'Date';
+    div.innerHTML = `<button type="button" class="absolute top-2 right-2 text-red-500 text-xs font-medium" data-remove="certificates" data-index="${i}">${labels.remove}</button><div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${certNameLabel}</label><input type="text" data-path="certificates.${i}.name" value="${escAttr(item.name || '')}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div><div class="grid sm:grid-cols-2 gap-3"><div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${issuerLabel}</label><input type="text" data-path="certificates.${i}.issuer" value="${escAttr(item.issuer || '')}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div><div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${dateLabel}</label><input type="month" data-path="certificates.${i}.date" value="${escAttr(normalizeMonthValue(item.date || ''))}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div></div>`;
+    return div;
+  }
 
-      document.getElementById('btn-add-certificate')?.addEventListener('click', function () {
-        state.certificates.push({ name: '', issuer: '', date: '' });
-        saveState(); renderDynamicBlocks();
-      });
+  function createLanguageBlock(item, i) {
+    const div = document.createElement('div');
+    div.className = 'p-4 bg-gray-50 rounded-xl border border-gray-200 relative space-y-3';
+    const langLabel = lang === 'es' ? 'Idioma' : lang === 'it' ? 'Lingua' : 'Language';
+    const levelLabel = lang === 'es' ? 'Nivel' : lang === 'it' ? 'Livello' : 'Fluency';
+    div.innerHTML = `<button type="button" class="absolute top-2 right-2 text-red-500 text-xs font-medium" data-remove="languages" data-index="${i}">${labels.remove}</button><div class="grid sm:grid-cols-2 gap-3"><div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${langLabel}</label><input type="text" data-path="languages.${i}.language" value="${escAttr(item.language || '')}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div><div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${levelLabel}</label><input type="text" data-path="languages.${i}.fluency" value="${escAttr(item.fluency || '')}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div></div>`;
+    return div;
+  }
 
-      document.getElementById('btn-add-language')?.addEventListener('click', function () {
-        state.languages.push({ language: '', fluency: '' });
-        saveState(); renderDynamicBlocks();
-      });
+  function removeByType(type, index) {
+    if (type === 'work') state.work.splice(index, 1);
+    else if (type === 'education') state.education.splice(index, 1);
+    else if (type === 'certificates') state.certificates.splice(index, 1);
+    else if (type === 'languages') state.languages.splice(index, 1);
+    else if (type === 'skill') state.skills.splice(index, 1);
+    else return;
+    saveState();
+    if (type === 'skill') renderSkillsTags();
+    else renderDynamicBlocks();
+  }
 
-      var skillsInput = document.getElementById('skills-input');
-      var skillsTagContainer = document.getElementById('skills-tag-container');
+  [document.getElementById('btn-add-work'), document.getElementById('btn-add-edu'), document.getElementById('btn-add-certificate'), document.getElementById('btn-add-language')].forEach((btn, idx) => {
+    if (!btn) return;
+    const types = ['work', 'education', 'certificates', 'languages'];
+    const empty = [
+      { name: '', position: '', startDate: '', endDate: '', summary: '' },
+      { institution: '', area: '', startDate: '', endDate: '' },
+      { name: '', issuer: '', date: '' },
+      { language: '', fluency: '' }
+    ];
+    btn.addEventListener('click', () => { state[types[idx]].push(empty[idx]); saveState(); renderDynamicBlocks(); });
+  });
 
-      function renderSkillsTags() {
-        if (!skillsTagContainer) return;
-        document.querySelectorAll('.skill-tag-item').forEach(function (el) { el.remove(); });
-        state.skills.forEach(function (skillObj, idx) {
-          if (!skillObj.name) return;
-          var div = document.createElement('div');
-          div.className = 'skill-tag-item inline-flex items-center gap-1.5 bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded-lg';
-          div.innerHTML = '<span>' + escText(skillObj.name) + '</span><button type="button" class="text-blue-200 hover:text-white font-extrabold ml-0.5" data-remove="skill" data-index="' + idx + '">&times;</button>';
-          skillsTagContainer.appendChild(div);
-        });
-        renderPreview();
-      }
+  const skillsInput = document.getElementById('skills-input');
+  const skillsTagContainer = document.getElementById('skills-tag-container');
 
-      if (skillsInput) {
-        skillsInput.addEventListener('keydown', function (e) {
-          if (e.key === 'Enter' || e.key === ',') {
-            e.preventDefault();
-            var val = skillsInput.value.replace(/,/g, '').trim();
-            if (val) {
-              if (!state.skills.some(function (s) { return s.name.toLowerCase() === val.toLowerCase(); })) {
-                state.skills.push({ name: val });
-                saveState(); renderSkillsTags();
-              }
-            }
-            skillsInput.value = '';
-          }
-        });
-      }
+  function renderSkillsTags() {
+    if (!skillsTagContainer) return;
+    document.querySelectorAll('.skill-tag-item').forEach(el => el.remove());
+    state.skills.forEach((skillObj, idx) => {
+      if (!skillObj.name) return;
+      const div = document.createElement('div');
+      div.className = 'skill-tag-item inline-flex items-center gap-1.5 bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded-lg';
+      div.innerHTML = `<span>${escText(skillObj.name)}</span><button type="button" class="text-blue-200 hover:text-white font-extrabold ml-0.5" data-remove="skill" data-index="${idx}">&times;</button>`;
+      skillsTagContainer.appendChild(div);
+    });
+    renderPreview();
+  }
 
-      function toggleSection(id, hasContent) {
-        var el = document.getElementById(id);
-        if (el) el.classList.toggle('hidden', !hasContent);
-      }
-
-      function renderPreview() {
-        var nameEl = document.getElementById('view-name');
-        var labelEl = document.getElementById('view-label');
-        var summaryEl = document.getElementById('view-summary');
-        var contactEl = document.getElementById('view-contact');
-
-        if (nameEl) nameEl.textContent = state.basics.name.trim() || translationsUI.defaultName;
-        if (labelEl) labelEl.textContent = state.basics.label.trim() || translationsUI.defaultLabel;
-        if (summaryEl) summaryEl.textContent = state.basics.summary || '';
-        toggleSection('section-summary', !!state.basics.summary);
-
-        if (contactEl) {
-          var html = '';
-          if (state.basics.email) html += '<span>📧 ' + escText(state.basics.email) + '</span>';
-          if (state.basics.phone) html += '<span>📞 ' + escText(state.basics.phone) + '</span>';
-          var website = state.basics.web || state.basics.url || '';
-          if (website) html += '<span>🔗 <a href="' + escAttr(website) + '" target="_blank" rel="noopener noreferrer">' + escText(website) + '</a></span>';
-          contactEl.innerHTML = html;
-        }
-
-        var imgEl = document.getElementById('view-image');
-        if (imgEl) {
-          if (state.basics.image) {
-            imgEl.src = state.basics.image;
-            imgEl.classList.remove('hidden');
-          } else {
-            imgEl.classList.add('hidden');
-          }
-        }
-
-        var expEl = document.getElementById('view-experience');
-        if (expEl) {
-          expEl.innerHTML = '';
-          state.work.forEach(function (w) {
-            var div = document.createElement('div');
-            div.innerHTML = '<div class="flex justify-between font-semibold text-sm"><span class="text-gray-900 font-bold">' + escText(w.position || '') + '</span><span class="text-gray-500 text-xs">' + escText(formatDateRange(w.startDate, w.endDate)) + '</span></div><div class="text-blue-600 text-xs font-medium">' + escText(w.name || '') + '</div><p class="text-gray-600 text-xs mt-1 whitespace-pre-line">' + escText(w.summary || '') + '</p>';
-            expEl.appendChild(div);
-          });
-          toggleSection('section-experience', state.work.length > 0);
-        }
-
-        var eduEl = document.getElementById('view-education');
-        if (eduEl) {
-          eduEl.innerHTML = '';
-          state.education.forEach(function (e) {
-            var div = document.createElement('div');
-            div.innerHTML = '<div class="flex justify-between font-semibold text-sm"><span class="text-gray-900 font-bold">' + escText(e.area || '') + '</span><span class="text-gray-500 text-xs">' + escText(formatDateRange(e.startDate, e.endDate)) + '</span></div><div class="text-gray-500 text-xs font-medium">' + escText(e.institution || '') + '</div>';
-            eduEl.appendChild(div);
-          });
-          toggleSection('section-education', state.education.length > 0);
-        }
-
-        var certEl = document.getElementById('view-certificates');
-        if (certEl) {
-          certEl.innerHTML = '';
-          state.certificates.forEach(function (c) {
-            var div = document.createElement('div');
-            div.innerHTML = '<div class="flex justify-between font-semibold text-sm"><span class="text-gray-900 font-bold">' + escText(c.name || '') + '</span><span class="text-gray-500 text-xs">' + escText(normalizeMonthValue(c.date || '')) + '</span></div><div class="text-gray-500 text-xs font-medium">' + escText(c.issuer || '') + '</div>';
-            certEl.appendChild(div);
-          });
-          toggleSection('section-certificates', state.certificates.length > 0);
-        }
-
-        var langEl = document.getElementById('view-languages');
-        if (langEl) {
-          langEl.innerHTML = '';
-          state.languages.forEach(function (l) {
-            var div = document.createElement('div');
-            div.className = 'flex justify-between text-sm text-gray-700';
-            div.innerHTML = '<span>' + escText(l.language || '') + '</span><span class="text-gray-500">' + escText(l.fluency || '') + '</span>';
-            langEl.appendChild(div);
-          });
-          toggleSection('section-languages', state.languages.length > 0);
-        }
-
-        var badgesEl = document.getElementById('view-skills-badges');
-        if (badgesEl) {
-          badgesEl.innerHTML = '';
-          state.skills.forEach(function (s) {
-            if (!s.name) return;
-            var span = document.createElement('span');
-            span.className = 'badge-item-live border shadow-xs';
-            span.textContent = s.name;
-            badgesEl.appendChild(span);
-          });
-          toggleSection('section-skills', state.skills.length > 0);
-        }
-      }
-
-      document.querySelectorAll('.btn-print-control').forEach(function (btn) {
-        btn.addEventListener('click', function () { window.print(); });
-      });
-
-      document.querySelectorAll('.btn-download-json-control').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          var dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(state, null, 2));
-          var anchor = document.createElement('a');
-          anchor.setAttribute('href', dataStr);
-          anchor.setAttribute('download', 'resume.' + lang + '.json');
-          document.body.appendChild(anchor);
-          anchor.click(); anchor.remove();
-        });
-      });
-
-      document.getElementById('btn-publish')?.addEventListener('click', async function () {
-        var btn = document.getElementById('btn-publish');
-        if (!btn) return;
-        var isAuthenticated = document.cookie.indexOf('github_user=') !== -1;
-        if (!isAuthenticated) {
-          var confirmLogin = confirm(lang === 'es' ? '¿Conectar tu GitHub para publicar tu CV en tu propia web?' : lang === 'it' ? 'Vuoi collegare il tuo GitHub per pubblicare il tuo CV sul tuo sito web?' : 'Do you want to connect your GitHub to publish your CV on your own website?');
-          if (confirmLogin) window.location.href = '/.netlify/functions/auth-login';
-          return;
-        }
-        btn.disabled = true;
-        var originalText = btn.textContent;
-        btn.textContent = lang === 'es' ? 'Publicando...' : lang === 'it' ? 'Pubblicazione...' : 'Publishing...';
-        try {
-          var savedLangs = ['es', 'it', 'en'];
-          var resumeDataByLang = {};
-          savedLangs.forEach(function (code) {
-            var saved = localStorage.getItem('cv_backup_data_' + code);
-            if (!saved) return;
-            try {
-              var parsed = JSON.parse(saved);
-              if (parsed && parsed.basics && parsed.basics.name && parsed.basics.name.trim()) {
-                resumeDataByLang[code] = parsed;
-              }
-            } catch (e) {}
-          });
-          if (!resumeDataByLang[lang]) resumeDataByLang[lang] = state;
-          var response = await fetch('/.netlify/functions/deploy', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({
-              langs: Object.keys(resumeDataByLang),
-              resumeDataByLang: resumeDataByLang,
-              template: state.meta ? state.meta.template : localStorage.getItem(TEMPLATE_KEY) || 'minimalist'
-            })
-          });
-          var data = await response.json();
-          if (response.ok) {
-            alert(lang === 'es' ? '¡Publicado! Tu CV está en: ' + data.webUrl : lang === 'it' ? 'Pubblicato! Il tuo CV è su: ' + data.webUrl : 'Published! Your CV is at: ' + data.webUrl);
-          } else {
-            alert(data.error || (lang === 'es' ? 'Error al publicar.' : lang === 'it' ? 'Errore nella pubblicazione.' : 'Error publishing.'));
-          }
-        } catch (err) {
-          console.error('Error:', err);
-          alert(lang === 'es' ? 'Error de conexión.' : lang === 'it' ? 'Errore di connessione.' : 'Connection error.');
-        } finally {
-          btn.disabled = false;
-          btn.textContent = originalText;
-        }
-      });
-
-      var savedTemplate = (state.meta && state.meta.template) || localStorage.getItem(TEMPLATE_KEY) || 'minimalist';
-
-      var githubBtns = Array.from(document.querySelectorAll('.btn-github-auth-control'));
-      var statusTexts = Array.from(document.querySelectorAll('.github-status-text'));
-
-      function updateGitHubAuthStatus() {
-        var isAuthenticated = document.cookie.indexOf('github_user=') !== -1;
-        var username = '';
-        var match = document.cookie.match(/github_user=([^;]+)/);
-        if (match) username = match[1];
-        githubBtns.forEach(function (btn) {
-          if (isAuthenticated) {
-            btn.classList.remove('bg-gray-800', 'hover:bg-gray-900');
-            btn.classList.add('bg-green-600', 'hover:bg-green-700');
-          } else {
-            btn.classList.remove('bg-green-600', 'hover:bg-green-700');
-            btn.classList.add('bg-gray-800', 'hover:bg-gray-900');
-          }
-        });
-        statusTexts.forEach(function (el) {
-          el.textContent = isAuthenticated ? '✓ ' + username : (lang === 'es' ? 'Conectar' : lang === 'it' ? 'Collegare' : 'Connect');
-        });
-      }
-
-      githubBtns.forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          var isAuthenticated = document.cookie.indexOf('github_user=') !== -1;
-          if (isAuthenticated) {
-            var logout = confirm(lang === 'es' ? '¿Desconectar de GitHub?' : lang === 'it' ? 'Disconnettere da GitHub?' : 'Disconnect from GitHub?');
-            if (logout) {
-              document.cookie = 'github_token=; Max-Age=0; Path=/';
-              document.cookie = 'github_user=; Max-Age=0; Path=/';
-              updateGitHubAuthStatus();
-            }
-          } else {
-            window.location.href = '/.netlify/functions/auth-login';
-          }
-        });
-      });
-
-      updateGitHubAuthStatus();
-
-      /* ——— EVENT DELEGATION ——— */
-      function escAttr(s) { return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
-      function escText(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
-
-      document.getElementById('cv-form')?.addEventListener('input', function (e) {
-        var target = e.target;
-        var path = target.getAttribute('data-path');
-        if (!path) return;
-        setDeepValue(state, path, target.value);
-        saveState();
-      });
-
-      function removeByType(type, index) {
-        if (type === 'work') { state.work.splice(index, 1); }
-        else if (type === 'education') { state.education.splice(index, 1); }
-        else if (type === 'certificates') { state.certificates.splice(index, 1); }
-        else if (type === 'languages') { state.languages.splice(index, 1); }
-        else if (type === 'skill') { state.skills.splice(index, 1); }
-        else { return; }
-        saveState();
-        if (type === 'skill') { renderSkillsTags(); }
-        else { renderDynamicBlocks(); }
-      }
-
-      document.querySelectorAll('#work-container, #education-container, #certificates-container, #languages-container').forEach(function (container) {
-        container?.addEventListener('click', function (e) {
-          var btn = e.target.closest('[data-remove]');
-          if (!btn) return;
-          e.preventDefault();
-          removeByType(btn.getAttribute('data-remove'), parseInt(btn.getAttribute('data-index'), 10));
-        });
-      });
-
-      document.getElementById('skills-tag-container')?.addEventListener('click', function (e) {
-        var btn = e.target.closest('[data-remove="skill"]');
-        if (!btn) return;
+  if (skillsInput) {
+    skillsInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ',') {
         e.preventDefault();
-        removeByType('skill', parseInt(btn.getAttribute('data-index'), 10));
-      });
-
-      /* ——— INIT ——— */
-      try {
-        (async function () {
-          var remoteData = await loadRemoteResume();
-          if (remoteData) state = remoteData;
-          populateFormBasics();
-          renderDynamicBlocks();
+        const val = skillsInput.value.replace(/,/g, '').trim();
+        if (val && !state.skills.some(s => s.name.toLowerCase() === val.toLowerCase())) {
+          state.skills.push({ name: val });
+          saveState();
           renderSkillsTags();
-          applyTemplate(savedTemplate);
-          renderPreview();
-        })();
-      } catch (e) {
-        console.error('CV Editor init error:', e);
+        }
+        skillsInput.value = '';
       }
-    })();
-  </script>
+    });
+  }
 
-  <!-- Cookie Consent Banner -->
-  <div id="privacy-banner"
-    class="fixed bottom-4 left-4 right-4 md:left-4 md:right-auto md:max-w-md bg-white border border-gray-200 p-4 rounded-xl shadow-2xl z-50 opacity-0 translate-y-8 pointer-events-none flex flex-col sm:flex-row items-start sm:items-center gap-4 transition-all duration-500 ease-out"
-  >
-    <div class="hidden sm:flex flex-shrink-0 w-16 h-16 overflow-hidden items-end self-end -mb-4">
-      <img src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExbG5uaXVwc3ZvY3A0Z2Nvenk0YWZqcWV4amtydHIyOHp4eHNrd2N4ZiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/CPsnRKLWN0XS9DO4Ej/giphy.gif"
-        alt="Cookie consent" class="w-full h-auto object-contain max-h-[110%] origin-bottom scale-110" loading="lazy" />
+  function toggleSection(id, hasContent) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = hasContent ? '' : 'none';
+  }
+
+  function renderPreview() {
+    const nameEl = document.getElementById('view-name');
+    const labelEl = document.getElementById('view-label');
+    const summaryEl = document.getElementById('view-summary');
+    const contactEl = document.getElementById('view-contact');
+
+    if (nameEl) nameEl.textContent = state.basics.name.trim() || translationsUI.defaultName;
+    if (labelEl) labelEl.textContent = state.basics.label.trim() || translationsUI.defaultLabel;
+    if (summaryEl) summaryEl.textContent = state.basics.summary || '';
+    toggleSection('section-summary', !!state.basics.summary);
+
+    if (contactEl) {
+      let html = '';
+      if (state.basics.email) html += `<span>\u{1F4E7} ${escText(state.basics.email)}</span>`;
+      if (state.basics.phone) html += `<span>\u{1F4DE} ${escText(state.basics.phone)}</span>`;
+      const website = state.basics.web || state.basics.url || '';
+      if (website) html += `<span>\u{1F517} <a href="${escAttr(website)}" target="_blank" rel="noopener noreferrer">${escText(website)}</a></span>`;
+      contactEl.innerHTML = html;
+    }
+
+    const imgEl = document.getElementById('view-image');
+    if (imgEl) {
+      if (state.basics.image) { imgEl.src = state.basics.image; imgEl.classList.remove('hidden'); }
+      else { imgEl.classList.add('hidden'); }
+    }
+
+    const expEl = document.getElementById('view-experience');
+    if (expEl) {
+      expEl.innerHTML = '';
+      state.work.forEach(w => {
+        const div = document.createElement('div');
+        div.innerHTML = `<div class="flex justify-between font-semibold text-sm"><span class="text-gray-900 font-bold">${escText(w.position || '')}</span><span class="text-gray-500 text-xs">${escText(formatDateRange(w.startDate, w.endDate))}</span></div><div class="text-blue-600 text-xs font-medium">${escText(w.name || '')}</div><p class="text-gray-600 text-xs mt-1 whitespace-pre-line">${escText(w.summary || '')}</p>`;
+        expEl.appendChild(div);
+      });
+      toggleSection('section-experience', state.work.length > 0);
+    }
+
+    const eduEl = document.getElementById('view-education');
+    if (eduEl) {
+      eduEl.innerHTML = '';
+      state.education.forEach(e => {
+        const div = document.createElement('div');
+        div.innerHTML = `<div class="flex justify-between font-semibold text-sm"><span class="text-gray-900 font-bold">${escText(e.area || '')}</span><span class="text-gray-500 text-xs">${escText(formatDateRange(e.startDate, e.endDate))}</span></div><div class="text-gray-500 text-xs font-medium">${escText(e.institution || '')}</div>`;
+        eduEl.appendChild(div);
+      });
+      toggleSection('section-education', state.education.length > 0);
+    }
+
+    const certEl = document.getElementById('view-certificates');
+    if (certEl) {
+      certEl.innerHTML = '';
+      state.certificates.forEach(c => {
+        const div = document.createElement('div');
+        div.innerHTML = `<div class="flex justify-between font-semibold text-sm"><span class="text-gray-900 font-bold">${escText(c.name || '')}</span><span class="text-gray-500 text-xs">${escText(normalizeMonthValue(c.date || ''))}</span></div><div class="text-gray-500 text-xs font-medium">${escText(c.issuer || '')}</div>`;
+        certEl.appendChild(div);
+      });
+      toggleSection('section-certificates', state.certificates.length > 0);
+    }
+
+    const langEl = document.getElementById('view-languages');
+    if (langEl) {
+      langEl.innerHTML = '';
+      state.languages.forEach(l => {
+        const div = document.createElement('div');
+        div.className = 'flex justify-between text-sm text-gray-700';
+        div.innerHTML = `<span>${escText(l.language || '')}</span><span class="text-gray-500">${escText(l.fluency || '')}</span>`;
+        langEl.appendChild(div);
+      });
+      toggleSection('section-languages', state.languages.length > 0);
+    }
+
+    const badgesEl = document.getElementById('view-skills-badges');
+    if (badgesEl) {
+      badgesEl.innerHTML = '';
+      state.skills.forEach(s => {
+        if (!s.name) return;
+        const span = document.createElement('span');
+        span.className = 'badge-item-live border shadow-xs';
+        span.textContent = s.name;
+        badgesEl.appendChild(span);
+      });
+      toggleSection('section-skills', state.skills.length > 0);
+    }
+  }
+
+  document.querySelectorAll('.btn-print-control').forEach(btn => btn.addEventListener('click', () => window.print()));
+  document.querySelectorAll('.btn-download-json-control').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const a = document.createElement('a');
+      a.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(state, null, 2));
+      a.download = `resume.${lang}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    });
+  });
+
+  document.getElementById('btn-publish')?.addEventListener('click', async () => {
+    const btn = document.getElementById('btn-publish');
+    if (!btn) return;
+    if (document.cookie.indexOf('github_user=') === -1) {
+      if (confirm(lang === 'es' ? '\u00bfConectar tu GitHub para publicar tu CV en tu propia web?' : lang === 'it' ? 'Vuoi collegare il tuo GitHub per pubblicare il tuo CV sul tuo sito web?' : 'Do you want to connect your GitHub to publish your CV on your own website?'))
+        window.location.href = '/.netlify/functions/auth-login';
+      return;
+    }
+    btn.disabled = true;
+    const originalText = btn.textContent;
+    btn.textContent = lang === 'es' ? 'Publicando...' : lang === 'it' ? 'Pubblicazione...' : 'Publishing...';
+    try {
+      const resumeDataByLang = {};
+      ['es', 'it', 'en'].forEach(code => {
+        try {
+          const parsed = JSON.parse(localStorage.getItem('cv_backup_data_' + code) || 'null');
+          if (parsed?.basics?.name?.trim()) resumeDataByLang[code] = parsed;
+        } catch (e) {}
+      });
+      if (!resumeDataByLang[lang]) resumeDataByLang[lang] = state;
+      const response = await fetch('/.netlify/functions/deploy', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+        body: JSON.stringify({ langs: Object.keys(resumeDataByLang), resumeDataByLang, template: state.meta?.template || localStorage.getItem(TEMPLATE_KEY) || 'minimalist' })
+      });
+      const data = await response.json();
+      alert(response.ok
+        ? (lang === 'es' ? '\u00a1Publicado! Tu CV est\u00e1 en: ' + data.webUrl : lang === 'it' ? 'Pubblicato! Il tuo CV \u00e8 su: ' + data.webUrl : 'Published! Your CV is at: ' + data.webUrl)
+        : (data.error || (lang === 'es' ? 'Error al publicar.' : lang === 'it' ? 'Errore nella pubblicazione.' : 'Error publishing.')));
+    } catch (err) {
+      console.error('Error:', err);
+      alert(lang === 'es' ? 'Error de conexi\u00f3n.' : lang === 'it' ? 'Errore di connessione.' : 'Connection error.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
+  });
+
+  const savedTemplate = state.meta?.template || localStorage.getItem(TEMPLATE_KEY) || 'minimalist';
+
+  const githubBtns = Array.from(document.querySelectorAll('.btn-github-auth-control'));
+  const statusTexts = Array.from(document.querySelectorAll('.github-status-text'));
+
+  function updateGitHubAuthStatus() {
+    const authed = document.cookie.indexOf('github_user=') !== -1;
+    const m = document.cookie.match(/github_user=([^;]+)/);
+    const username = m ? m[1] : '';
+    githubBtns.forEach(btn => {
+      btn.classList.toggle('bg-green-600', authed);
+      btn.classList.toggle('hover:bg-green-700', authed);
+      btn.classList.toggle('bg-gray-800', !authed);
+      btn.classList.toggle('hover:bg-gray-900', !authed);
+    });
+    statusTexts.forEach(el => { el.textContent = authed ? '\u2713 ' + username : (lang === 'es' ? 'Conectar' : lang === 'it' ? 'Collegare' : 'Connect'); });
+  }
+
+  githubBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (document.cookie.indexOf('github_user=') !== -1) {
+        if (confirm(lang === 'es' ? '\u00bfDesconectar de GitHub?' : lang === 'it' ? 'Disconnettere da GitHub?' : 'Disconnect from GitHub?')) {
+          document.cookie = 'github_token=; Max-Age=0; Path=/';
+          document.cookie = 'github_user=; Max-Age=0; Path=/';
+          updateGitHubAuthStatus();
+        }
+      } else {
+        window.location.href = '/.netlify/functions/auth-login';
+      }
+    });
+  });
+
+  updateGitHubAuthStatus();
+
+  document.getElementById('cv-form')?.addEventListener('input', e => {
+    const path = e.target.getAttribute('data-path');
+    if (!path) return;
+    setDeepValue(state, path, e.target.value);
+    saveState();
+  });
+
+  document.querySelectorAll('#work-container, #education-container, #certificates-container, #languages-container').forEach(el => {
+    if (!el) return;
+    el.addEventListener('click', e => {
+      const btn = e.target.closest('[data-remove]');
+      if (!btn) return;
+      e.preventDefault();
+      removeByType(btn.getAttribute('data-remove'), parseInt(btn.getAttribute('data-index'), 10));
+    });
+  });
+
+  document.getElementById('skills-tag-container')?.addEventListener('click', e => {
+    const btn = e.target.closest('[data-remove="skill"]');
+    if (!btn) return;
+    e.preventDefault();
+    removeByType('skill', parseInt(btn.getAttribute('data-index'), 10));
+  });
+
+  (async () => {
+    try {
+      const remoteData = await loadRemoteResume();
+      if (remoteData) state = remoteData;
+      populateFormBasics();
+      renderDynamicBlocks();
+      renderSkillsTags();
+      applyTemplate(savedTemplate);
+      renderPreview();
+    } catch (e) { console.error('CV Editor init error:', e); }
+  })();
+</script>
+
+<!-- Cookie Consent Banner -->
+<div id="privacy-banner"
+  class="fixed bottom-4 left-4 right-4 md:left-4 md:right-auto md:max-w-md bg-white border border-gray-200 p-4 rounded-xl shadow-2xl z-50 opacity-0 translate-y-8 pointer-events-none flex flex-col sm:flex-row items-start sm:items-center gap-4 transition-all duration-500 ease-out"
+>
+  <div class="hidden sm:flex flex-shrink-0 w-16 h-16 overflow-hidden items-end self-end -mb-4">
+    <img src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExbG5uaXVwc3ZvY3A0Z2Nvenk0YWZqcWV4amtydHIyOHp4eHNrd2N4ZiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/CPsnRKLWN0XS9DO4Ej/giphy.gif"
+      alt="Cookie consent" class="w-full h-auto object-contain max-h-[110%] origin-bottom scale-110" loading="lazy" />
+  </div>
+  <div class="flex-1 flex flex-col gap-3">
+    <div>
+      <h4 class="text-sm font-bold text-gray-900 mb-1">
+        {lang === 'it' ? 'Uso dei Cookie' : 'Uso de Cookies'}
+      </h4>
+      <p class="text-xs text-gray-500 leading-relaxed m-0 text-left">
+        {lang === 'it'
+          ? 'Utilizziamo cookie propri e di terze parti per analizzare le prestazioni del sito e migliorare la tua esperienza. Puoi accettare tutti i cookie o rifiutarli.'
+          : 'Utilizamos cookies propias y de terceros para analizar el rendimiento de la web y mejorar tu experiencia. Puedes aceptar todas las cookies o rechazarlas.'}
+        <a href="https://raulmguerrero.com/terms" target="_blank" rel="noopener"
+          class="text-blue-600 font-bold underline hover:opacity-80 transition-opacity">
+          {lang === 'it' ? 'termini di utilizzo' : 't\u00e9rminos de uso'}
+        </a>
+        {lang === 'it' ? ' e ' : ' y '}
+        <a href="https://raulmguerrero.com/privacy" target="_blank" rel="noopener"
+          class="text-blue-600 font-bold underline hover:opacity-80 transition-opacity">
+          {lang === 'it' ? 'informativa sulla privacy' : 'pol\u00edtica de privacidad'}
+        </a>.
+      </p>
     </div>
-    <div class="flex-1 flex flex-col gap-3">
-      <div>
-        <h4 class="text-sm font-bold text-gray-900 mb-1">
-          {lang === 'it' ? 'Uso dei Cookie' : 'Uso de Cookies'}
-        </h4>
-        <p class="text-xs text-gray-500 leading-relaxed m-0 text-left">
-          {lang === 'it'
-            ? 'Utilizziamo cookie propri e di terze parti per analizzare le prestazioni del sito e migliorare la tua esperienza. Puoi accettare tutti i cookie o rifiutarli.'
-            : 'Utilizamos cookies propias y de terceros para analizar el rendimiento de la web y mejorar tu experiencia. Puedes aceptar todas las cookies o rechazarlas.'}
-          <a href="https://raulmguerrero.com/terms" target="_blank" rel="noopener"
-            class="text-blue-600 font-bold underline hover:opacity-80 transition-opacity">
-            {lang === 'it' ? 'termini di utilizzo' : 'términos de uso'}
-          </a>
-          {lang === 'it' ? ' e ' : ' y '}
-          <a href="https://raulmguerrero.com/privacy" target="_blank" rel="noopener"
-            class="text-blue-600 font-bold underline hover:opacity-80 transition-opacity">
-            {lang === 'it' ? 'informativa sulla privacy' : 'política de privacidad'}
-          </a>.
-        </p>
-      </div>
-      <div class="flex items-center gap-2 self-end sm:self-start w-full sm:w-auto">
-        <button id="accept-privacy"
-          class="flex-1 sm:flex-initial text-center cursor-pointer bg-blue-600 text-white text-xs font-semibold py-2 px-4 rounded-lg shadow-sm hover:brightness-110 transition-all">
-          {lang === 'it' ? 'Accetta tutto' : 'Aceptar todo'}
-        </button>
-        <button id="deny-privacy"
-          class="flex-1 sm:flex-initial text-center cursor-pointer bg-transparent text-gray-500 border border-gray-200 text-xs font-semibold py-2 px-4 rounded-lg hover:bg-gray-50 transition-all">
-          {lang === 'it' ? 'Rifiuta tutto' : 'Rechazar todo'}
-        </button>
-      </div>
+    <div class="flex items-center gap-2 self-end sm:self-start w-full sm:w-auto">
+      <button id="accept-privacy"
+        class="flex-1 sm:flex-initial text-center cursor-pointer bg-blue-600 text-white text-xs font-semibold py-2 px-4 rounded-lg shadow-sm hover:brightness-110 transition-all">
+        {lang === 'it' ? 'Accetta tutto' : 'Aceptar todo'}
+      </button>
+      <button id="deny-privacy"
+        class="flex-1 sm:flex-initial text-center cursor-pointer bg-transparent text-gray-500 border border-gray-200 text-xs font-semibold py-2 px-4 rounded-lg hover:bg-gray-50 transition-all">
+        {lang === 'it' ? 'Rifiuta tutto' : 'Rechazar todo'}
+      </button>
     </div>
   </div>
+</div>
 
-  <script is:inline>
-    (function() {
-      var banner = document.getElementById('privacy-banner');
-      var btnAccept = document.getElementById('accept-privacy');
-      var btnDeny = document.getElementById('deny-privacy');
-      if (!banner || !btnAccept || !btnDeny) return;
+<script is:inline>
+  (function() {
+    var banner = document.getElementById('privacy-banner');
+    var btnAccept = document.getElementById('accept-privacy');
+    var btnDeny = document.getElementById('deny-privacy');
+    if (!banner || !btnAccept || !btnDeny) return;
 
-      var consent = localStorage.getItem('cookie-consent');
-      if (!consent) {
-        setTimeout(function() {
-          banner.classList.remove('opacity-0', 'translate-y-8', 'pointer-events-none');
-        }, 300);
-      }
+    var consent = localStorage.getItem('cookie-consent');
+    if (!consent) {
+      setTimeout(function() {
+        banner.classList.remove('opacity-0', 'translate-y-8', 'pointer-events-none');
+      }, 300);
+    }
 
-      btnAccept.addEventListener('click', function() {
-        localStorage.setItem('cookie-consent', 'accepted');
-        banner.classList.add('opacity-0', 'translate-y-8', 'pointer-events-none');
-        window.location.reload();
-      });
+    btnAccept.addEventListener('click', function() {
+      localStorage.setItem('cookie-consent', 'accepted');
+      banner.classList.add('opacity-0', 'translate-y-8', 'pointer-events-none');
+      window.location.reload();
+    });
 
-      btnDeny.addEventListener('click', function() {
-        localStorage.setItem('cookie-consent', 'denied');
-        banner.classList.add('opacity-0', 'translate-y-8', 'pointer-events-none');
-      });
-    })();
-  </script>
-</body>
-</html>
+    btnDeny.addEventListener('click', function() {
+      localStorage.setItem('cookie-consent', 'denied');
+      banner.classList.add('opacity-0', 'translate-y-8', 'pointer-events-none');
+    });
+  })();
+</script>
+
+</MinimalistLayout>
