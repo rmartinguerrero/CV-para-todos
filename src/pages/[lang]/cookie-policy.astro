@@ -18,25 +18,129 @@ const t = (key: string) => strictT(key as UIKeys);
 ---
 
 <MinimalistLayout
-  title={lang === 'es' ? 'Política de Cookies' : lang === 'it' ? 'Cookie Policy' : 'Cookie Policy'}
-  description={lang === 'es' ? 'Política de cookies de CV para Todos' : lang === 'it' ? 'Cookie policy di CV para Todos' : 'CV para Todos cookie policy'}
+  title={
+    lang === 'es' ? 'Política de Cookies'
+      : lang === 'it' ? 'Cookie Policy'
+      : 'Cookie Policy'
+  }
+  description={
+    lang === 'es'
+      ? 'Política de cookies de CV para Todos'
+      : lang === 'it'
+        ? 'Cookie policy di CV para Todos'
+        : 'CV para Todos cookie policy'
+  }
   lang={lang}
   currentLang={lang}
   availableLangs={['es', 'it', 'en']}
   resume={{ basics: { name: '' } }}
   t={t}
 >
-  <article class="prose prose-gray max-w-none">
-    <h1>{lang === 'es' ? 'Política de Cookies' : lang === 'it' ? 'Cookie Policy' : 'Cookie Policy'}</h1>
-    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-    <h2>{lang === 'es' ? '¿Qué son las cookies?' : lang === 'it' ? 'Cosa sono i cookie?' : 'What Are Cookies?'}</h2>
-    <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-    <h2>{lang === 'es' ? 'Tipos de cookies' : lang === 'it' ? 'Tipi di cookie' : 'Types of Cookies'}</h2>
-    <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
-    <h2>{lang === 'es' ? 'Cómo gestionar las cookies' : lang === 'it' ? 'Come gestire i cookie' : 'How to Manage Cookies'}</h2>
-    <p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.</p>
-    <h2>{lang === 'es' ? 'Cookies de terceros' : lang === 'it' ? 'Cookie di terze parti' : 'Third-Party Cookies'}</h2>
-    <p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.</p>
+
+  <!-- TOP BAR -->
+  <div class="w-full flex justify-center px-4 pt-6">
+    <div class="w-full max-w-3xl flex items-center justify-between">
+
+      <a href={`/${lang}`} class="font-bold text-lg tracking-tight hover:opacity-70 transition">
+        CV para Todos
+      </a>
+
+      <a
+        href={`/${lang}/edit`}
+        class="text-sm font-medium px-4 py-2 rounded-md border border-gray-300 bg-white hover:bg-gray-50 shadow-sm transition"
+      >
+        {lang === 'es' ? 'Volver al editor'
+          : lang === 'it' ? 'Torna all’editor'
+          : 'Back to editor'}
+      </a>
+
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <article class="min-h-screen flex justify-center px-4 py-16">
+    <div class="w-full max-w-3xl text-left leading-relaxed">
+
+      <h1 class="text-3xl md:text-4xl font-bold mb-8 text-center">
+        {lang === 'es' ? 'Política de Cookies'
+          : lang === 'it' ? 'Cookie Policy'
+          : 'Cookie Policy'}
+      </h1>
+
+      <p class="text-gray-700 mb-8">
+        {lang === 'es'
+          ? 'En CV para Todos utilizamos cookies únicamente cuando es estrictamente necesario para el funcionamiento del sitio y para analizar el uso de forma anónima. El uso de cookies no esenciales, como Google Analytics, requiere tu consentimiento previo y explícito a través del banner de cookies.'
+          : lang === 'it'
+            ? 'In CV para Todos utilizziamo cookie solo quando strettamente necessario per il funzionamento del sito e per analizzare l’utilizzo in forma anonima. I cookie non essenziali, come Google Analytics, richiedono il tuo consenso esplicito tramite il banner cookie.'
+            : 'At CV para Todos we only use cookies when strictly necessary for the site to function and for anonymous analytics. Non-essential cookies such as Google Analytics require your explicit consent through the cookie banner.'}
+      </p>
+
+      <h2 class="text-xl font-semibold mt-10 mb-3">
+        {lang === 'es' ? '¿Qué son las cookies?' : lang === 'it' ? 'Cosa sono i cookie?' : 'What are cookies?'}
+      </h2>
+
+      <p class="text-gray-700 mb-6">
+        {lang === 'es'
+          ? 'Las cookies son pequeños archivos almacenados en tu navegador que permiten el funcionamiento básico de una web o ayudan a analizar su uso.'
+          : lang === 'it'
+            ? 'I cookie sono piccoli file memorizzati nel browser che permettono il funzionamento base del sito o aiutano ad analizzarne l’uso.'
+            : 'Cookies are small files stored in your browser that enable basic website functionality or help analyze usage.'}
+      </p>
+
+      <h2 class="text-xl font-semibold mt-10 mb-3">
+        {lang === 'es' ? 'Tipos de cookies utilizadas' : lang === 'it' ? 'Tipi di cookie utilizzati' : 'Types of cookies used'}
+      </h2>
+
+      <ul class="list-disc pl-6 space-y-2 mb-8 text-gray-700">
+
+        <li>
+          <strong>Google Analytics:</strong>
+          {lang === 'es'
+            ? ' solo se activa con tu consentimiento previo. Se utiliza para estadísticas anónimas.'
+            : lang === 'it'
+              ? ' attivato solo con il tuo consenso. Usato per statistiche anonime.'
+              : ' only activated with your consent. Used for anonymous analytics.'}
+        </li>
+
+        <li>
+          <strong>
+            {lang === 'es' ? 'Almacenamiento local'
+              : lang === 'it' ? 'Archiviazione locale'
+              : 'Local storage'}:
+          </strong>
+          {lang === 'es'
+            ? ' los datos del CV permanecen en tu dispositivo y no se envían a servidores.'
+            : lang === 'it'
+              ? ' i dati del CV restano sul tuo dispositivo e non vengono inviati ai server.'
+              : ' CV data remains on your device and is not sent to servers.'}
+        </li>
+
+        <li>
+          <strong>OAuth:</strong>
+          {lang === 'es'
+            ? ' tokens de sesión temporales para autenticación.'
+            : lang === 'it'
+              ? ' token di sessione temporanei per l’autenticazione.'
+              : ' temporary session tokens for authentication.'}
+        </li>
+
+      </ul>
+
+      <h2 class="text-xl font-semibold mt-10 mb-3">
+        {lang === 'es' ? 'Consentimiento' : lang === 'it' ? 'Consenso' : 'Consent'}
+      </h2>
+
+      <p class="text-gray-700">
+        {lang === 'es'
+          ? 'Las cookies no esenciales solo se activan tras tu aceptación explícita mediante el banner de consentimiento. Puedes retirar o modificar tu consentimiento en cualquier momento desde la configuración del navegador o el panel de cookies.'
+          : lang === 'it'
+            ? 'I cookie non essenziali vengono attivati solo dopo il tuo consenso esplicito tramite il banner. Puoi modificare o revocare il consenso in qualsiasi momento.'
+            : 'Non-essential cookies are only activated after your explicit consent via the banner. You can withdraw or modify consent at any time.'}
+      </p>
+
+    </div>
   </article>
+
   <Footer lang={lang} />
+
 </MinimalistLayout>

@@ -18,25 +18,166 @@ const t = (key: string) => strictT(key as UIKeys);
 ---
 
 <MinimalistLayout
-  title={lang === 'es' ? 'Política de Privacidad' : lang === 'it' ? 'Informativa sulla Privacy' : 'Privacy Policy'}
-  description={lang === 'es' ? 'Política de privacidad de CV para Todos' : lang === 'it' ? 'Informativa sulla privacy di CV para Todos' : 'CV para Todos privacy policy'}
+  title={
+    lang === 'es' ? 'Política de Privacidad'
+      : lang === 'it' ? 'Informativa sulla Privacy'
+      : 'Privacy Policy'
+  }
+  description={
+    lang === 'es'
+      ? 'Política de privacidad de CV para Todos'
+      : lang === 'it'
+        ? 'Informativa sulla privacy di CV para Todos'
+        : 'CV para Todos privacy policy'
+  }
   lang={lang}
   currentLang={lang}
   availableLangs={['es', 'it', 'en']}
   resume={{ basics: { name: '' } }}
   t={t}
 >
-  <article class="prose prose-gray max-w-none">
-    <h1>{lang === 'es' ? 'Política de Privacidad' : lang === 'it' ? 'Informativa sulla Privacy' : 'Privacy Policy'}</h1>
-    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-    <h2>{lang === 'es' ? 'Recopilación de datos' : lang === 'it' ? 'Raccolta dei dati' : 'Data Collection'}</h2>
-    <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-    <h2>{lang === 'es' ? 'Uso de la información' : lang === 'it' ? 'Uso delle informazioni' : 'Use of Information'}</h2>
-    <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
-    <h2>{lang === 'es' ? 'Cookies' : lang === 'it' ? 'Cookie' : 'Cookies'}</h2>
-    <p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.</p>
-    <h2>{lang === 'es' ? 'Tus derechos' : lang === 'it' ? 'I tuoi diritti' : 'Your Rights'}</h2>
-    <p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.</p>
+
+  <!-- TOP BAR -->
+  <div class="w-full flex justify-center px-4 pt-6">
+    <div class="w-full max-w-3xl flex items-center justify-between">
+
+      <a href={`/${lang}`} class="font-bold text-lg tracking-tight hover:opacity-70 transition">
+        CV para Todos
+      </a>
+
+      <a
+        href={`/${lang}/edit`}
+        class="text-sm font-medium px-4 py-2 rounded-md border border-gray-300 bg-white hover:bg-gray-50 shadow-sm transition"
+      >
+        {lang === 'es' ? 'Volver al editor'
+          : lang === 'it' ? 'Torna all’editor'
+          : 'Back to editor'}
+      </a>
+
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <article class="min-h-screen flex justify-center px-4 py-16">
+    <div class="w-full max-w-3xl text-left leading-relaxed">
+
+      <h1 class="text-3xl md:text-4xl font-bold mb-8 text-center">
+        {lang === 'es' ? 'Política de Privacidad'
+          : lang === 'it' ? 'Informativa sulla Privacy'
+          : 'Privacy Policy'}
+      </h1>
+
+      <p class="text-gray-700 mb-8">
+        {lang === 'es'
+          ? 'CV para Todos está diseñado bajo un modelo “local-first”. Esto significa que no almacenamos datos personales en servidores y no tenemos acceso al contenido que creas dentro de la plataforma.'
+          : lang === 'it'
+            ? 'CV para Todos è progettato con un modello “local-first”. Non memorizziamo dati personali sui server e non abbiamo accesso ai contenuti creati nella piattaforma.'
+            : 'CV para Todos is built on a local-first model. We do not store personal data on servers and we do not have access to content created inside the platform.'}
+      </p>
+
+      <h2 class="text-xl font-semibold mt-10 mb-3">
+        {lang === 'es' ? 'Dónde se guardan tus datos' : lang === 'it' ? 'Dove vengono salvati i dati' : 'Where data is stored'}
+      </h2>
+
+      <p class="text-gray-700 mb-6">
+        {lang === 'es'
+          ? 'Todos los datos del CV se almacenan exclusivamente en tu navegador (LocalStorage / IndexedDB). No salen de tu dispositivo.'
+          : lang === 'it'
+            ? 'Tutti i dati del CV sono salvati esclusivamente nel tuo browser (LocalStorage / IndexedDB). Non lasciano il tuo dispositivo.'
+            : 'All CV data is stored exclusively in your browser (LocalStorage / IndexedDB). It never leaves your device.'}
+      </p>
+
+      <h2 class="text-xl font-semibold mt-10 mb-3">
+        OAuth / autenticación
+      </h2>
+
+      <p class="text-gray-700 mb-6">
+        {lang === 'es'
+          ? 'Si utilizas inicio de sesión con proveedores externos, solo se utilizan tokens de sesión temporales. No almacenamos credenciales ni contraseñas.'
+          : lang === 'it'
+            ? 'Se utilizzi login con provider esterni, vengono usati solo token di sessione temporanei. Non memorizziamo credenziali o password.'
+            : 'If you use external login providers, only temporary session tokens are used. We do not store credentials or passwords.'}
+      </p>
+
+      <h2 class="text-xl font-semibold mt-10 mb-3">
+        Google Analytics
+      </h2>
+
+      <p class="text-gray-700 mb-6">
+        {lang === 'es'
+          ? 'Google Analytics solo se activa tras tu consentimiento explícito mediante el banner de cookies. Los datos recopilados son agregados y anónimos.'
+          : lang === 'it'
+            ? 'Google Analytics si attiva solo dopo il tuo consenso esplicito tramite il banner cookie. I dati sono aggregati e anonimi.'
+            : 'Google Analytics is only activated after explicit consent via the cookie banner. Data collected is aggregated and anonymous.'}
+      </p>
+
+      <h2 class="text-xl font-semibold mt-10 mb-3">
+        {lang === 'es' ? 'Cómo ver tus datos en el navegador' : lang === 'it' ? 'Come vedere i tuoi dati nel browser' : 'How to view your data in browser'}
+      </h2>
+
+      <p class="text-gray-700 mb-4">
+        {lang === 'es'
+          ? 'Puedes ver y eliminar los datos almacenados localmente en tu navegador siguiendo estos pasos:'
+          : lang === 'it'
+            ? 'Puoi vedere ed eliminare i dati locali nel browser seguendo questi passaggi:'
+            : 'You can view and delete locally stored data in your browser using these steps:'}
+      </p>
+
+      <ul class="list-disc pl-6 space-y-3 text-gray-700">
+
+        <li>
+          <strong>Chrome:</strong>
+          {lang === 'es'
+            ? ' Configuración → Privacidad y seguridad → Cookies → Ver datos del sitio.'
+            : lang === 'it'
+              ? ' Impostazioni → Privacy e sicurezza → Cookie → Visualizza dati sito.'
+              : ' Settings → Privacy & Security → Cookies → View site data.'}
+        </li>
+
+        <li>
+          <strong>Firefox:</strong>
+          {lang === 'es'
+            ? ' Ajustes → Privacidad → Cookies y datos del sitio → Administrar datos.'
+            : lang === 'it'
+              ? ' Impostazioni → Privacy → Cookie e dati sito → Gestisci dati.'
+              : ' Settings → Privacy → Cookies and Site Data → Manage data.'}
+        </li>
+
+        <li>
+          <strong>Edge:</strong>
+          {lang === 'es'
+            ? ' Configuración → Cookies y permisos del sitio → Ver cookies y datos.'
+            : lang === 'it'
+              ? ' Impostazioni → Cookie e permessi sito → Visualizza cookie.'
+              : ' Settings → Cookies & site permissions → View cookies.'}
+        </li>
+
+        <li>
+          <strong>Safari:</strong>
+          {lang === 'es'
+            ? ' Preferencias → Privacidad → Gestionar datos de sitios web.'
+            : lang === 'it'
+              ? ' Preferenze → Privacy → Gestisci dati siti web.'
+              : ' Preferences → Privacy → Manage website data.'}
+        </li>
+
+      </ul>
+
+      <h2 class="text-xl font-semibold mt-10 mb-3">
+        {lang === 'es' ? 'Control del usuario' : lang === 'it' ? 'Controllo dell’utente' : 'User control'}
+      </h2>
+
+      <p class="text-gray-700">
+        {lang === 'es'
+          ? 'Tienes control total sobre tus datos. Puedes eliminarlos en cualquier momento desde tu navegador. No existe base de datos central.'
+          : lang === 'it'
+            ? 'Hai pieno controllo sui tuoi dati. Puoi eliminarli in qualsiasi momento dal browser. Non esiste un database centrale.'
+            : 'You have full control over your data. You can delete it at any time from your browser. There is no central database.'}
+      </p>
+
+    </div>
   </article>
+
   <Footer lang={lang} />
+
 </MinimalistLayout>
