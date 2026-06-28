@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 500">
-  <rect width="750" height="500" fill="#009246"/>
-  <rect width="750" height="500" fill="#fff" clip-path="url(#clip)"/>
-  <rect width="750" height="500" fill="#ce2b37" clip-path="url(#clip_right)"/>
-  <defs>
-    <clipPath id="clip"><rect x="0" y="0" width="250" height="500"/></clipPath>
-    <clipPath id="clip_right"><rect x="500" y="0" width="250" height="500"/></clipPath>
-  </defs>
-</svg>
