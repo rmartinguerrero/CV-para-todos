@@ -6,7 +6,7 @@ import resumeIt from '../../data/resume.it.json';
 import resumeEn from '../../data/resume.en.json';
 import { CV_THEMES_CSS } from '../../styles/cv-themes';
 import MinimalistLayout from '../../layouts/MinimalistLayout.astro';
-
+  
 export function getStaticPaths() {
   return [
     { params: { lang: 'es' } },
@@ -17,8 +17,7 @@ export function getStaticPaths() {
 
 const { lang } = Astro.params as { lang: Lang };
 const resumes = { es: resumeEs, it: resumeIt, en: resumeEn };
-const initialData = resumes[lang] || resumeEs;
-
+const initialData = resumes[lang];
 const strictT = useTranslations(lang);
 const t = (key: string) => strictT(key as UIKeys);
 
@@ -141,16 +140,16 @@ const templates = Object.entries(layoutModules)
       </div>
 
       <div class="relative">
-        <button id="tab-prev" type="button" class="lg:hidden absolute left-0 top-1/2 z-10 -translate-y-1/2 rounded-full border border-gray-200 bg-white/90 px-2 py-1 text-sm text-gray-600 shadow-sm transition hover:bg-gray-100" aria-label="Anterior secci&oacute;n">&lsaquo;</button>
+        <button id="tab-prev" type="button" class="lg:hidden absolute left-0 top-1/2 z-10 -translate-y-1/2 rounded-full border border-gray-200 bg-white/90 px-2 py-1 text-sm text-gray-600 shadow-sm transition hover:bg-gray-100" aria-label="Anterior sección">&lsaquo;</button>
         <nav id="tab-nav" class="flex text-xs sm:text-sm overflow-x-auto whitespace-nowrap scroll-smooth px-10" aria-label="Tabs">
           <button class="tab-btn px-4 py-2 border-b-2 border-blue-600 font-medium text-blue-600" data-tab="basics">{t('nav.contact')}</button>
           <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="work">{lang === 'es' ? 'Experiencia' : lang === 'it' ? 'Esperienza' : 'Experience'}</button>
-          <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="education">{lang === 'es' ? 'Formaci&oacute;n' : lang === 'it' ? 'Formazione' : 'Education'}</button>
-          <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="extras">{lang === 'es' ? 'Formaci&oacute;n extra' : lang === 'it' ? 'Formazione extra' : 'Extra training'}</button>
+          <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="education">{lang === 'es' ? 'Formación' : lang === 'it' ? 'Formazione' : 'Education'}</button>
+          <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="extras">{lang === 'es' ? 'Formación extra' : lang === 'it' ? 'Formazione extra' : 'Extra training'}</button>
           <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="skills">{lang === 'es' ? 'Habilidades' : lang === 'it' ? 'Competenze' : 'Skills'}</button>
           <button class="tab-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="templates">{t('templates.title')}</button>
         </nav>
-        <button id="tab-next" type="button" class="lg:hidden absolute right-0 top-1/2 z-10 -translate-y-1/2 rounded-full border border-gray-200 bg-white/90 px-2 py-1 text-sm text-gray-600 shadow-sm transition hover:bg-gray-100" aria-label="Siguiente secci&oacute;n">&rsaquo;</button>
+        <button id="tab-next" type="button" class="lg:hidden absolute right-0 top-1/2 z-10 -translate-y-1/2 rounded-full border border-gray-200 bg-white/90 px-2 py-1 text-sm text-gray-600 shadow-sm transition hover:bg-gray-100" aria-label="Siguiente sección">&rsaquo;</button>
       </div>
 
       <div id="cv-form" class="space-y-6">
@@ -171,7 +170,7 @@ const templates = Object.entries(layoutModules)
               <input type="email" data-path="basics.email" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-blue-500" />
             </div>
             <div>
-              <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">{lang === 'es' ? 'Tel&eacute;fono' : lang === 'it' ? 'Telefono' : 'Phone'}</label>
+              <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">{lang === 'es' ? 'Teléfono' : lang === 'it' ? 'Telefono' : 'Phone'}</label>
               <input type="tel" data-path="basics.phone" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-blue-500" />
             </div>
           </div>
@@ -180,7 +179,7 @@ const templates = Object.entries(layoutModules)
             <input type="url" data-path="basics.web" placeholder="https://" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-blue-500" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">{lang === 'es' ? 'Fotograf&iacute;a' : lang === 'it' ? 'Fotografia' : 'Photo'}</label>
+            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">{lang === 'es' ? 'Fotografía' : lang === 'it' ? 'Fotografia' : 'Photo'}</label>
             <div class="flex items-center gap-3 bg-gray-50 p-3 rounded-xl border border-dashed border-gray-300">
               <input type="file" id="photo-file" accept="image/*" class="hidden" />
               <button type="button" onclick="document.getElementById('photo-file').click()" class="px-3 py-1.5 bg-white border border-gray-200 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-50 shadow-sm">
@@ -199,14 +198,14 @@ const templates = Object.entries(layoutModules)
         <div id="tab-work" class="tab-content space-y-4 hidden">
           <div id="work-container" class="space-y-4"></div>
           <button type="button" id="btn-add-work" class="w-full py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-semibold rounded-xl border border-dashed border-blue-200">
-            {lang === 'es' ? '+ A&ntilde;adir Experiencia' : lang === 'it' ? '+ Aggiungi Esperienza' : '+ Add Experience'}
+            {lang === 'es' ? '+ Añadir Experiencia' : lang === 'it' ? '+ Aggiungi Esperienza' : '+ Add Experience'}
           </button>
         </div>
 
         <div id="tab-education" class="tab-content space-y-4 hidden">
           <div id="education-container" class="space-y-4"></div>
           <button type="button" id="btn-add-edu" class="w-full py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-semibold rounded-xl border border-dashed border-blue-200">
-            {lang === 'es' ? '+ A&ntilde;adir Formaci&oacute;n' : lang === 'it' ? '+ Aggiungi Formazione' : '+ Add Education'}
+            {lang === 'es' ? '+ Añadir Formación' : lang === 'it' ? '+ Aggiungi Formazione' : '+ Add Education'}
           </button>
         </div>
 
@@ -217,7 +216,7 @@ const templates = Object.entries(layoutModules)
             </div>
             <div id="certificates-container" class="space-y-4"></div>
             <button type="button" id="btn-add-certificate" class="w-full py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-semibold rounded-xl border border-dashed border-blue-200">
-              {lang === 'es' ? '+ A&ntilde;adir Certificado' : lang === 'it' ? '+ Aggiungi Certificato' : '+ Add Certificate'}
+              {lang === 'es' ? '+ Añadir Certificado' : lang === 'it' ? '+ Aggiungi Certificato' : '+ Add Certificate'}
             </button>
           </div>
           <div>
@@ -226,7 +225,7 @@ const templates = Object.entries(layoutModules)
             </div>
             <div id="languages-container" class="space-y-4"></div>
             <button type="button" id="btn-add-language" class="w-full py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-semibold rounded-xl border border-dashed border-blue-200">
-              {lang === 'es' ? '+ A&ntilde;adir Idioma' : lang === 'it' ? '+ Aggiungi Lingua' : '+ Add Language'}
+              {lang === 'es' ? '+ Añadir Idioma' : lang === 'it' ? '+ Aggiungi Lingua' : '+ Add Language'}
             </button>
           </div>
         </div>
@@ -299,7 +298,7 @@ const templates = Object.entries(layoutModules)
 
       <section id="section-education" class="mt-6" style="display:none">
         <h3 class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3 pb-1 border-b border-gray-100">
-          {lang === 'es' ? 'Formaci&oacute;n' : lang === 'it' ? 'Formazione' : 'Education'}
+          {lang === 'es' ? 'Formación' : lang === 'it' ? 'Formazione' : 'Education'}
         </h3>
         <div id="view-education" class="space-y-4"></div>
       </section>
