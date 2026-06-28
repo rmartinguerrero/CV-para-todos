@@ -24,6 +24,7 @@ Para mantener las cosas organizadas y sencillas, el proyecto se divide así:
 * `src/data/` ➔ Los archivos de texto donde reside la información de tu currículum (`resume.es.json`, `resume.it.json`, etc.).
 * `src/netlify/functions/` ➔ La lógica simple encargada de procesar el formulario visual de administración y guardar los cambios.
 
+```
 └── 📁CV-para-todos
     └── 📁.astro
         └── 📁collections
@@ -101,7 +102,7 @@ Para mantener las cosas organizadas y sencillas, el proyecto se divide así:
     ├── SETUP_OAUTH.md \\ Guía paso a paso para configurar la GitHub App de autenticación.
     ├── tailwind.config.mjs \\ Configuración global de Tailwind CSS.
     ├── tsconfig.json \\ Configuración de TypeScript para el proyecto.
-
+```
 ---
 
 ## 🚀 Stack Tecnológico
