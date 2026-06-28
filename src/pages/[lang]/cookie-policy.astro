@@ -38,16 +38,16 @@ const t = (key: string) => strictT(key as UIKeys);
 >
 
   <!-- TOP BAR -->
-  <div class="w-full flex justify-center px-4 pt-6">
-    <div class="w-full max-w-3xl flex items-center justify-between">
+  <div class="w-full flex justify-center px-4 pt-4 md:pt-6">
+    <div class="w-full max-w-3xl flex items-center justify-between gap-2 md:gap-3">
 
-      <a href={`/${lang}`} class="font-bold text-lg tracking-tight hover:opacity-70 transition">
+      <a href={`/${lang}`} class="font-bold text-base md:text-lg tracking-tight hover:opacity-70 transition">
         CV para Todos
       </a>
 
       <a
         href={`/${lang}/edit`}
-        class="text-sm font-medium px-4 py-2 rounded-md border border-gray-300 bg-white hover:bg-gray-50 shadow-sm transition"
+        class="text-sm font-medium px-3 py-1.5 md:px-4 md:py-2 rounded-md border border-gray-300 bg-white hover:bg-gray-50 shadow-sm transition whitespace-nowrap"
       >
         {lang === 'es' ? 'Volver al editor'
           : lang === 'it' ? 'Torna all’editor'
@@ -58,16 +58,16 @@ const t = (key: string) => strictT(key as UIKeys);
   </div>
 
   <!-- CONTENT -->
-  <article class="min-h-screen flex justify-center px-4 py-16">
+  <article class="min-h-screen flex justify-center px-4 md:px-6 py-10 md:py-16">
     <div class="w-full max-w-3xl text-left leading-relaxed">
 
-      <h1 class="text-3xl md:text-4xl font-bold mb-8 text-center">
+      <h1 class="text-3xl md:text-4xl font-bold mb-6 md:mb-8 text-center">
         {lang === 'es' ? 'Política de Cookies'
           : lang === 'it' ? 'Cookie Policy'
           : 'Cookie Policy'}
       </h1>
 
-      <p class="text-gray-700 mb-8">
+      <p class="text-gray-700 mb-6 md:mb-8">
         {lang === 'es'
           ? 'En CV para Todos utilizamos cookies únicamente cuando es estrictamente necesario para el funcionamiento del sitio y para analizar el uso de forma anónima. El uso de cookies no esenciales, como Google Analytics, requiere tu consentimiento previo y explícito a través del banner de cookies.'
           : lang === 'it'
@@ -75,7 +75,7 @@ const t = (key: string) => strictT(key as UIKeys);
             : 'At CV para Todos we only use cookies when strictly necessary for the site to function and for anonymous analytics. Non-essential cookies such as Google Analytics require your explicit consent through the cookie banner.'}
       </p>
 
-      <h2 class="text-xl font-semibold mt-10 mb-3">
+      <h2 class="text-xl font-semibold mt-8 md:mt-10 mb-3">
         {lang === 'es' ? '¿Qué son las cookies?' : lang === 'it' ? 'Cosa sono i cookie?' : 'What are cookies?'}
       </h2>
 
@@ -87,11 +87,11 @@ const t = (key: string) => strictT(key as UIKeys);
             : 'Cookies are small files stored in your browser that enable basic website functionality or help analyze usage.'}
       </p>
 
-      <h2 class="text-xl font-semibold mt-10 mb-3">
+      <h2 class="text-xl font-semibold mt-8 md:mt-10 mb-3">
         {lang === 'es' ? 'Tipos de cookies utilizadas' : lang === 'it' ? 'Tipi di cookie utilizzati' : 'Types of cookies used'}
       </h2>
 
-      <ul class="list-disc pl-6 space-y-2 mb-8 text-gray-700">
+      <ul class="list-disc pl-4 md:pl-6 space-y-2 mb-6 md:mb-8 text-gray-700">
 
         <li>
           <strong>Google Analytics:</strong>
@@ -126,7 +126,7 @@ const t = (key: string) => strictT(key as UIKeys);
 
       </ul>
 
-      <h2 class="text-xl font-semibold mt-10 mb-3">
+      <h2 class="text-xl font-semibold mt-8 md:mt-10 mb-3">
         {lang === 'es' ? 'Consentimiento' : lang === 'it' ? 'Consenso' : 'Consent'}
       </h2>
 
