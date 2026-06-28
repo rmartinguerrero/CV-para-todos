@@ -10,6 +10,7 @@ import Education   from '../../components/Education.astro';
 import Skills      from '../../components/Skills.astro';
 import Projects    from '../../components/Projects.astro';
 import SetupWizard from '../../components/SetupWizard.astro';
+import Footer from '../../components/Footer.astro';
 
 import resumeEs from '../../data/resume.es.json';
 import resumeIt from '../../data/resume.it.json';
@@ -63,5 +64,6 @@ const DynamicLayout = LAYOUTS_MAP[templateKey] || MinimalistLayout;
     {resume.education?.length > 0 && <Education  resume={resume} t={t} />}
     {resume.skills?.length    > 0 && <Skills     resume={resume} t={t} />}
     {resume.projects?.length  > 0 && <Projects   resume={resume} t={t} />}
+    <Footer lang={lang} />
   </DynamicLayout>
 )}

@@ -33,8 +33,6 @@ interface Props {
   t: (key: string) => string;
 }
 
-import Footer from '../components/Footer.astro';
-
 const { title, description, lang, currentLang, availableLangs, resume, t } = Astro.props;
 ---
 <!DOCTYPE html>
@@ -51,7 +49,6 @@ const { title, description, lang, currentLang, availableLangs, resume, t } = Ast
   <main class="max-w-3xl mx-auto px-6 py-12 sm:py-16 print:p-0">
     <slot />
   </main>
-  <Footer lang={lang} />
 </body>
 </html>
 

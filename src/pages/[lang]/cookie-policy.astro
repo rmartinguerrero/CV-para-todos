@@ -2,6 +2,7 @@
 // src/pages/[lang]/cookie-policy.astro
 import { useTranslations, type Lang, type UIKeys } from '../../i18n/ui';
 import MinimalistLayout from '../../layouts/MinimalistLayout.astro';
+import Footer from '../../components/Footer.astro';
 
 export function getStaticPaths() {
   return [
@@ -37,4 +38,5 @@ const t = (key: string) => strictT(key as UIKeys);
     <h2>{lang === 'es' ? 'Cookies de terceros' : lang === 'it' ? 'Cookie di terze parti' : 'Third-Party Cookies'}</h2>
     <p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.</p>
   </article>
+  <Footer lang={lang} />
 </MinimalistLayout>

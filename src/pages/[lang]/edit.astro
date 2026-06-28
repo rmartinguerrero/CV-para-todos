@@ -6,6 +6,7 @@ import resumeIt from '../../data/resume.it.json';
 import resumeEn from '../../data/resume.en.json';
 import { CV_THEMES_CSS } from '../../styles/cv-themes';
 import MinimalistLayout from '../../layouts/MinimalistLayout.astro';
+import Footer from '../../components/Footer.astro';
   
 export function getStaticPaths() {
   return [
@@ -90,9 +91,9 @@ const templates = Object.entries(layoutModules)
       </a>
 
       <div class="inline-flex rounded-xl bg-gray-100 p-0.5 border border-gray-200 shadow-inner">
-        <button onclick="window.location.href='/es/edit'" class={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all ${lang === 'es' ? 'bg-white text-gray-900 shadow-xs border border-gray-200/60' : 'text-gray-500 hover:text-gray-900'}`}><img src="/flags/es.svg" class="hidden xl:inline w-4 h-3 align-middle mr-1" alt="ES" />ES</button>
-        <button onclick="window.location.href='/it/edit'" class={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all ${lang === 'it' ? 'bg-white text-gray-900 shadow-xs border border-gray-200/60' : 'text-gray-500 hover:text-gray-900'}`}><img src="/flags/it.svg" class="hidden xl:inline w-4 h-3 align-middle mr-1" alt="IT" />IT</button>
-        <button onclick="window.location.href='/en/edit'" class={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all ${lang === 'en' ? 'bg-white text-gray-900 shadow-xs border border-gray-200/60' : 'text-gray-500 hover:text-gray-900'}`}><img src="/flags/en.svg" class="hidden xl:inline w-4 h-3 align-middle mr-1" alt="EN" />EN</button>
+        <button onclick="window.location.href='/es/edit'" class={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all ${lang === 'es' ? 'bg-white text-gray-900 shadow-xs border border-gray-200/60' : 'text-gray-500 hover:text-gray-900'}`}>&#127466;&#127480;&#8202;ES</button>
+        <button onclick="window.location.href='/it/edit'" class={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all ${lang === 'it' ? 'bg-white text-gray-900 shadow-xs border border-gray-200/60' : 'text-gray-500 hover:text-gray-900'}`}>&#127470;&#127481;&#8202;IT</button>
+        <button onclick="window.location.href='/en/edit'" class={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all ${lang === 'en' ? 'bg-white text-gray-900 shadow-xs border border-gray-200/60' : 'text-gray-500 hover:text-gray-900'}`}>&#127482;&#127480;&#8202;EN</button>
       </div>
 
       <div class="flex items-center gap-2">
@@ -914,4 +915,5 @@ const templates = Object.entries(layoutModules)
   })();
 </script>
 
+<Footer lang={lang} />
 </MinimalistLayout>
