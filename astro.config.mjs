@@ -12,5 +12,5 @@ export default defineConfig({
   },
   output: 'static',
 
-  site: 'https://cvparatodos.com',
+  site: 'https://cv.raulmguerrero.com',
 });
