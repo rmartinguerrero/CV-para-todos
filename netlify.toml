@@ -2,5 +2,28 @@
   publish = "dist"
   command = "pnpm build"
 
+# Forzamos el bundler moderno de funciones
 [functions.node_bundle]
   external_node_modules = []
+
+# --- REDIRECCIONES AUTOMÁTICAS POR IDIOMA DE NAVEGADOR ---
+# 1. Si prefiere Español, entra a /es/ de forma transparente
+[[redirects]]
+  from = "/"
+  to = "/es"
+  status = 302
+  conditions = { Language = ["es"] }
+
+# 2. Si prefiere Italiano, entra a /it/ de forma transparente
+[[redirects]]
+  from = "/"
+  to = "/it"
+  status = 302
+  conditions = { Language = ["it"] }
+
+# 3. Regla por defecto: Cualquier otro idioma (o si falla la detección) va a Inglés
+[[redirects]]
+  from = "/"
+  to = "/en"
+  status = 302
+
