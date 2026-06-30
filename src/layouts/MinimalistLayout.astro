@@ -54,9 +54,30 @@ const { title, description, lang, currentLang, availableLangs, resume, t } = Ast
 
 <style is:global>
   @media print {
-    body { background: white; color: black; }
-    .print\:hidden { display: none !important; }
+  body {
+    background: white;
+    color: black;
   }
+
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* CLAVE: eliminar altura forzada */
+  .min-h-screen {
+    min-height: auto !important;
+  }
+
+  html, body {
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  @page {
+    margin: 0;
+    size: A4;
+  }
+}
 
   body.minimalist-layout header, [data-template="minimalist"] #preview-header {
     display: flex !important;
