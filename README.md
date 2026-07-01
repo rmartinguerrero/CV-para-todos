@@ -125,6 +125,44 @@ Para mantener las cosas organizadas y sencillas, el proyecto se divide así:
 
 ---
 
+## 🤖 Desarrollo Asistido por IA
+
+Este proyecto ha sido desarrollado con la ayuda de herramientas de Inteligencia Artificial como apoyo durante el diseño, la programación, la documentación y las tareas de revisión.
+
+La IA ha sido utilizada para:
+
+- 💡 Proponer soluciones técnicas y alternativas de implementación.
+- 🏗️ Ayudar en el diseño de la arquitectura del proyecto.
+- 🔍 Detectar errores, realizar auditorías y sugerir mejoras.
+- 🌍 Facilitar la internacionalización y la generación de documentación.
+- 🧪 Revisar código y validar decisiones de diseño.
+
+Todas las decisiones finales, la arquitectura, la supervisión del código y la dirección del proyecto corresponden a **Raúl Martín Guerrero**.
+
+El objetivo es demostrar que la IA puede ser una excelente herramienta de apoyo para desarrollar software libre de calidad, manteniendo siempre el criterio humano como responsable final.
+
+---
+## 🧠 Archivo `architecture.json`
+
+El repositorio incluye un archivo denominado `architecture.json`, que actúa como la documentación técnica central del proyecto.
+
+Este archivo reúne información estructurada sobre:
+
+- 📐 Arquitectura general.
+- 🏛️ Decisiones de diseño (ADR).
+- 🔄 Flujos de funcionamiento.
+- 📂 Estructura del proyecto.
+- 🛠️ Tecnologías utilizadas.
+- 📋 Convenciones de desarrollo.
+- 🐞 Problemas detectados y soluciones aplicadas.
+- 🚀 Evolución del proyecto.
+
+El archivo architecture.json está pensado para que tanto personas como asistentes de IA puedan comprender rápidamente la arquitectura del proyecto y colaborar de forma más eficiente, manteniendo la coherencia de las decisiones técnicas adoptadas.
+
+Se recomienda mantener este archivo actualizado cuando se introduzcan cambios importantes en la arquitectura o en el flujo de trabajo del proyecto.
+
+---
+
 ## 📋 Funcionamiento e Instrucciones de Uso
 
 ### 1. Inicialización y SetupWizard
