@@ -2,6 +2,8 @@
 
 Un currículum web multiidioma, ultra rápido, privado y diseñado para ser **fácil de usar y gestionar**. 
 
+CV para Todos nace como una alternativa libre y transparente frente a plataformas que limitan funciones tras un pago, monetizan los datos personales o dificultan la exportación del currículum. El objetivo es que cualquier persona pueda crear, gestionar y publicar su CV de forma sencilla, sin costes ocultos y manteniendo siempre el control sobre su información.
+
 La filosofía de este proyecto es la **simplicidad y la autonomía (No-Code / Low-Code)**: cualquier persona debe poder tener su portafolio profesional online y gestionarlo de forma visual y cómoda, sin complicaciones técnicas de backend, sin bases de datos pesadas y con total respeto a la privacidad.
 
 ---
@@ -119,7 +121,7 @@ Para mantener las cosas organizadas y sencillas, el proyecto se divide así:
 
 1. **Fase 1 (Landing & Onboarding):** Detección automática de idioma del navegador. CTA para "Crear desde cero" (`SetupWizard`) o "Editar" (vía OAuth).
 2. **Fase 2 (Formulario No-Code):** Ruta aislada `/[lang]/edit`. Formulario modular. Selector dinámico de plantillas y acciones de descarga (JSON/PDF) o publicación en la nube.
-3. **Fase 3 (CV Público):** Ruta `/[lang]/index`. Carga el JSON y renderiza la plantilla seleccionada en `meta.template`. Sin botones de admin, ni scripts, protegiendo la privacidad visual.
+3. **Fase 3 (CV Público):** Ruta `/[lang]/index`. Carga el JSON y renderiza la plantilla seleccionada en `meta.template`.
 
 ---
 
@@ -139,12 +141,173 @@ El sistema utiliza archivos `src/data/resume.[lang].json`.
 Al presionar el botón de "Publicar" en el editor, una *Netlify Function* realiza un `push` seguro a tu repositorio de GitHub, actualizando el archivo JSON fuente y disparando una nueva compilación (build) del sitio.
 
 ---
+## 📋 Requisitos
+
+Antes de comenzar, asegúrate de tener instalado:
+
+* **Node.js 20** o superior.
+* **pnpm 10** o superior.
+* **Netlify CLI** (para ejecutar las funciones de Netlify en desarrollo).
+* Una **cuenta de GitHub** (solo necesaria si deseas publicar tu CV directamente desde el editor mediante OAuth).
+
+Puedes comprobar que todo está instalado ejecutando:
+
+```bash
+node -v
+pnpm -v
+netlify --version
+```
 
 ## 💻 Desarrollo Local
 
-Poner la web en marcha en tu ordenador es sumamente sencillo. Solo abre tu terminal y sigue estos dos pasos:
+Poner la web en marcha en tu ordenador es muy sencillo.
 
 ### 1. Instalar las dependencias
-Instala los paquetes necesarios de forma ultra rápida usando `pnpm`:
+
+Instala los paquetes necesarios utilizando **pnpm**:
+
 ```bash
 pnpm install
+```
+
+### 2. Configurar las variables de entorno
+
+El proyecto incluye un archivo **`.env.example`** con todas las variables necesarias para ejecutar la aplicación.
+
+Solo debes copiarlo y renombrarlo como **`.env.local`**:
+
+```bash
+cp .env.example .env.local
+```
+
+o en Windows:
+
+```powershell
+copy .env.example .env.local
+```
+
+Después, abre el archivo `.env.local` y completa los valores correspondientes:
+
+* `GITHUB_CLIENT_ID`
+* `GITHUB_CLIENT_SECRET`
+* `GITHUB_REDIRECT_URI`
+* Cualquier otra variable necesaria para tu entorno.
+
+Para configurar correctamente la autenticación OAuth puedes seguir la guía incluida en:
+
+```
+SETUP_OAUTH.md
+```
+
+### 3. Ejecutar el proyecto
+
+Una vez configurado el entorno:
+
+```bash
+pnpm install
+npx netlify dev
+```
+
+Netlify CLI cargará automáticamente las variables definidas en `.env.local`.
+
+---
+
+## 🔐 Variables de entorno
+
+El repositorio **sí incluye** un archivo:
+
+```
+.env.example
+```
+
+Este archivo sirve únicamente como plantilla y puede subirse al repositorio sin ningún problema, ya que **no contiene credenciales reales**.
+
+Nunca debes subir tus claves personales.
+
+Los archivos reales de configuración como:
+
+```
+.env
+.env.local
+.env.production.local
+```
+
+deben permanecer siempre privados.
+
+---
+
+## 🚫 Archivos que NO deben subirse al repositorio
+
+El proyecto ya incluye un `.gitignore` preparado para evitar subir archivos temporales, compilaciones y credenciales.
+
+Entre ellos:
+
+### Dependencias
+
+```
+node_modules/
+.pnpm-store/
+```
+
+### Archivos generados por Astro
+
+```
+dist/
+.astro/
+```
+
+### Archivos locales de Netlify
+
+```
+.netlify/
+```
+
+### Variables de entorno
+
+```
+.env
+.env.local
+.env.*.local
+```
+
+### Logs
+
+```
+*.log
+npm-debug.log*
+pnpm-debug.log*
+```
+
+### Archivos temporales
+
+```
+deno.lock
+```
+
+### Archivos del sistema operativo
+
+```
+.DS_Store
+Thumbs.db
+```
+
+> **Importante:** El único archivo relacionado con la configuración que debe mantenerse en el repositorio es **`.env.example`**, ya que actúa como plantilla para que cualquier usuario pueda configurar el proyecto sin exponer información sensible.
+
+
+## 📜 Licencia
+
+Este proyecto está distribuido bajo la **GNU General Public License v3.0 (GPL-3.0)**.
+
+Su objetivo es garantizar que **CV para Todos** permanezca siempre como software libre, permitiendo a cualquier persona utilizarlo, estudiarlo, modificarlo y compartirlo.
+
+Si redistribuyes este proyecto o una versión modificada, deberás hacerlo respetando los términos de la licencia GPL v3 y mantener el código fuente disponible conforme a dicha licencia.
+
+Copyright © 2026 Raúl Martín Guerrero
+
+Puedes consultar el texto completo de la licencia en el archivo `LICENSE` incluido en este repositorio.
+
+## 🧠 Autor
+
+Proyecto desarrollado por **Raúl Martín Guerrero**.
+
+Si este proyecto te resulta útil, considera darle una ⭐ al repositorio de GitHub. Ayuda a que más personas descubran una alternativa libre, transparente y respetuosa con la privacidad para crear y publicar su currículum.
