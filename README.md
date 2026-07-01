@@ -1,3 +1,5 @@
+[ES](README.md) | [EN](README.EN.md) | [IT](README.IT.md)
+
 # 📄 CV Para Todos
 
 Un currículum web multiidioma, ultra rápido, privado y diseñado para ser **fácil de usar y gestionar**. 
