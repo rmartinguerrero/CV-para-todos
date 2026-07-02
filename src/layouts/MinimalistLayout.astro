@@ -63,7 +63,6 @@ const { title, description, lang, currentLang, availableLangs, resume, t } = Ast
     display: none !important;
   }
 
-  /* CLAVE: eliminar altura forzada */
   .min-h-screen {
     min-height: auto !important;
   }
@@ -71,6 +70,75 @@ const { title, description, lang, currentLang, availableLangs, resume, t } = Ast
   html, body {
     height: auto !important;
     overflow: visible !important;
+  }
+
+  header {
+    margin-bottom: 0.75rem !important;
+  }
+
+  header > div:first-child {
+    margin-bottom: 0.5rem !important;
+  }
+
+  header > div:last-child {
+    gap: 0.75rem !important;
+  }
+
+  header img {
+    width: 72px !important;
+    height: 72px !important;
+  }
+
+  header h1 {
+    font-size: 1.5rem !important;
+  }
+
+  header p:first-of-type {
+    font-size: 0.9rem !important;
+    margin-top: 0.1rem !important;
+  }
+
+  header p:last-of-type {
+    font-size: 0.8rem !important;
+    margin-top: 0.25rem !important;
+    line-height: 1.5 !important;
+  }
+
+  header ul {
+    margin-top: 0.35rem !important;
+    gap: 0.25rem 0.75rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  section {
+    margin-bottom: 0.75rem !important;
+  }
+
+  section h2 {
+    margin-bottom: 0.35rem !important;
+    font-size: 0.7rem !important;
+  }
+
+  section h3 {
+    margin-bottom: 0.35rem !important;
+    font-size: 0.7rem !important;
+  }
+
+  ol, .space-y-6 {
+    margin: 0 !important;
+  }
+
+  ol > li, .space-y-6 > li {
+    margin-bottom: 0.35rem !important;
+  }
+
+  .space-y-6 {
+    --space: 0 !important;
+  }
+
+  main {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
   }
 
   @page {
@@ -87,5 +155,13 @@ const { title, description, lang, currentLang, availableLangs, resume, t } = Ast
   }
   body.minimalist-layout header img, [data-template="minimalist"] #preview-header img {
     order: -1 !important;
+  }
+  body.minimalist-layout header img {
+    width: 96px !important;
+    height: 96px !important;
+    object-fit: cover !important;
+    border-radius: 0.75rem !important;
+    border: 1px solid #e5e7eb !important;
+    box-shadow: none !important;
   }
 </style>

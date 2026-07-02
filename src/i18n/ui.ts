@@ -24,6 +24,7 @@ const esDict = {
   'form.name': 'Nombre Completo',
   'form.label': 'Profesión / Puesto',
   'form.website': 'Sitio Web',
+  'form.photoHelp': 'Tamaño recomendado: 200 × 200 px (imagen cuadrada)',
   'nav.contact': 'Datos Básicos',
   // Traducciones de la categoría de plantillas dinámicas
   'templates.title': 'Plantilla Visual',
@@ -53,6 +54,7 @@ export const ui: Record<Lang, Record<UIKeys, string>> = {
     'form.name': 'Nome Completo',
     'form.label': 'Professione / Ruolo',
     'form.website': 'Sito Web',
+    'form.photoHelp': 'Dimensioni consigliate: 200 × 200 px (immagine quadrata)',
     'nav.contact': 'Dati di Contatto',
     // Modello Visivo (Italiano)
     'templates.title': 'Modello Visivo',
@@ -77,6 +79,7 @@ export const ui: Record<Lang, Record<UIKeys, string>> = {
     'form.name': 'Full Name',
     'form.label': 'Profession / Title',
     'form.website': 'Website',
+    'form.photoHelp': 'Recommended size: 200 × 200 px (square image)',
     'nav.contact': 'Basic Information',
     // Visual Template (English)
     'templates.title': 'Visual Template',

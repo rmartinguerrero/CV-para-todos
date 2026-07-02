@@ -43,6 +43,11 @@ ul{list-style:none}
 }
 [data-template="minimalist"] #preview-header img {
   order: -1 !important;
+  width: 96px !important;
+  height: 96px !important;
+  object-fit: cover !important;
+  border-radius: 0.75rem !important;
+  border: 1px solid #e5e7eb !important;
 }
 
 /* ===== TEMA TECHY ===== */
@@ -212,5 +217,27 @@ ul{list-style:none}
   #preview-section{min-height:auto!important;box-shadow:none!important;border:0!important}
   html,body{height:auto!important}
   .print\\:block{display:block!important}
-  @page{size:A4;margin:10mm}
+  .panel-header{gap:0.75rem!important}
+  .profile-image{width:72px!important;height:72px!important}
+  .panel-name{font-size:1.5rem!important;margin:0.15rem 0 0.25rem!important;line-height:1.1!important}
+  .panel-label{font-size:0.9rem!important;margin:0!important}
+  .panel-summary{font-size:0.8rem!important;margin-bottom:0.5rem!important;line-height:1.5!important}
+  .panel-contact{gap:0.5rem!important;margin-top:0.4rem!important;font-size:0.75rem!important}
+  .section-title{font-size:0.75rem!important;margin-bottom:0.4rem!important}
+  .panel-main{gap:0.75rem!important}
+  .cards-grid{gap:0.5rem!important}
+  .card{padding:0.5rem!important}
+  .card-header{gap:0.25rem!important}
+  .card-body{margin-top:0.35rem!important;font-size:0.8rem!important;line-height:1.5!important}
+  .card-date{font-size:0.75rem!important}
+  .card-subtitle{margin-top:0.25rem!important;font-size:0.8rem!important}
+  .skills-wrap{gap:0.35rem!important}
+  .tag{font-size:0.7rem!important;padding:0.2rem 0.5rem!important}
+  .extra-grid{gap:0.75rem!important}
+  .cert-item{padding:0.4rem!important;margin-bottom:0.35rem!important}
+  .cert-name{font-size:0.85rem!important}
+  .cert-meta{font-size:0.75rem!important}
+  .lang-item{padding:0.35rem!important;margin-bottom:0.25rem!important}
+  .lang-fluency{font-size:0.8rem!important}
+  @page{size:A4;margin:8mm}
 }`;

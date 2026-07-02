@@ -205,6 +205,8 @@ const templates = Object.entries(layoutModules)
               <button type="button" id="btn-remove-photo" class="text-xs text-red-500 font-medium hidden hover:underline">{lang === 'es' ? 'Eliminar' : lang === 'it' ? 'Elimina' : 'Remove'}</button>
               <span id="photo-status" class="text-xs text-gray-400 truncate max-w-[100px] sm:max-w-[180px]">{lang === 'es' ? 'Sin archivo' : lang === 'it' ? 'Nessun file' : 'No file'}</span>
             </div>
+            <input type="url" id="photo-url" placeholder="https://" class="mt-2 w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-blue-500" />
+            <p class="mt-1 text-xs text-gray-400">{t('form.photoHelp')}</p>
           </div>
           <div>
             <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">{lang === 'es' ? 'Extracto Profesional' : lang === 'it' ? 'Profilo Professionale' : 'Professional Summary'}</label>
@@ -468,11 +470,13 @@ const templates = Object.entries(layoutModules)
   const fileInput = document.getElementById('photo-file');
   const photoStatus = document.getElementById('photo-status');
   const removePhotoBtn = document.getElementById('btn-remove-photo');
+  const photoUrlInput = document.getElementById('photo-url');
 
   if (fileInput) {
     fileInput.addEventListener('change', e => {
       const file = e.target.files[0];
       if (!file) return;
+      if (photoUrlInput) photoUrlInput.value = '';
       if (photoStatus) photoStatus.textContent = file.name;
       if (removePhotoBtn) removePhotoBtn.classList.remove('hidden');
       const reader = new FileReader();
@@ -481,10 +485,22 @@ const templates = Object.entries(layoutModules)
     });
   }
 
+  if (photoUrlInput) {
+    photoUrlInput.addEventListener('input', e => {
+      const url = e.target.value.trim();
+      if (fileInput) fileInput.value = '';
+      if (photoStatus) photoStatus.textContent = url ? (lang === 'es' ? 'URL cargada' : lang === 'it' ? 'URL caricata' : 'URL loaded') : (lang === 'es' ? 'Sin archivo' : lang === 'it' ? 'Nessun file' : 'No file');
+      if (removePhotoBtn) removePhotoBtn.classList.toggle('hidden', !url);
+      state.basics.image = url;
+      saveState();
+    });
+  }
+
   if (removePhotoBtn) {
     removePhotoBtn.addEventListener('click', () => {
       state.basics.image = '';
       if (fileInput) fileInput.value = '';
+      if (photoUrlInput) photoUrlInput.value = '';
       if (photoStatus) photoStatus.textContent = lang === 'es' ? 'Sin archivo' : lang === 'it' ? 'Nessun file' : 'No file';
       removePhotoBtn.classList.add('hidden');
       saveState();
@@ -533,8 +549,14 @@ const templates = Object.entries(layoutModules)
       const path = input.getAttribute('data-path');
       if (path) input.value = getDeepValue(state, path) || '';
     });
-    if (state.basics.image && photoStatus) {
-      photoStatus.textContent = lang === 'es' ? 'Imagen cargada' : lang === 'it' ? 'Immagine caricata' : 'Image loaded';
+    if (state.basics.image) {
+      if (state.basics.image.startsWith('data:')) {
+        if (photoStatus) photoStatus.textContent = lang === 'es' ? 'Imagen cargada' : lang === 'it' ? 'Immagine caricata' : 'Image loaded';
+        if (photoUrlInput) photoUrlInput.value = '';
+      } else {
+        if (photoUrlInput) photoUrlInput.value = state.basics.image;
+        if (photoStatus) photoStatus.textContent = lang === 'es' ? 'URL cargada' : lang === 'it' ? 'URL caricata' : 'URL loaded';
+      }
       if (removePhotoBtn) removePhotoBtn.classList.remove('hidden');
     }
   }
@@ -841,7 +863,7 @@ const templates = Object.entries(layoutModules)
       if (remoteData) {
         const localImage = state.basics?.image || '';
         state = remoteData;
-        if (localImage.startsWith('data:')) state.basics.image = localImage;
+        if (localImage) state.basics.image = localImage;
       }
       populateFormBasics();
       renderDynamicBlocks();
