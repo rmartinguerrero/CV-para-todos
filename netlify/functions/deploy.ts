@@ -333,13 +333,13 @@ export const handler = async (event: any) => {
       await octokit.repos.updateInformationAboutPagesSite({
         owner: username,
         repo: PUBLISHED_REPO_NAME,
+        build_type: 'legacy',
         source: { branch: 'main', path: '/' }
       } as any);
       pagesConfigured = true;
-      console.log('GitHub Pages source updated to main branch');
     } catch (updateError: any) {
       if (updateError.status !== 404) {
-        console.warn('Error updating Pages config:', updateError.message || updateError);
+        return { statusCode: 500, headers, body: JSON.stringify({ error: `Error al configurar GitHub Pages: ${updateError.message || updateError}` }) };
       }
     }
 
@@ -349,12 +349,26 @@ export const handler = async (event: any) => {
         await octokit.repos.createPagesSite({
           owner: username,
           repo: PUBLISHED_REPO_NAME,
+          build_type: 'legacy',
           source: { branch: 'main', path: '/' }
         } as any);
-        console.log('GitHub Pages created successfully');
       } catch (createError: any) {
-        console.warn('No se pudo habilitar GitHub Pages automáticamente:', createError.message || createError);
+        return { statusCode: 500, headers, body: JSON.stringify({ error: `No se pudo crear GitHub Pages: ${createError.message || createError}` }) };
       }
+    }
+
+    // Verificar que la configuración se aplicó correctamente
+    try {
+      const { data: pagesInfo } = await octokit.repos.getPagesSite({ owner: username, repo: PUBLISHED_REPO_NAME } as any);
+      if (pagesInfo.build_type !== 'legacy') {
+        return { statusCode: 500, headers, body: JSON.stringify({ error: `GitHub Pages se configuró con build_type "${pagesInfo.build_type || 'indefinido'}" en lugar de "legacy". Revisa en https://github.com/${username}/${PUBLISHED_REPO_NAME}/settings/pages` }) };
+      }
+      if (pagesInfo.status === 'errored') {
+        return { statusCode: 500, headers, body: JSON.stringify({ error: `GitHub Pages reporta estado "errored". Revisa https://github.com/${username}/${PUBLISHED_REPO_NAME}/settings/pages` }) };
+      }
+      console.log(`GitHub Pages configurado y verificado: build_type=${pagesInfo.build_type}`);
+    } catch (verifyError: any) {
+      return { statusCode: 500, headers, body: JSON.stringify({ error: `No se pudo verificar GitHub Pages: ${verifyError.message || verifyError}` }) };
     }
 
     const pagePath = isUserSite ? '' : `${PUBLISHED_REPO_NAME}/`;

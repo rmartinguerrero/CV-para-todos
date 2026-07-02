@@ -53,4 +53,3 @@ jobs:
           publish_dir: ./dist
           publish_branch: gh-pages
           commit_message: "Deploy static site from main"
-          clean: true
