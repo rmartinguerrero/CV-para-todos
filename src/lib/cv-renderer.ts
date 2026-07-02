@@ -62,9 +62,9 @@ export function renderCvContent(resume: any, lang: string, basePath = ''): strin
   const contactUrl = b.url || '';
   const contacts: string[] = [];
 
-  if (b.email) contacts.push(`<li><a href="mailto:${escapeHtml(b.email)}">${escapeHtml(b.email)}</a></li>`);
-  if (b.phone) contacts.push(`<li><a href="tel:${escapeHtml(b.phone)}">${escapeHtml(b.phone)}</a></li>`);
-  if (contactUrl) contacts.push(`<li><a href="${escapeHtml(contactUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(contactUrl)}</a></li>`);
+  if (b.email) contacts.push(`<li>\u{1F4E7} <a href="mailto:${escapeHtml(b.email)}">${escapeHtml(b.email)}</a></li>`);
+  if (b.phone) contacts.push(`<li>\u{1F4DE} <a href="tel:${escapeHtml(b.phone)}">${escapeHtml(b.phone)}</a></li>`);
+  if (contactUrl) contacts.push(`<li>\u{1F517} <a href="${escapeHtml(contactUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(contactUrl)}</a></li>`);
 
   let workHtml = '';
   if (resume.work?.length) {
