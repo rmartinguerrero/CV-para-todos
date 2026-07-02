@@ -2,6 +2,7 @@
 // src/components/SetupWizard.astro
 import MinimalistLayout from '../layouts/MinimalistLayout.astro';
 import { useTranslations, type Lang, languages, type UIKeys } from '../i18n/ui';
+import Footer from './Footer.astro'
 
 interface Props {
   availableLangs: string[];
@@ -334,7 +335,44 @@ const currentFaqs = faqs[lang] || faqs.es;
 
   <!-- Input file oculto -->
   <input type="file" id="wizard-file-input" accept=".json" class="hidden" />
+<Footer lang={lang} />
 
+<!-- Cookie Consent Banner (Landing) -->
+<div id="privacy-banner"
+  class="fixed bottom-3 left-3 right-3 sm:left-6 sm:bottom-6 sm:right-auto sm:max-w-md 
+  bg-white border border-gray-200 p-4 rounded-xl shadow-2xl z-50 
+  opacity-0 translate-y-8 pointer-events-none flex flex-col gap-3 
+  transition-all duration-500 ease-out">
+
+  <div>
+    <h4 class="text-sm font-bold text-gray-900 mb-1">
+      {lang === 'it' ? 'Uso dei Cookie' : lang === 'es' ? 'Uso de Cookies' : 'Cookie Usage'}
+    </h4>
+
+    <p class="text-xs text-gray-500 leading-relaxed">
+      {lang === 'it'
+        ? 'Usiamo cookie per analisi e miglioramento dell’esperienza.'
+        : lang === 'es'
+        ? 'Usamos cookies para analizar el rendimiento y mejorar la experiencia.'
+        : 'We use cookies to analyze performance and improve experience.'}
+      <a href={`/${lang}/cookie-policy`} class="text-blue-600 underline font-semibold">Policy</a>
+      {' · '}
+      <a href={`/${lang}/privacy-policy`} class="text-blue-600 underline font-semibold">Privacy</a>
+    </p>
+  </div>
+
+  <div class="flex gap-2 justify-end">
+    <button id="accept-privacy"
+      class="bg-blue-600 text-white text-xs font-semibold py-2 px-4 rounded-lg hover:brightness-110">
+      {lang === 'it' ? 'Accetta tutto' : lang === 'es' ? 'Aceptar' : 'Accept'}
+    </button>
+
+    <button id="deny-privacy"
+      class="bg-gray-100 text-gray-600 text-xs font-semibold py-2 px-4 rounded-lg hover:bg-gray-200">
+      {lang === 'it' ? 'Rifiuta' : lang === 'es' ? 'Rechazar' : 'Reject'}
+    </button>
+  </div>
+</div>
 </MinimalistLayout>
 
 <style>
@@ -461,4 +499,72 @@ const currentFaqs = faqs[lang] || faqs.es;
     .forEach((el, i) => {
       (el.style).transitionDelay = `${0.1 + i * 0.08}s`;
     });
+</script>
+
+<!-- Cookie Consent + Google Analytics (RGPD) - LANDING -->
+<script is:inline>
+  (() => {
+    const consent = localStorage.getItem('cookie-consent');
+    if (consent !== 'accepted') return;
+
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    window.gtag = gtag;
+
+    gtag('js', new Date());
+    gtag('config', 'G-R3TG90C8J5', { anonymize_ip: true });
+
+    const gaScript = document.createElement('script');
+    gaScript.async = true;
+    gaScript.src = "https://www.googletagmanager.com/gtag/js?id=G-R3TG90C8J5";
+
+    document.head.appendChild(gaScript);
+  })();
+</script>
+
+<script is:inline>
+(function() {
+  const banner = document.getElementById('privacy-banner');
+  const btnAccept = document.getElementById('accept-privacy');
+  const btnDeny = document.getElementById('deny-privacy');
+
+  if (!banner || !btnAccept || !btnDeny) return;
+
+  const consent = localStorage.getItem('cookie-consent');
+
+  // mostrar banner si no hay decisión
+  if (!consent) {
+    setTimeout(() => {
+      banner.classList.remove('opacity-0', 'translate-y-8', 'pointer-events-none');
+    }, 400);
+  }
+
+  btnAccept.addEventListener('click', () => {
+    localStorage.setItem('cookie-consent', 'accepted');
+
+    banner.classList.add('opacity-0', 'translate-y-8', 'pointer-events-none');
+
+    // activar GA solo si no estaba ya activo
+    if (!window._gaLoaded) {
+      window._gaLoaded = true;
+
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){ dataLayer.push(arguments); }
+      window.gtag = gtag;
+
+      gtag('js', new Date());
+      gtag('config', 'G-R3TG90C8J5', { anonymize_ip: true });
+
+      const s = document.createElement('script');
+      s.async = true;
+      s.src = "https://www.googletagmanager.com/gtag/js?id=G-R3TG90C8J5";
+      document.head.appendChild(s);
+    }
+  });
+
+  btnDeny.addEventListener('click', () => {
+    localStorage.setItem('cookie-consent', 'denied');
+    banner.classList.add('opacity-0', 'translate-y-8', 'pointer-events-none');
+  });
+})();
 </script>
