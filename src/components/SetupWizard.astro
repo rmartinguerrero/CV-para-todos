@@ -153,7 +153,7 @@ const currentFaqs = faqs[lang] || faqs.es;
           {['es', 'it', 'en'].map((l) => (
             <a 
               href={`/${l}/`}
-              class={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all no-underline ${
+              class={`px-2 sm:px-3 py-1.5 rounded-full text-xs font-semibold transition-all no-underline ${
                 lang === l 
                   ? 'bg-white text-gray-900 shadow-sm border border-gray-300' 
                   : 'text-gray-600 hover:text-gray-900'
