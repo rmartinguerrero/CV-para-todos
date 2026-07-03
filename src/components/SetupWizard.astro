@@ -150,19 +150,22 @@ const currentFaqs = faqs[lang] || faqs.es;
           <span class="text-sm font-bold text-gray-800">{t('brand.name')}</span>
         </a>
         <div class="inline-flex rounded-full bg-gray-100 p-1 border border-gray-200 gap-1">
-          {['es', 'it', 'en'].map((l) => (
-            <a 
-              href={`/${l}/`}
-              class={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all no-underline ${
-                lang === l 
-                  ? 'bg-white text-gray-900 shadow-sm border border-gray-300' 
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              {l === 'es' ? '🇪🇸' : l === 'it' ? '🇮🇹' : '🇺🇸'} {languages[l as Lang]}
-            </a>
-          ))}
-        </div>
+            {['es', 'it', 'en'].map((l) => (
+              <a
+                href={`/${l}/`}
+                class={`px-2 sm:px-3 py-1.5 rounded-full text-xs font-semibold transition-all no-underline ${
+                  lang === l
+                    ? 'bg-white text-gray-900 shadow-sm border border-gray-300'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <span>{l === 'es' ? '🇪🇸' : l === 'it' ? '🇮🇹' : '🇺🇸'}</span>
+                <span class="hidden sm:inline ml-1">
+                  {languages[l as Lang]}
+                </span>
+              </a>
+            ))}
+          </div>
       </div>
     </nav>
 
