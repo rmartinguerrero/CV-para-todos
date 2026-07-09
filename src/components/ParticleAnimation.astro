@@ -1,0 +1,346 @@
+<svg id="particle-svg" class="particle-canvas" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <filter id="paper-shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0.5" dy="1" stdDeviation="1" flood-color="#000" flood-opacity="0.15"/>
+    </filter>
+    <g id="paper-def">
+      <rect x="0.5" y="0.5" width="23" height="27" rx="2" fill="#fff" stroke="#d1d5db" stroke-width="0.5" filter="url(#paper-shadow)"/>
+      <path d="M18 0.5V5.5H23" fill="#fafafa" stroke="#d1d5db" stroke-width="0.5"/>
+      <path d="M18 0.5L23 5.5" fill="#fafafa" stroke="#d1d5db" stroke-width="0.5"/>
+      <rect x="4" y="6" width="10" height="2" rx="0.5" fill="#e5e7eb"/>
+      <rect x="4" y="10" width="16" height="1.5" rx="0.5" fill="#f3f4f6"/>
+      <rect x="4" y="13" width="13" height="1.5" rx="0.5" fill="#f3f4f6"/>
+      <rect x="4" y="16" width="7" height="1.5" rx="0.5" fill="#e5e7eb"/>
+      <rect x="4" y="20" width="14" height="1.5" rx="0.5" fill="#f3f4f6"/>
+      <rect x="4" y="23" width="9" height="1.5" rx="0.5" fill="#f3f4f6"/>
+    </g>
+  </defs>
+</svg>
+
+<style>
+  .particle-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    cursor: default;
+    mask-image: radial-gradient(circle at center, black 60%, transparent 100%);
+    -webkit-mask-image: radial-gradient(circle at center, black 60%, transparent 100%);
+  }
+</style>
+
+<script is:inline>
+(function () {
+  'use strict';
+
+  var SVG_NS = 'http://www.w3.org/2000/svg';
+  var COLS = 12;
+  var ROWS = 15;
+  var GAP = 4;
+
+  var BITMAP_4 = [
+    '    ##      ',
+    '    ##      ',
+    '    ##      ',
+    '    ##      ',
+    '    ##      ',
+    '   ###      ',
+    '  # ##      ',
+    ' #  ##      ',
+    '#   ##      ',
+    '############',
+    '    ##      ',
+    '    ##      ',
+    '    ##      ',
+    '    ##      ',
+    '    ##      ',
+  ];
+
+  var BITMAP_0 = [
+    '  ######    ',
+    ' ##    ##   ',
+    '##      ##  ',
+    '##      ##  ',
+    '##      ##  ',
+    '##      ##  ',
+    '##      ##  ',
+    '##      ##  ',
+    '##      ##  ',
+    '##      ##  ',
+    '##      ##  ',
+    '##      ##  ',
+    '##      ##  ',
+    ' ##    ##   ',
+    '  ######    ',
+  ];
+
+  function getHomePositions() {
+    var positions = [];
+    var bitmaps = [BITMAP_4, BITMAP_0, BITMAP_4];
+    for (var d = 0; d < 3; d++) {
+      var bmp = bitmaps[d];
+      for (var r = 0; r < ROWS; r++) {
+        for (var c = 0; c < COLS; c++) {
+          if (bmp[r][c] === '#') {
+            positions.push({
+              col: d * (COLS + GAP) + c,
+              row: r,
+              density: Math.random() < 0.6 ? 2 : 1
+            });
+          }
+        }
+      }
+    }
+    return positions;
+  }
+
+  /* ── Physics ── */
+  var SPRING_K = 0.025;
+  var DAMPING = 0.90;
+  var SPREAD = 140;
+
+  var IDLE_AMP_MIN = 0.4;
+  var IDLE_AMP_MAX = 1.0;
+  var IDLE_SPEED_MIN = 0.7;
+  var IDLE_SPEED_MAX = 1.3;
+
+  var WIND_STRENGTH = 2;
+  var WIND_RADIUS = 300;
+
+  var EXPLOSION_RADIUS = 160;
+  var EXPLOSION_BURST = 50;
+  var EXPLOSION_CONTINUOUS = 4;
+
+  var particles = [];
+  var mouseX = -Infinity;
+  var mouseY = -Infinity;
+  function rand(a, b) { return a + Math.random() * (b - a); }
+
+  function createParticle(homeX, homeY) {
+    var use = document.createElementNS(SVG_NS, 'use');
+    use.setAttribute('href', '#paper-def');
+    use.setAttribute('width', '24');
+    use.setAttribute('height', '28');
+    return {
+      el: use,
+      x: homeX + rand(-SPREAD, SPREAD),
+      y: homeY + rand(-SPREAD, SPREAD),
+      vx: rand(-4, 4),
+      vy: rand(-4, 4),
+      homeX: homeX,
+      homeY: homeY,
+      rotation: Math.random() * 360,
+      rotationV: rand(-5, 5),
+      phase: Math.random() * Math.PI * 2,
+      idleAmp: rand(IDLE_AMP_MIN, IDLE_AMP_MAX),
+      idleSpeed: rand(IDLE_SPEED_MIN, IDLE_SPEED_MAX),
+      wasInRange: false,
+      burstTimer: 0,
+    };
+  }
+
+  function applyTransform(p) {
+    p.el.style.transform =
+      'translate(' + p.x + 'px,' + p.y + 'px) rotate(' + p.rotation + 'deg)';
+    p.el.style.transformOrigin = '12px 14px';
+  }
+
+  function tick(time) {
+    for (var i = 0; i < particles.length; i++) {
+      var p = particles[i];
+
+      var dx = p.homeX - p.x;
+      var dy = p.homeY - p.y;
+
+      p.vx += dx * SPRING_K;
+      p.vy += dy * SPRING_K;
+
+      p.vx *= DAMPING;
+      p.vy *= DAMPING;
+
+      /* ── Idle float ── */
+      var t1 = time * 0.001 * p.idleSpeed;
+      var ax = Math.sin(t1 + p.phase) * p.idleAmp * 0.3;
+      var ay = Math.cos(t1 * 1.3 + p.phase * 1.7) * p.idleAmp;
+      p.vx += ax;
+      p.vy += ay;
+
+      /* ── Mouse wind + explosion ── */
+      var dxm = p.x - mouseX;
+      var dym = p.y - mouseY;
+      var dist = Math.sqrt(dxm * dxm + dym * dym);
+
+      if (dist < WIND_RADIUS && dist > 0) {
+        var inWind = 1 - dist / WIND_RADIUS;
+        var nx = dxm / dist;
+        var ny = dym / dist;
+
+        if (dist < EXPLOSION_RADIUS) {
+          var t = 1 - dist / EXPLOSION_RADIUS;
+
+          if (!p.wasInRange) {
+            var burst = t * EXPLOSION_BURST;
+            p.vx += nx * burst;
+            p.vy += ny * burst;
+            p.rotationV += nx * burst * 0.05;
+            p.wasInRange = true;
+            p.burstTimer = 3000 + Math.random() * 2000;
+          }
+
+          var gentle = t * EXPLOSION_CONTINUOUS;
+          p.vx += nx * gentle;
+          p.vy += ny * gentle;
+          p.rotationV += nx * gentle * 0.03;
+        } else {
+          p.wasInRange = false;
+          var wind = inWind * WIND_STRENGTH;
+          p.vx += nx * wind;
+          p.vy += ny * wind;
+        }
+      } else {
+        p.wasInRange = false;
+      }
+
+      p.x += p.vx;
+      p.y += p.vy;
+
+      p.rotation += p.rotationV;
+      p.rotationV *= DAMPING;
+
+      if (p.burstTimer > 0) {
+        p.burstTimer -= 16;
+      }
+
+      applyTransform(p);
+    }
+  }
+
+  function loop(time) {
+    tick(time);
+    requestAnimationFrame(loop);
+  }
+
+  /* ── Init ── */
+  var INIT_RETRIES = 0;
+  var INIT_MAX_RETRIES = 50;
+
+  function init() {
+    var svg = document.getElementById('particle-svg');
+    if (!svg) return;
+    var parent = svg.parentElement;
+    if (!parent) return;
+
+    var rect = parent.getBoundingClientRect();
+    var w = rect.width;
+    var h = rect.height;
+    if ((w === 0 || h === 0) && INIT_RETRIES < INIT_MAX_RETRIES) {
+      INIT_RETRIES++;
+      requestAnimationFrame(init);
+      return;
+    }
+    if (w === 0 || h === 0) return;
+    svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+
+    var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    var totalCols = COLS * 3 + GAP * 2;
+    var cellSize = Math.min(w / totalCols, h / ROWS, 28);
+    var totalW = cellSize * totalCols;
+    var totalH = cellSize * ROWS;
+    var offsetX = (w - totalW) / 2;
+    var offsetY = (h - totalH) / 2;
+
+    var homes = getHomePositions();
+
+    for (var i = 0; i < homes.length; i++) {
+      var home = homes[i];
+      var baseX = offsetX + home.col * cellSize + cellSize / 2;
+      var baseY = offsetY + home.row * cellSize + cellSize / 2;
+
+      for (var j = 0; j < home.density; j++) {
+        var jx = rand(-cellSize, cellSize) * 0.25;
+        var jy = rand(-cellSize, cellSize) * 0.25;
+        var p = createParticle(baseX + jx, baseY + jy);
+
+        if (prefersReduced) {
+          p.x = p.homeX;
+          p.y = p.homeY;
+          p.vx = 0;
+          p.vy = 0;
+          p.rotation = 0;
+          p.rotationV = 0;
+        }
+
+        applyTransform(p);
+        svg.appendChild(p.el);
+        particles.push(p);
+      }
+    }
+
+    if (prefersReduced) return;
+
+    /* ── Pointer ── */
+    function onPointer(e) {
+      var svgRect = svg.getBoundingClientRect();
+      var cx = e.clientX;
+      var cy = e.clientY;
+      if (cx === undefined) {
+        var t = e.touches;
+        if (!t || !t.length) return;
+        cx = t[0].clientX;
+        cy = t[0].clientY;
+      }
+      mouseX = cx - svgRect.left;
+      mouseY = cy - svgRect.top;
+    }
+
+    function onPointerLeave() {
+      mouseX = -Infinity;
+      mouseY = -Infinity;
+    }
+
+    svg.addEventListener('mousemove', onPointer);
+    svg.addEventListener('mouseleave', onPointerLeave);
+    svg.addEventListener('touchmove', onPointer, { passive: true });
+    svg.addEventListener('touchend', onPointerLeave);
+    svg.addEventListener('touchcancel', onPointerLeave);
+
+    /* ── Resize ── */
+    var resizeTimer;
+    window.addEventListener('resize', function () {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(onResize, 150);
+    });
+
+    function onResize() {
+      if (!svg.parentElement) return;
+      var r = svg.parentElement.getBoundingClientRect();
+      var nw = r.width;
+      var nh = r.height;
+      if (nw === 0 || nh === 0) return;
+      svg.setAttribute('viewBox', '0 0 ' + nw + ' ' + nh);
+
+      var nc = Math.min(nw / totalCols, nh / ROWS, 28);
+      var ntw = nc * totalCols;
+      var nth = nc * ROWS;
+      var nox = (nw - ntw) / 2;
+      var noy = (nh - nth) / 2;
+
+      for (var k = 0; k < particles.length; k++) {
+        var pk = particles[k];
+        pk.homeX += nox - offsetX;
+        pk.homeY += noy - offsetY;
+      }
+    }
+
+    requestAnimationFrame(loop);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
