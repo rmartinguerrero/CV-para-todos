@@ -10,6 +10,10 @@ La filosofia di questo progetto è la **semplicità e l'autonomia (No-Code / Low
 
 ---
 
+🌐 **[Visualizza Demo Live](https://rmartinguerrero.github.io/personal-resume/)**
+
+---
+
 ## ✨ Caratteristiche Principali
 
 * 🌍 **Multilingua Dinamico e Nativo:** Gestione intelligente delle lingue (Spagnolo, Inglese, Italiano...) strutturata in modo pulito nella cartella `src/pages/[lang]/`. Cambia lingua mantenendo posizione e velocità.

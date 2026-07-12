@@ -10,6 +10,10 @@ The philosophy of this project is **simplicity and autonomy (No-Code / Low-Code)
 
 ---
 
+🌐 **[View Live Demo](https://rmartinguerrero.github.io/personal-resume/)**
+
+---
+
 ## ✨ Key Features
 
 * 🌍 **Dynamic and Native Multilingual:** Smart language management (Spanish, English, Italian...) cleanly structured in the `src/pages/[lang]/` folder. Switch languages while keeping your position and speed.
