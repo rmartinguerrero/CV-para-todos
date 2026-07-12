@@ -16,6 +16,7 @@
 import { Octokit } from "@octokit/rest";
 import { SECTION_TITLES, escapeHtml, renderCvContent } from "../../src/lib/cv-renderer.js";
 import { CV_THEMES_CSS } from "../../src/styles/cv-themes.js";
+import { corsHeaders } from "./_shared/cors.js";
 
 declare const process: any;
 declare const Buffer: any;
@@ -163,12 +164,7 @@ async function deleteFileIfNeeded(octokit: Octokit, owner: string, repo: string,
 // Handler principal
 // =========================================================================
 export const handler = async (event: any) => {
-  const headers = {
-    "Content-Type": "application/json",
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "Content-Type",
-    "Access-Control-Allow-Methods": "POST, OPTIONS"
-  };
+  const headers = corsHeaders('POST, OPTIONS');
 
   if (event.httpMethod === "OPTIONS") {
     return { statusCode: 200, headers, body: "" };
@@ -359,7 +355,7 @@ export const handler = async (event: any) => {
 
     // Verificar que la configuración se aplicó correctamente
     try {
-      const { data: pagesInfo } = await octokit.repos.getPagesSite({ owner: username, repo: PUBLISHED_REPO_NAME } as any);
+      const { data: pagesInfo } = await octokit.repos.getPages({ owner: username, repo: PUBLISHED_REPO_NAME } as any);
       if (pagesInfo.build_type !== 'legacy') {
         return { statusCode: 500, headers, body: JSON.stringify({ error: `GitHub Pages se configuró con build_type "${pagesInfo.build_type || 'indefinido'}" en lugar de "legacy". Revisa en https://github.com/${username}/${PUBLISHED_REPO_NAME}/settings/pages` }) };
       }

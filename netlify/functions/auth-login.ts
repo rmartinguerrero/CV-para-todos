@@ -1,4 +1,7 @@
-const generateState = () => Buffer.from(Math.random().toString()).toString('base64').slice(0, 32);
+import { randomUUID } from 'node:crypto';
+import { corsHeaders } from "./_shared/cors.js";
+
+const generateState = () => randomUUID();
 
 const buildCookie = (name: string, value: string, secure: boolean) => {
   const options = [
@@ -27,12 +30,7 @@ const isLocalDev = (event: any) => {
 };
 
 export const handler = async (event: any) => {
-  const headers = {
-    'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Allow-Methods': 'GET, OPTIONS'
-  };
+  const headers = corsHeaders('GET, OPTIONS');
 
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 200, headers, body: '' };

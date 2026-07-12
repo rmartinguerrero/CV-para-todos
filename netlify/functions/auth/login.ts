@@ -10,13 +10,10 @@ interface LoginRequest {
   redirectUri?: string;
 }
 
+import { corsHeaders } from "../_shared/cors.js";
+
 export const handler = async (event: any) => {
-  const headers = {
-    "Content-Type": "application/json",
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "Content-Type",
-    "Access-Control-Allow-Methods": "POST, GET, OPTIONS"
-  };
+  const headers = corsHeaders('POST, GET, OPTIONS');
 
   if (event.httpMethod === "OPTIONS") {
     return { statusCode: 200, headers, body: "" };
@@ -37,7 +34,8 @@ export const handler = async (event: any) => {
     }
 
     // Generar state aleatorio para CSRF protection
-    const state = Buffer.from(Math.random().toString()).toString('base64').slice(0, 32);
+    const { randomUUID } = await import('node:crypto');
+    const state = randomUUID();
 
     // Guardar state en cookies (será validado en callback)
     const stateCookie = `github_oauth_state=${state}; Max-Age=600; Path=/; HttpOnly; Secure; SameSite=Lax`;
