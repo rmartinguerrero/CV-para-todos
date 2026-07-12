@@ -1,4 +1,8 @@
-[ES](README.md) | [EN](README.EN.md) | [IT](README.IT.md)
+<p align="center">
+  <a href="README.md"><img src="https://img.shields.io/badge/🇪🇸-ES-ff4b4b?style=for-the-badge&labelColor=1a1a2e" alt="Español"></a>
+  <a href="README.EN.md"><img src="https://img.shields.io/badge/🇬🇧-EN-4b8bff?style=for-the-badge&labelColor=1a1a2e" alt="English"></a>
+  <a href="README.IT.md"><img src="https://img.shields.io/badge/🇮🇹-IT-2ecc71?style=for-the-badge&labelColor=1a1a2e" alt="Italiano"></a>
+</p>
 
 # 📄 CV Para Todos
 
