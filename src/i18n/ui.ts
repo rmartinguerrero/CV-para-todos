@@ -60,6 +60,21 @@ const esDict = {
   'wizard.result5Icon': '🌍',
   'wizard.result5Title': 'Soporte multilenguaje',
   'wizard.result5Desc': 'Crea tu CV en Español, Italiano o Inglés. Cambia de idioma al instante sin perder tu progreso.',
+  // Hero
+  'wizard.heroTagline': 'Gratis. Sin registro. Sin instalaciones.',
+  // Problema
+  'wizard.problemTitle': 'El problema con los editores de currículum',
+  // Solución
+  'wizard.solutionTitle': 'La idea detrás de CV para Todos',
+  // Qué puedes hacer
+  'wizard.capabilitiesTitle': 'Todo lo que puedes hacer',
+  // Por qué es diferente
+  'wizard.whyDifferentTitle': '¿Por qué es diferente?',
+  // Para quién es
+  'wizard.audienceTitle': '¿Para quién es?',
+  // CTA final
+  'wizard.ctaTitle': 'Tu currículum profesional, listo en minutos',
+  'wizard.ctaSubtitle': 'Gratis. Sin registro. Sin tarjeta. Sin compromiso.',
   // Sección FAQ
   'wizard.faqTitle': 'Preguntas frecuentes sobre el CV builder',
   'wizard.faq1q': '¿Es realmente gratis?',
@@ -130,6 +145,21 @@ export const ui: Record<Lang, Record<UIKeys, string>> = {
     'wizard.result5Icon': '🌍',
     'wizard.result5Title': 'Supporto multilingua',
     'wizard.result5Desc': 'Crea il tuo CV in Spagnolo, Italiano o Inglese. Cambia lingua istantaneamente senza perdere i progressi.',
+    // Hero
+    'wizard.heroTagline': 'Gratis. Nessuna registrazione. Nessuna installazione.',
+    // Problema
+    'wizard.problemTitle': 'Il problema con gli editor di curriculum',
+    // Soluzione
+    'wizard.solutionTitle': 'L\'idea alla base di CV per Tutti',
+    // Cosa puoi fare
+    'wizard.capabilitiesTitle': 'Tutto ciò che puoi fare',
+    // Perché è diverso
+    'wizard.whyDifferentTitle': 'Perché è diverso?',
+    // Per chi è
+    'wizard.audienceTitle': 'Per chi è?',
+    // CTA finale
+    'wizard.ctaTitle': 'Il tuo curriculum professionale, pronto in pochi minuti',
+    'wizard.ctaSubtitle': 'Gratis. Nessuna registrazione. Nessuna carta. Nessun impegno.',
     // Sezione FAQ
     'wizard.faqTitle': 'Domande frequenti sul CV builder',
     'wizard.faq1q': 'È veramente gratuito?',
@@ -195,6 +225,21 @@ export const ui: Record<Lang, Record<UIKeys, string>> = {
     'wizard.result5Icon': '🌍',
     'wizard.result5Title': 'Multi-language support',
     'wizard.result5Desc': 'Create your CV in Spanish, Italian or English. Switch languages instantly without losing your progress.',
+    // Hero
+    'wizard.heroTagline': 'Free. No sign-up. No installation.',
+    // Problem
+    'wizard.problemTitle': 'The problem with traditional resume builders',
+    // Solution
+    'wizard.solutionTitle': 'The idea behind CV for Everyone',
+    // What you can do
+    'wizard.capabilitiesTitle': 'Everything you can do',
+    // Why it's different
+    'wizard.whyDifferentTitle': 'Why is it different?',
+    // Who it's for
+    'wizard.audienceTitle': 'Who is it for?',
+    // Final CTA
+    'wizard.ctaTitle': 'Your professional resume, ready in minutes',
+    'wizard.ctaSubtitle': 'Free. No sign-up. No credit card. No commitment.',
     // FAQ section
     'wizard.faqTitle': 'Frequently asked questions about the CV builder',
     'wizard.faq1q': 'Is it really free?',

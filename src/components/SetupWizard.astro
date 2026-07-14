@@ -15,119 +15,241 @@ const lang = defaultLang as Lang;
 const strictT = useTranslations(lang);
 const t = (key: string) => strictT(key as UIKeys);
 
-// Contenido de beneficios traducido
-const benefits = {
+// Problemas
+const problems = {
   es: [
-    { icon: '🆓', title: 'Completamente Gratuito', desc: 'Sin suscripción, sin anuncios, sin restricciones. Publica tu CV sin pagar nada.' },
-    { icon: '🔐', title: '100% Privacidad', desc: 'Tu CV vive en tu repositorio GitHub. Nadie más tiene acceso a tus datos.' },
-    { icon: '⚡', title: 'Crea un CV profesional en minutos', desc: 'Generador No-Code. Solo rellena el formulario y publica al instante.' }
+    { icon: '😩', title: 'El formato se rompe cada vez que editas', desc: 'Añades una línea y las tablas se descolocan, los márgenes cambian y el diseño se descuadra.' },
+    { icon: '📂', title: 'Tienes diez versiones del mismo archivo', desc: 'CV_final, CV_final2, CV_final_REAL, CV_última_versión... No sabes cuál enviar.' },
+    { icon: '⏱️', title: 'Pierdes horas arreglando la maquetación', desc: 'Más tiempo en colocar elementos que en escribir tu experiencia profesional.' },
+    { icon: '💸', title: 'Canva cobra por funciones básicas', desc: 'La versión web, las plantillas premium y la exportación avanzada requieren pago.' },
+    { icon: '📄', title: 'El PDF nunca se ve como en la pantalla', desc: 'Exportas a PDF y el resultado no se parece a lo que veías en el editor.' },
+    { icon: '🔄', title: 'Cada actualización empieza desde cero', desc: 'Cambiar de plantilla significa rehacer todo el diseño desde el principio.' },
+    { icon: '🌐', title: 'No tienes versión web profesional', desc: 'Un PDF no es un sitio web. Los reclutadores esperan un enlace, no un archivo adjunto.' }
   ],
   it: [
-    { icon: '🆓', title: 'Completamente Gratuito', desc: 'Nessun abbonamento, nessun annuncio, nessuna limitazione. Pubblica il tuo CV gratis.' },
-    { icon: '🔐', title: '100% Privacy', desc: 'Il tuo CV vive nel tuo repository GitHub. Nessun altro ha accesso ai tuoi dati.' },
-    { icon: '⚡', title: 'Crea un CV professionale in minuti', desc: 'Generatore No-Code. Compila il modulo e pubblica immediatamente.' }
+    { icon: '😩', title: 'Il formato si rompe ogni volta che modifichi', desc: 'Aggiungi una riga e le tabelle si spostano, i margini cambiano e il design si sfasa.' },
+    { icon: '📂', title: 'Hai dieci versioni dello stesso file', desc: 'CV_finale, CV_finale2, CV_finale_REALE... Non sai quale inviare.' },
+    { icon: '⏱️', title: 'Perdi ore a sistemare l\'impaginazione', desc: 'Piu tempo a posizionare gli elementi che a scrivere la tua esperienza.' },
+    { icon: '💸', title: 'Canva fa pagare funzioni basiche', desc: 'La versione web, i modelli premium e l\'esportazione avanzata richiedono il pagamento.' },
+    { icon: '📄', title: 'Il PDF non sembra mai quello dello schermo', desc: 'Esporti in PDF e il risultato non assomiglia a ciò che vedevi nell\'editor.' },
+    { icon: '🔄', title: 'Ogni aggiornamento ricomincia da zero', desc: 'Cambiare modello significa rifare tutto il design da capo.' },
+    { icon: '🌐', title: 'Non hai un sito web professionale', desc: 'Un PDF non è un sito web. I reclutatori si aspettano un link, non un allegato.' }
   ],
   en: [
-    { icon: '🆓', title: 'Completely Free', desc: 'No subscription, no ads, no restrictions. Publish your CV at no cost.' },
-    { icon: '🔐', title: '100% Privacy', desc: 'Your CV lives in your GitHub repository. Nobody else has access to your data.' },
-    { icon: '⚡', title: 'Create a professional CV in minutes', desc: 'No-Code generator. Just fill the form and publish instantly.' }
+    { icon: '😩', title: 'The format breaks every time you edit', desc: 'You add a line and the tables shift, margins change and the layout falls apart.' },
+    { icon: '📂', title: 'You have ten versions of the same file', desc: 'CV_final, CV_final2, CV_final_REAL... You don\'t know which one to send.' },
+    { icon: '⏱️', title: 'You waste hours fixing the layout', desc: 'More time positioning elements than writing your professional experience.' },
+    { icon: '💸', title: 'Canva charges for basic features', desc: 'The web version, premium templates and advanced export require payment.' },
+    { icon: '📄', title: 'The PDF never looks like it does on screen', desc: 'You export to PDF and the result doesn\'t match what you saw in the editor.' },
+    { icon: '🔄', title: 'Every update starts from scratch', desc: 'Changing templates means redoing the entire design from the beginning.' },
+    { icon: '🌐', title: 'You don\'t have a professional website', desc: 'A PDF is not a website. Recruiters expect a link, not an attachment.' }
   ]
 };
 
-const steps = {
+// Solución
+const solutions = {
   es: [
-    { num: '1', title: 'Conecta tu GitHub', desc: 'Autoriza la aplicación con tu cuenta de GitHub de forma segura.' },
-    { num: '2', title: 'Rellena tus Datos', desc: 'Completa el formulario No-Code con tu experiencia y habilidades.' },
-    { num: '3', title: 'Publica al instante en GitHub Pages', desc: 'Tu CV estará disponible en tu web personal (username.github.io).' }
+    { icon: '✏️', title: 'Ecribes tus datos una sola vez', desc: 'Tu información se guarda separada del diseño. Nunca pierdes lo que has escrito.' },
+    { icon: '🎨', title: 'Cambias el diseño cuando quieras', desc: 'Plantillas profesionales listas para usar. Cambias y el formato siempre queda perfecto.' },
+    { icon: '🔄', title: 'Actualizas en minutos, no en horas', desc: 'Modificas un dato, publicas y tu CV se actualiza al instante.' },
+    { icon: '📋', title: 'Web y PDF desde la misma fuente', desc: 'Un solo lugar para tu CV. Generas la web y descargas el PDF sin duplicar esfuerzo.' }
   ],
   it: [
-    { num: '1', title: 'Connetti il tuo GitHub', desc: 'Autorizza l\'app con il tuo account GitHub in modo sicuro.' },
-    { num: '2', title: 'Compila i Tuoi Dati', desc: 'Completa il modulo No-Code con la tua esperienza e competenze.' },
-    { num: '3', title: 'Pubblica immediatamente su GitHub Pages', desc: 'Il tuo CV sarà disponibile sulla tua pagina personale (username.github.io).' }
+    { icon: '✏️', title: 'Scrivi i tuoi dati una sola volta', desc: 'Le tue informazioni sono separate dal design. Non perdi mai quello che hai scritto.' },
+    { icon: '🎨', title: 'Cambia il design quando vuoi', desc: 'Modelli professionali pronti all\'uso. Cambi e il formato è sempre perfetto.' },
+    { icon: '🔄', title: 'Aggiorni in minuti, non in ore', desc: 'Modifichi un dato, pubblici e il tuo CV si aggiorna istantaneamente.' },
+    { icon: '📋', title: 'Web e PDF dalla stessa fonte', desc: 'Un unico posto per il tuo CV. Generi il sito e scarichi il PDF senza duplicare sforzi.' }
   ],
   en: [
-    { num: '1', title: 'Connect your GitHub', desc: 'Authorize the app with your GitHub account securely.' },
-    { num: '2', title: 'Fill in Your Data', desc: 'Complete the No-Code form with your experience and skills.' },
-    { num: '3', title: 'Publish instantly on GitHub Pages', desc: 'Your CV will be available on your personal web (username.github.io).' }
+    { icon: '✏️', title: 'Write your data once', desc: 'Your information is stored separately from the design. You never lose what you\'ve written.' },
+    { icon: '🎨', title: 'Change the design anytime', desc: 'Professional templates ready to use. Switch and the format is always perfect.' },
+    { icon: '🔄', title: 'Update in minutes, not hours', desc: 'Change a detail, publish and your CV updates instantly.' },
+    { icon: '📋', title: 'Web and PDF from the same source', desc: 'One place for your CV. Generate the website and download the PDF without duplicating effort.' }
   ]
 };
 
-// How It Works detail (4 steps)
+// Cómo funciona (5 pasos)
 const howSteps = {
   es: [
-    { num: '1', icon: '🔗', title: t('wizard.howStep1Title'), desc: t('wizard.howStep1Desc') },
-    { num: '2', icon: '✏️', title: t('wizard.howStep2Title'), desc: t('wizard.howStep2Desc') },
-    { num: '3', icon: '🚀', title: t('wizard.howStep3Title'), desc: t('wizard.howStep3Desc') },
-    { num: '4', icon: '🔗', title: t('wizard.howStep4Title'), desc: t('wizard.howStep4Desc') }
+    { num: '1', icon: '🔗', title: 'Conecta tu GitHub', desc: 'Autoriza la aplicación con tu cuenta. Es seguro y solo toma un momento.' },
+    { num: '2', icon: '✏️', title: 'Rellena tus datos', desc: 'Completa el formulario con tu experiencia, formación y habilidades.' },
+    { num: '3', icon: '🎨', title: 'Elige un diseño', desc: 'Selecciona entre plantillas profesionales. Puedes cambiar después sin perder nada.' },
+    { num: '4', icon: '🚀', title: 'Publica tu CV', desc: 'Un solo clic. Tu CV se publica como web profesional y está listo para compartir.' },
+    { num: '5', icon: '📄', title: 'Descarga el PDF', desc: 'Desde el navegador, imprime o descarga tu CV en PDF con un clic.' }
   ],
   it: [
-    { num: '1', icon: '🔗', title: t('wizard.howStep1Title'), desc: t('wizard.howStep1Desc') },
-    { num: '2', icon: '✏️', title: t('wizard.howStep2Title'), desc: t('wizard.howStep2Desc') },
-    { num: '3', icon: '🚀', title: t('wizard.howStep3Title'), desc: t('wizard.howStep3Desc') },
-    { num: '4', icon: '🔗', title: t('wizard.howStep4Title'), desc: t('wizard.howStep4Desc') }
+    { num: '1', icon: '🔗', title: 'Connetti il tuo GitHub', desc: 'Autorizza l\'app con il tuo account. È sicuro e richiede solo un momento.' },
+    { num: '2', icon: '✏️', title: 'Compila i tuoi dati', desc: 'Completa il modulo con la tua esperienza, formazione e competenze.' },
+    { num: '3', icon: '🎨', title: 'Scegli un design', desc: 'Seleziona tra modelli professionali. Puoi cambiare dopo senza perdere nulla.' },
+    { num: '4', icon: '🚀', title: 'Pubblica il tuo CV', desc: 'Un solo clic. Il tuo CV viene pubblicato come sito professionale, pronto da condividere.' },
+    { num: '5', icon: '📄', title: 'Scarica il PDF', desc: 'Dal browser, stampa o scarica il tuo CV in PDF con un clic.' }
   ],
   en: [
-    { num: '1', icon: '🔗', title: t('wizard.howStep1Title'), desc: t('wizard.howStep1Desc') },
-    { num: '2', icon: '✏️', title: t('wizard.howStep2Title'), desc: t('wizard.howStep2Desc') },
-    { num: '3', icon: '🚀', title: t('wizard.howStep3Title'), desc: t('wizard.howStep3Desc') },
-    { num: '4', icon: '🔗', title: t('wizard.howStep4Title'), desc: t('wizard.howStep4Desc') }
+    { num: '1', icon: '🔗', title: 'Connect your GitHub', desc: 'Authorize the app with your account. It\'s secure and takes just a moment.' },
+    { num: '2', icon: '✏️', title: 'Fill in your data', desc: 'Complete the form with your experience, education and skills.' },
+    { num: '3', icon: '🎨', title: 'Choose a design', desc: 'Select from professional templates. You can switch later without losing anything.' },
+    { num: '4', icon: '🚀', title: 'Publish your CV', desc: 'One click. Your CV is published as a professional website, ready to share.' },
+    { num: '5', icon: '📄', title: 'Download the PDF', desc: 'From the browser, print or download your CV as PDF with one click.' }
   ]
 };
 
-// Results cards
-const results = {
+// Qué puedes hacer
+const capabilities = {
   es: [
-    { icon: '🌐', title: 'Web pública profesional', desc: 'Tu CV funciona como sitio web, accesible desde cualquier dispositivo. Sin necesidad de alojamiento adicional.' },
-    { icon: '📄', title: 'PDF exportable', desc: 'Diseñado para impresión. Descarga o imprime tu CV directamente desde el navegador con un solo clic.' },
-    { icon: '⚡', title: 'GitHub Pages gratuito', desc: 'Alojamiento rápido y sin costo. Usamos GitHub Pages para publicar tu CV sin servidores ni configuraciones.' },
-    { icon: '🔐', title: 'Propiedad total de tus datos', desc: 'Tu información vive en tu repositorio GitHub. Siempre bajo tu control, nunca en servidores de terceros.' },
-    { icon: '🌍', title: 'Soporte multilenguaje', desc: 'Crea tu CV en Español, Italiano o Inglés. Cambia de idioma al instante sin perder tu progreso.' }
+    { icon: '✔️', text: 'Crear un CV gratis' },
+    { icon: '✔️', text: 'Tener una web profesional para compartir' },
+    { icon: '✔️', text: 'Descargar tu CV en PDF' },
+    { icon: '✔️', text: 'Actualizar tu CV cuando quieras' },
+    { icon: '✔️', text: 'Cambiar de diseño sin perder datos' },
+    { icon: '✔️', text: 'Usar varios idiomas' },
+    { icon: '✔️', text: 'Importar un archivo resume.json' },
+    { icon: '✔️', text: 'Compartir una URL profesional' },
+    { icon: '✔️', text: 'Mantener una única versión siempre actualizada' }
   ],
   it: [
-    { icon: '🌐', title: 'Sito web professionale pubblico', desc: 'Il tuo CV funziona come sito web accessibile da qualsiasi dispositivo. Senza bisogno di hosting aggiuntivo.' },
-    { icon: '📄', title: 'PDF esportabile', desc: 'Progettato per la stampa. Scarica o stampa il tuo CV direttamente dal browser con un clic.' },
-    { icon: '⚡', title: 'GitHub Pages gratuito', desc: 'Hosting veloce e senza costi. Usiamo GitHub Pages per pubblicare il tuo CV senza server né configurazioni.' },
-    { icon: '🔐', title: 'Proprietà totale dei tuoi dati', desc: 'Le tue informazioni vivono nel tuo repository GitHub. Sempre sotto il tuo controllo, mai su server di terze parti.' },
-    { icon: '🌍', title: 'Supporto multilingua', desc: 'Crea il tuo CV in Spagnolo, Italiano o Inglese. Cambia lingua istantaneamente senza perdere i progressi.' }
+    { icon: '✔️', text: 'Creare un CV gratuito' },
+    { icon: '✔️', text: 'Avere un sito web professionale da condividere' },
+    { icon: '✔️', text: 'Scaricare il CV in PDF' },
+    { icon: '✔️', text: 'Aggiornare il CV quando vuoi' },
+    { icon: '✔️', text: 'Cambiare design senza perdere dati' },
+    { icon: '✔️', text: 'Usare più lingue' },
+    { icon: '✔️', text: 'Importare un file resume.json' },
+    { icon: '✔️', text: 'Condividere un URL professionale' },
+    { icon: '✔️', text: 'Mantenere un\'unica versione sempre aggiornata' }
   ],
   en: [
-    { icon: '🌐', title: 'Public professional website', desc: 'Your CV works as a website accessible from any device. No additional hosting needed.' },
-    { icon: '📄', title: 'Exportable PDF', desc: 'Designed for printing. Download or print your CV directly from the browser with one click.' },
-    { icon: '⚡', title: 'Free GitHub Pages hosting', desc: 'Fast, cost-free hosting. We use GitHub Pages to publish your CV with no servers or setup.' },
-    { icon: '🔐', title: 'Full data ownership', desc: 'Your information lives in your GitHub repository. Always under your control, never on third-party servers.' },
-    { icon: '🌍', title: 'Multi-language support', desc: 'Create your CV in Spanish, Italian or English. Switch languages instantly without losing your progress.' }
+    { icon: '✔️', text: 'Create a free CV' },
+    { icon: '✔️', text: 'Have a professional website to share' },
+    { icon: '✔️', text: 'Download your CV as PDF' },
+    { icon: '✔️', text: 'Update your CV anytime' },
+    { icon: '✔️', text: 'Switch designs without losing data' },
+    { icon: '✔️', text: 'Use multiple languages' },
+    { icon: '✔️', text: 'Import a resume.json file' },
+    { icon: '✔️', text: 'Share a professional URL' },
+    { icon: '✔️', text: 'Keep a single version always up to date' }
+  ]
+};
+
+// Beneficios reales
+const benefits = {
+  es: [
+    { icon: '📐', title: 'El formato nunca se rompe', desc: 'Escribe cuanto quieras. El diseño se mantiene intacto sin importar cuántas veces edites.' },
+    { icon: '⏱️', title: 'Actualiza tu CV en minutos', desc: 'Abre el editor, cambia lo que necesites y vuelve a publicar. Sin empezar desde cero.' },
+    { icon: '🔗', title: 'Un enlace profesional para compartir', desc: 'Dale a los reclutadores una URL. Tu CV accesible desde cualquier dispositivo.' },
+    { icon: '🔐', title: 'Tus datos son tuyos', desc: 'Viven en tu repositorio de GitHub. Tú controlas todo. Sin servidores de terceros.' },
+    { icon: '🌐', title: 'Web y PDF con un solo clic', desc: 'Genera una versión web profesional y descarga el PDF desde la misma herramienta.' },
+    { icon: '🌍', title: 'Disponible en varios idiomas', desc: 'Crea tu CV en español, italiano o inglés. Cambia de idioma al instante.' }
+  ],
+  it: [
+    { icon: '📐', title: 'Il formato non si rompe mai', desc: 'Scrivi quanto vuoi. Il design rimane intatto non importa quante volte modifichi.' },
+    { icon: '⏱️', title: 'Aggiorna il tuo CV in minuti', desc: 'Apri l\'editor, cambia quello che serve e ripubblica. Senza ricominciare da zero.' },
+    { icon: '🔗', title: 'Un link professionale da condividere', desc: 'Dai ai reclutatori un URL. Il tuo CV accessibile da qualsiasi dispositivo.' },
+    { icon: '🔐', title: 'I tuoi dati sono tuoi', desc: 'Vivono nel tuo repository GitHub. Tu controlli tutto. Senza server di terze parti.' },
+    { icon: '🌐', title: 'Web e PDF con un solo clic', desc: 'Genera una versione web professionale e scarica il PDF dallo stesso strumento.' },
+    { icon: '🌍', title: 'Disponibile in più lingue', desc: 'Crea il tuo CV in spagnolo, italiano o inglese. Cambia lingua istantaneamente.' }
+  ],
+  en: [
+    { icon: '📐', title: 'The format never breaks', desc: 'Write as much as you want. The design stays intact no matter how many times you edit.' },
+    { icon: '⏱️', title: 'Update your CV in minutes', desc: 'Open the editor, change what you need and republish. No starting from scratch.' },
+    { icon: '🔗', title: 'A professional link to share', desc: 'Give recruiters a URL. Your CV accessible from any device.' },
+    { icon: '🔐', title: 'Your data is yours', desc: 'It lives in your GitHub repository. You control everything. No third-party servers.' },
+    { icon: '🌐', title: 'Web and PDF with one click', desc: 'Generate a professional web version and download the PDF from the same tool.' },
+    { icon: '🌍', title: 'Available in multiple languages', desc: 'Create your CV in Spanish, Italian or English. Switch languages instantly.' }
+  ]
+};
+
+// Para quién es
+const audience = {
+  es: [
+    { icon: '🎓', title: 'Estudiantes', desc: 'Crea tu primer CV profesional sin gastar nada.' },
+    { icon: '💼', title: 'Profesionales', desc: 'Mantén tu CV siempre actualizado sin perder horas.' },
+    { icon: '🧑‍💻', title: 'Freelancers', desc: 'Ten una web profesional para compartir con clientes.' },
+    { icon: '🔍', title: 'Personas buscando empleo', desc: 'Un CV que impresiona, disponible al instante.' },
+    { icon: '👩‍💻', title: 'Desarrolladores', desc: 'Usa el estándar abierto JSON Resume.' },
+    { icon: '🎨', title: 'Perfiles creativos', desc: 'Diseños profesionales sin necesitar diseñador.' },
+    { icon: '🔄', title: 'Quien actualiza su CV frecuentemente', desc: 'Cambia datos sin volver a maquetar nada.' }
+  ],
+  it: [
+    { icon: '🎓', title: 'Studenti', desc: 'Crea il tuo primo CV professionale senza spendere nulla.' },
+    { icon: '💼', title: 'Professionisti', desc: 'Mantieni il CV sempre aggiornato senza perdere ore.' },
+    { icon: '🧑‍💻', title: 'Freelancer', desc: 'Avere un sito web professionale da condividere con i clienti.' },
+    { icon: '🔍', title: 'Chi cerca lavoro', desc: 'Un CV che impressiona, disponibile istantaneamente.' },
+    { icon: '👩‍💻', title: 'Sviluppatori', desc: 'Usa lo standard aperto JSON Resume.' },
+    { icon: '🎨', title: 'Profili creativi', desc: 'Design professionali senza bisogno di un designer.' },
+    { icon: '🔄', title: 'Chi aggiorna il CV spesso', desc: 'Cambia i dati senza riimpaginare nulla.' }
+  ],
+  en: [
+    { icon: '🎓', title: 'Students', desc: 'Create your first professional CV without spending anything.' },
+    { icon: '💼', title: 'Professionals', desc: 'Keep your CV always up to date without losing hours.' },
+    { icon: '🧑‍💻', title: 'Freelancers', desc: 'Have a professional website to share with clients.' },
+    { icon: '🔍', title: 'Job seekers', desc: 'A CV that impresses, available instantly.' },
+    { icon: '👩‍💻', title: 'Developers', desc: 'Use the open standard JSON Resume.' },
+    { icon: '🎨', title: 'Creative profiles', desc: 'Professional designs without needing a designer.' },
+    { icon: '🔄', title: 'Frequent CV updaters', desc: 'Change data without reformatting anything.' }
   ]
 };
 
 // FAQ
 const faqs = {
   es: [
-    { q: '¿Es realmente gratis?', a: 'Sí, completamente gratis. Sin suscripciones, sin anuncios, sin planes de pago. El código es abierto y tu CV se aloja en GitHub Pages, un servicio gratuito de GitHub.' },
-    { q: '¿Necesito saber programar para usarlo?', a: 'No. El editor es 100% No-Code: simplemente rellenas formularios con tus datos y el CV se genera automáticamente. No necesitas tocar una línea de código.' },
-    { q: '¿Dónde se almacena la información de mi CV?', a: 'En tu repositorio personal de GitHub. Solo tú tienes acceso de escritura. La aplicación solo puede crear y actualizar archivos en ese repositorio específico.' },
-    { q: '¿Puedo eliminar mi CV después de publicarlo?', a: 'Sí. Puedes borrar el repositorio desde GitHub en cualquier momento. Tu CV dejará de estar disponible inmediatamente al eliminar el repositorio.' },
-    { q: '¿Puedo editar mi CV después de publicarlo?', a: 'Sí. Vuelve al editor, modifica tus datos y vuelve a publicar. Tu sitio web se actualiza al instante conservando la misma URL.' }
+    { q: '¿Es realmente gratis?', a: 'Sí. Completamente gratis. Sin suscripciones, sin anuncios, sin planes de pago. El código es abierto y el CV se aloja en GitHub Pages, un servicio gratuito de GitHub.' },
+    { q: '¿Necesito saber programar?', a: 'No. El editor es 100% visual. Rellenas formularios con tus datos y el CV se genera automáticamente. No necesitas tocar una línea de código.' },
+    { q: '¿Qué es JSON Resume?', a: 'Es un formato abierto y estándar para currículums. Permite que tus datos vivan separados del diseño, para que puedas cambiar de plantilla sin perder nada.' },
+    { q: '¿Por qué usáis GitHub?', a: 'GitHub Pages es gratuito, fiable y no depende de nosotros. Tus datos viven en tu propia cuenta. Si la aplicación dejara de existir, tu CV seguiría disponible.' },
+    { q: '¿Puedo cambiar el diseño después?', a: 'Sí. Puedes cambiar de plantilla en cualquier momento. Tus datos se mantienen intactos. Solo cambia el diseño.' },
+    { q: '¿Puedo descargar mi CV en PDF?', a: 'Sí. Desde el navegador puedes imprimir o guardar tu CV como PDF con un solo clic.' },
+    { q: '¿Dónde viven mis datos?', a: 'En tu repositorio personal de GitHub. Solo tú tienes acceso de escritura. La aplicación no tiene servidores propios donde guardar tus datos.' },
+    { q: '¿Qué pasa si dejo de usar la aplicación?', a: 'Nada. Tus datos están en tu cuenta de GitHub. Puedes descargar el JSON, usar otro editor compatible con JSON Resume o seguir actualizando manualmente.' },
+    { q: '¿Puedo importar un resume.json?', a: 'Sí. Si ya tienes un archivo resume.json, puedes importarlo directamente y empezar a editar.' },
+    { q: '¿Puedo editar el CV después de publicarlo?', a: 'Sí. Vuelve al editor, modifica lo que necesites y vuelve a publicar. Tu web se actualiza al instante.' },
+    { q: '¿Puedo eliminar mi CV?', a: 'Sí. Borras tu repositorio de GitHub y tu CV deja de estar disponible inmediatamente.' },
+    { q: '¿Puedo tener varios idiomas?', a: 'Sí. Puedes crear tu CV en español, italiano o inglés. Cambia de idioma al instante.' },
+    { q: '¿Necesito instalar algo?', a: 'No. Funciona directamente en el navegador. No necesitas descargar ni instalar ningún programa.' },
+    { q: '¿Qué pasa si GitHub cambia?', a: 'Tú siempre tienes una copia de tus datos en formato estándar. Puedes migrar a cualquier servicio compatible con JSON Resume.' },
+    { q: '¿Por qué es mejor que un editor tradicional?', a: 'Porque separa los datos del diseño. En Word o Canva, cada cambio puede romper el formato. Aquí, cambias lo que quieras y el diseño siempre se mantiene.' }
   ],
   it: [
-    { q: 'È veramente gratuito?', a: 'Sì, completamente gratuito. Nessun abbonamento, nessuna pubblicità, nessun piano a pagamento. Il codice è aperto e il tuo CV è ospitato su GitHub Pages, un servizio gratuito di GitHub.' },
-    { q: 'Devo saper programmare per usarlo?', a: 'No. L\'editor è 100% No-Code: basta compilare i moduli con i tuoi dati e il CV viene generato automaticamente. Non serve scrivere una riga di codice.' },
-    { q: 'Dove vengono archiviati i dati del mio CV?', a: 'Nel tuo repository personale di GitHub. Solo tu hai accesso in scrittura. L\'app può solo creare e aggiornare file in quel repository specifico.' },
-    { q: 'Posso eliminare il mio CV dopo la pubblicazione?', a: 'Sì. Puoi cancellare il repository da GitHub in qualsiasi momento. Il tuo CV smetterà di essere disponibile immediatamente.' },
-    { q: 'Posso modificare il mio CV dopo la pubblicazione?', a: 'Sì. Torna all\'editor, modifica i tuoi dati e ripubblica. Il tuo sito web si aggiorna istantaneamente mantenendo lo stesso URL.' }
+    { q: 'È veramente gratuito?', a: 'Sì. Completamente gratuito. Nessun abbonamento, nessuna pubblicità, nessun piano a pagamento. Il codice è aperto e il CV è ospitato su GitHub Pages, un servizio gratuito di GitHub.' },
+    { q: 'Devo saper programmare?', a: 'No. L\'editor è al 100% visuale. Compili i moduli con i tuoi dati e il CV viene generato automaticamente. Non devi toccare una riga di codice.' },
+    { q: 'Che cos\'è JSON Resume?', a: 'È un formato aperto e standard per i curriculum. Permette che i tuoi dati vivano separati dal design, cosicché tu possa cambiare modello senza perdere nulla.' },
+    { q: 'Perché usate GitHub?', a: 'GitHub Pages è gratuito, affidabile e non dipende da noi. I tuoi dati vivono nel tuo account. Se l\'app smettesse di esistere, il tuo CV rimarrebbe disponibile.' },
+    { q: 'Posso cambiare il design dopo?', a: 'Sì. Puoi cambiare modello in qualsiasi momento. I tuoi dati rimangono intatti. Cambia solo il design.' },
+    { q: 'Posso scaricare il CV in PDF?', a: 'Sì. Dal browser puoi stampare o salvare il tuo CV come PDF con un solo clic.' },
+    { q: 'Dove vivono i miei dati?', a: 'Nel tuo repository personale di GitHub. Solo tu hai accesso in scrittura. L\'app non ha server propri dove archiviare i tuoi dati.' },
+    { q: 'Cosa succede se smetto di usare l\'app?', a: 'Nulla. I tuoi dati sono nel tuo account GitHub. Puoi scaricare il JSON, usare un altro editor compatibile con JSON Resume o continuare ad aggiornare manualmente.' },
+    { q: 'Posso importare un resume.json?', a: 'Sì. Se hai già un file resume.json, puoi importarlo direttamente e iniziare a modificare.' },
+    { q: 'Posso modificare il CV dopo la pubblicazione?', a: 'Sì. Torna all\'editor, modifica quello che serve e ripubblica. Il sito si aggiorna istantaneamente.' },
+    { q: 'Posso eliminare il mio CV?', a: 'Sì. Cancelli il tuo repository GitHub e il tuo CV smette di essere disponibile immediatamente.' },
+    { q: 'Posso avere più lingue?', a: 'Sì. Puoi creare il tuo CV in spagnolo, italiano o inglese. Cambia lingua istantaneamente.' },
+    { q: 'Devo installare qualcosa?', a: 'No. Funziona direttamente nel browser. Non devi scaricare né installare nessun programma.' },
+    { q: 'Cosa succede se GitHub cambia?', a: 'Tu hai sempre una copia dei tuoi dati in formato standard. Puoi migrare a qualsiasi servizio compatibile con JSON Resume.' },
+    { q: 'Perché è meglio di un editor tradizionale?', a: 'Perché separa i dati dal design. In Word o Canva, ogni modifica può rompere il formato. Qui, cambi quello che vuoi e il design si mantiene sempre.' }
   ],
   en: [
-    { q: 'Is it really free?', a: 'Yes, completely free. No subscriptions, no ads, no paid plans. The code is open source and your CV is hosted on GitHub Pages, a free service from GitHub.' },
-    { q: 'Do I need coding skills?', a: 'No. The editor is 100% No-Code: just fill in forms with your data and the CV is generated automatically. No need to write a single line of code.' },
-    { q: 'Where is my CV data stored?', a: 'In your personal GitHub repository. Only you have write access. The app can only create and update files in that specific repository.' },
-    { q: 'Can I delete my CV after publishing?', a: 'Yes. You can delete the repository from GitHub at any time. Your CV will stop being available immediately.' },
-    { q: 'Can I edit my CV after publishing?', a: 'Yes. Return to the editor, update your data and publish again. Your website updates instantly while keeping the same URL.' }
+    { q: 'Is it really free?', a: 'Yes. Completely free. No subscriptions, no ads, no paid plans. The code is open source and your CV is hosted on GitHub Pages, a free service from GitHub.' },
+    { q: 'Do I need to know how to code?', a: 'No. The editor is 100% visual. You fill in forms with your data and the CV is generated automatically. You don\'t need to touch a single line of code.' },
+    { q: 'What is JSON Resume?', a: 'It\'s an open, standard format for resumes. It keeps your data separate from the design, so you can switch templates without losing anything.' },
+    { q: 'Why do you use GitHub?', a: 'GitHub Pages is free, reliable and doesn\'t depend on us. Your data lives in your own account. If the app stopped existing, your CV would still be available.' },
+    { q: 'Can I change the design later?', a: 'Yes. You can switch templates anytime. Your data stays intact. Only the design changes.' },
+    { q: 'Can I download my CV as PDF?', a: 'Yes. From the browser you can print or save your CV as PDF with one click.' },
+    { q: 'Where does my data live?', a: 'In your personal GitHub repository. Only you have write access. The app has no servers of its own to store your data.' },
+    { q: 'What happens if I stop using the app?', a: 'Nothing. Your data is in your GitHub account. You can download the JSON, use another JSON Resume-compatible editor or keep updating manually.' },
+    { q: 'Can I import a resume.json?', a: 'Yes. If you already have a resume.json file, you can import it directly and start editing.' },
+    { q: 'Can I edit my CV after publishing?', a: 'Yes. Return to the editor, change what you need and republish. Your website updates instantly.' },
+    { q: 'Can I delete my CV?', a: 'Yes. Delete your GitHub repository and your CV stops being available immediately.' },
+    { q: 'Can I have multiple languages?', a: 'Yes. You can create your CV in Spanish, Italian or English. Switch languages instantly.' },
+    { q: 'Do I need to install anything?', a: 'No. It works directly in the browser. You don\'t need to download or install any software.' },
+    { q: 'What happens if GitHub changes?', a: 'You always have a copy of your data in standard format. You can migrate to any JSON Resume-compatible service.' },
+    { q: 'Why is it better than a traditional editor?', a: 'Because it separates data from design. In Word or Canva, every change can break the format. Here, you change what you want and the design always stays intact.' }
   ]
 };
 
-const currentBenefits = benefits[lang] || benefits.es;
-const currentSteps = steps[lang] || steps.es;
+const currentProblems = problems[lang] || problems.es;
+const currentSolutions = solutions[lang] || solutions.es;
 const currentHowSteps = howSteps[lang] || howSteps.es;
-const currentResults = results[lang] || results.es;
+const currentCapabilities = capabilities[lang] || capabilities.es;
+const currentBenefits = benefits[lang] || benefits.es;
+const currentAudience = audience[lang] || audience.es;
 const currentFaqs = faqs[lang] || faqs.es;
 ---
 
@@ -171,10 +293,10 @@ const currentFaqs = faqs[lang] || faqs.es;
 
     <!-- Hero Section -->
     <div class="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div class="max-w-4xl mx-auto w-full space-y-12">
+      <div class="max-w-6xl mx-auto w-full space-y-12">
 
         <!-- SEO hidden H2s -->
-        <h2 class="sr-only">{t('wizard.tagline')}</h2>
+        <h2 class="sr-only">{t('wizard.heroTagline')}</h2>
         <h2 class="sr-only">Free CV builder online — JSON Resume generator</h2>
         <h2 class="sr-only">GitHub resume builder — CV online gratis</h2>
 
@@ -183,14 +305,22 @@ const currentFaqs = faqs[lang] || faqs.es;
           <div class="inline-block">
             <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-sm font-semibold">
               <span class="text-lg">✨</span>
-              {t('wizard.tagline')}
+              {t('wizard.heroTagline')}
             </div>
           </div>
           <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 tracking-tight">
-            {t('wizard.welcome')}
+            {lang === 'es'
+              ? 'Deja de perder horas arreglando tu currículum'
+              : lang === 'it'
+              ? 'Smetti di perdere ore a sistemare il tuo curriculum'
+              : 'Stop wasting hours fixing your resume'}
           </h1>
           <p class="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">
-            {t('wizard.subtitle')}
+            {lang === 'es'
+              ? 'Escribe tus datos una vez. Actualízalos para siempre. Obtén un CV profesional en web y PDF. Gratis.'
+              : lang === 'it'
+              ? 'Scrivi i tuoi dati una volta. Aggiornali per sempre. Ottieni un CV professionale su web e PDF. Gratis.'
+              : 'Write your data once. Update it forever. Get a professional CV on the web and as PDF. Free.'}
           </p>
         </div>
 
@@ -214,58 +344,71 @@ const currentFaqs = faqs[lang] || faqs.es;
           </button>
         </div>
 
-        <!-- Beneficios -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 py-8 fade-in stagger-2">
-          {currentBenefits.map((benefit) => (
-            <div class="p-6 rounded-xl border border-gray-200 bg-white transition-all card-hover">
-              <div class="text-3xl mb-3">{benefit.icon}</div>
-              <h3 class="text-lg font-bold text-gray-900 mb-2">{benefit.title}</h3>
-              <p class="text-sm text-gray-600">{benefit.desc}</p>
-            </div>
-          ))}
-        </div>
-
-        <!-- 3 Pasos Clave -->
-        <div class="py-8 space-y-8 fade-in stagger-3">
+        <!-- El problema -->
+        <div class="py-8 space-y-8 fade-in">
           <h2 class="text-3xl font-bold text-gray-900 text-center">
-            {lang === 'es' ? '3 Pasos Simples' : lang === 'it' ? '3 Semplici Passi' : '3 Simple Steps'}
+            {t('wizard.problemTitle')}
           </h2>
+
+          <p class="text-center text-gray-600 max-w-2xl mx-auto">
+            {lang === 'es'
+              ? 'Cada vez que necesitas actualizar tu currículum, pasas por lo mismo:'
+              : lang === 'it'
+              ? 'Ogni volta che devi aggiornare il tuo curriculum, succede la stessa cosa:'
+              : 'Every time you need to update your resume, the same thing happens:'}
+          </p>
           
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {currentSteps.map((step, idx) => (
-              <div class="relative">
-                {/* Conector visual (solo en desktop) */}
-                {idx < 2 && (
-                  <div class="hidden md:block absolute top-12 right-0 w-full h-1 bg-gradient-to-r from-blue-300 to-transparent -left-1/2 -z-10" />
-                )}
-                
-                <div class="flex flex-col items-center text-center">
-                  <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white text-2xl font-bold shadow-lg mb-4 step-number">
-                    {step.num}
-                  </div>
-                  <h3 class="text-xl font-bold text-gray-900 mb-2">{step.title}</h3>
-                  <p class="text-sm text-gray-600">{step.desc}</p>
-                </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {currentProblems.map((problem) => (
+              <div class="p-5 rounded-xl border border-gray-200 bg-white transition-all card-hover stagger-item">
+                <div class="text-2xl mb-2">{problem.icon}</div>
+                <h3 class="text-sm font-bold text-gray-900 mb-1">{problem.title}</h3>
+                <p class="text-xs text-gray-600">{problem.desc}</p>
               </div>
             ))}
           </div>
         </div>
 
-        <!-- How It Works (detallado) -->
+        <!-- La solución -->
+        <div class="py-8 space-y-8 fade-in">
+          <h2 class="text-3xl font-bold text-gray-900 text-center">
+            {t('wizard.solutionTitle')}
+          </h2>
+
+          <p class="text-center text-gray-600 max-w-2xl mx-auto">
+            {lang === 'es'
+              ? 'CV para Todos separa tus datos del diseño. Escribes tu información una vez y la mantienes actualizada para siempre.'
+              : lang === 'it'
+              ? 'CV per Tutti separa i tuoi dati dal design. Scrivi le tue informazioni una volta e le mantieni aggiornate per sempre.'
+              : 'CV for Everyone separates your data from the design. Write your information once and keep it updated forever.'}
+          </p>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {currentSolutions.map((solution) => (
+              <div class="p-6 rounded-xl border border-gray-200 bg-white transition-all card-hover stagger-item">
+                <div class="text-3xl mb-3">{solution.icon}</div>
+                <h3 class="text-base font-bold text-gray-900 mb-2">{solution.title}</h3>
+                <p class="text-sm text-gray-600">{solution.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <!-- Cómo funciona -->
         <div class="py-8 space-y-8 fade-in">
           <h2 class="text-3xl font-bold text-gray-900 text-center">
             {t('wizard.howTitle')}
           </h2>
           
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {currentHowSteps.map((step, idx) => (
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+            {currentHowSteps.map((step) => (
               <div class="relative card-hover stagger-item">
                 <div class="flex flex-col items-center text-center p-5 rounded-xl border border-gray-200 bg-white transition-all h-full">
                   <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white text-xl font-bold shadow-lg mb-4 step-number">
                     {step.num}
                   </div>
                   <div class="text-2xl mb-2">{step.icon}</div>
-                  <h3 class="text-base font-bold text-gray-900 mb-2">{step.title}</h3>
+                  <h3 class="text-sm font-bold text-gray-900 mb-2">{step.title}</h3>
                   <p class="text-xs text-gray-600">{step.desc}</p>
                 </div>
               </div>
@@ -273,18 +416,120 @@ const currentFaqs = faqs[lang] || faqs.es;
           </div>
         </div>
 
-        <!-- What You Get -->
+        <!-- Qué puedes hacer -->
+        <div class="py-8 space-y-8 fade-in">
+          <h2 class="text-3xl font-bold text-gray-900 text-center">
+            {t('wizard.capabilitiesTitle')}
+          </h2>
+          
+          <div class="max-w-2xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {currentCapabilities.map((cap) => (
+              <div class="flex items-center gap-3 p-3 rounded-lg bg-white border border-gray-100 stagger-item">
+                <span class="text-green-500 text-lg">{cap.icon}</span>
+                <span class="text-sm text-gray-700 font-medium">{cap.text}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <!-- Beneficios reales -->
         <div class="py-8 space-y-8 fade-in">
           <h2 class="text-3xl font-bold text-gray-900 text-center">
             {t('wizard.resultsTitle')}
           </h2>
           
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {currentResults.map((result) => (
+            {currentBenefits.map((benefit) => (
               <div class="p-6 rounded-xl border border-gray-200 bg-white transition-all card-hover stagger-item">
-                <div class="text-3xl mb-3">{result.icon}</div>
-                <h3 class="text-base font-bold text-gray-900 mb-2">{result.title}</h3>
-                <p class="text-sm text-gray-600">{result.desc}</p>
+                <div class="text-3xl mb-3">{benefit.icon}</div>
+                <h3 class="text-base font-bold text-gray-900 mb-2">{benefit.title}</h3>
+                <p class="text-sm text-gray-600">{benefit.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <!-- ¿Por qué es diferente? -->
+        <div class="py-8 space-y-8 fade-in">
+          <h2 class="text-3xl font-bold text-gray-900 text-center">
+            {t('wizard.whyDifferentTitle')}
+          </h2>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <!-- Editor tradicional -->
+            <div class="p-6 rounded-xl border border-red-200 bg-red-50/50 stagger-item">
+              <h3 class="text-base font-bold text-red-700 mb-4">
+                {lang === 'es' ? 'Editor tradicional' : lang === 'it' ? 'Editor tradizionale' : 'Traditional editor'}
+              </h3>
+              <ul class="space-y-2">
+                <li class="flex items-start gap-2 text-sm text-gray-700">
+                  <span class="text-red-500 mt-0.5">✗</span>
+                  <span>{lang === 'es' ? 'Datos y diseño mezclados' : lang === 'it' ? 'Dati e design mescolati' : 'Data and design mixed together'}</span>
+                </li>
+                <li class="flex items-start gap-2 text-sm text-gray-700">
+                  <span class="text-red-500 mt-0.5">✗</span>
+                  <span>{lang === 'es' ? 'Cada cambio puede romper el formato' : lang === 'it' ? 'Ogni modifica può rompere il formato' : 'Every change can break the format'}</span>
+                </li>
+                <li class="flex items-start gap-2 text-sm text-gray-700">
+                  <span class="text-red-500 mt-0.5">✗</span>
+                  <span>{lang === 'es' ? 'Cambiar de plantilla empieza desde cero' : lang === 'it' ? 'Cambiare modello significa ricominciare da zero' : 'Changing templates means starting from scratch'}</span>
+                </li>
+                <li class="flex items-start gap-2 text-sm text-gray-700">
+                  <span class="text-red-500 mt-0.5">✗</span>
+                  <span>{lang === 'es' ? 'No tienes versión web' : lang === 'it' ? 'Non hai una versione web' : 'No web version'}</span>
+                </li>
+              </ul>
+            </div>
+            
+            <!-- CV para Todos -->
+            <div class="p-6 rounded-xl border border-green-200 bg-green-50/50 stagger-item">
+              <h3 class="text-base font-bold text-green-700 mb-4">
+                {t('brand.name')}
+              </h3>
+              <ul class="space-y-2">
+                <li class="flex items-start gap-2 text-sm text-gray-700">
+                  <span class="text-green-500 mt-0.5">✓</span>
+                  <span>{lang === 'es' ? 'Datos separados del diseño' : lang === 'it' ? 'Dati separati dal design' : 'Data separated from design'}</span>
+                </li>
+                <li class="flex items-start gap-2 text-sm text-gray-700">
+                  <span class="text-green-500 mt-0.5">✓</span>
+                  <span>{lang === 'es' ? 'Cambias lo que quieras, el formato siempre se mantiene' : lang === 'it' ? 'Cambi quello che vuoi, il formato si mantiene sempre' : 'Change what you want, the format always stays'}</span>
+                </li>
+                <li class="flex items-start gap-2 text-sm text-gray-700">
+                  <span class="text-green-500 mt-0.5">✓</span>
+                  <span>{lang === 'es' ? 'Cambias de plantilla sin perder nada' : lang === 'it' ? 'Cambi modello senza perdere nulla' : 'Switch templates without losing anything'}</span>
+                </li>
+                <li class="flex items-start gap-2 text-sm text-gray-700">
+                  <span class="text-green-500 mt-0.5">✓</span>
+                  <span>{lang === 'es' ? 'Web y PDF desde la misma fuente' : lang === 'it' ? 'Web e PDF dalla stessa fonte' : 'Web and PDF from the same source'}</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <p class="text-center text-sm text-gray-500 max-w-2xl mx-auto">
+            {lang === 'es'
+              ? 'Esto es posible gracias a JSON Resume, un formato abierto que mantiene tus datos independientes del diseño. No necesitas conocerlo, pero es bueno saber que existe.'
+              : lang === 'it'
+              ? 'Questo è possibile grazie a JSON Resume, un formato aperto che mantiene i tuoi dati indipendenti dal design. Non devi conoscerlo, ma è bene sapere che esiste.'
+              : 'This is possible thanks to JSON Resume, an open format that keeps your data independent from the design. You don\'t need to know about it, but it\'s good to know it exists.'}
+          </p>
+        </div>
+
+        <!-- Para quién es -->
+        <div class="py-8 space-y-8 fade-in">
+          <h2 class="text-3xl font-bold text-gray-900 text-center">
+            {t('wizard.audienceTitle')}
+          </h2>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {currentAudience.map((person) => (
+              <div class="flex items-start gap-3 p-4 rounded-xl border border-gray-200 bg-white transition-all card-hover stagger-item">
+                <span class="text-2xl">{person.icon}</span>
+                <div>
+                  <h3 class="text-sm font-bold text-gray-900 mb-1">{person.title}</h3>
+                  <p class="text-xs text-gray-600">{person.desc}</p>
+                </div>
               </div>
             ))}
           </div>
@@ -310,6 +555,33 @@ const currentFaqs = faqs[lang] || faqs.es;
                 </div>
               </details>
             ))}
+          </div>
+        </div>
+
+        <!-- CTA Final -->
+        <div class="py-8 text-center space-y-6 fade-in">
+          <h2 class="text-3xl font-bold text-gray-900">
+            {t('wizard.ctaTitle')}
+          </h2>
+          <p class="text-lg text-gray-600">
+            {t('wizard.ctaSubtitle')}
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a 
+              href={`/${lang}/edit`}
+              class="inline-flex justify-center items-center py-3.5 px-8 border border-transparent text-base font-semibold rounded-xl text-white bg-blue-600 hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl no-underline card-hover"
+            >
+              <span class="mr-2">✨</span>
+              {t('wizard.create')}
+            </a>
+            <button 
+              type="button"
+              id="wizard-import-btn-bottom"
+              class="inline-flex justify-center items-center py-3.5 px-8 border border-gray-300 text-base font-semibold rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-all shadow-md hover:shadow-lg cursor-pointer card-hover"
+            >
+              <span class="mr-2">📥</span>
+              {t('wizard.import')}
+            </button>
           </div>
         </div>
 
@@ -354,7 +626,7 @@ const currentFaqs = faqs[lang] || faqs.es;
 
     <p class="text-xs text-gray-500 leading-relaxed">
       {lang === 'it'
-        ? 'Usiamo cookie per analisi e miglioramento dell’esperienza.'
+        ? 'Usiamo cookie per analisi e miglioramento dell\'esperienza.'
         : lang === 'es'
         ? 'Usamos cookies para analizar el rendimiento y mejorar la experiencia.'
         : 'We use cookies to analyze performance and improve experience.'}
@@ -456,9 +728,11 @@ const currentFaqs = faqs[lang] || faqs.es;
   const currentAlerts = alerts[lang] || alerts.es;
 
   const importBtn = document.getElementById('wizard-import-btn');
+  const importBtnBottom = document.getElementById('wizard-import-btn-bottom');
   const fileInput = document.getElementById('wizard-file-input');
 
   importBtn?.addEventListener('click', () => fileInput?.click());
+  importBtnBottom?.addEventListener('click', () => fileInput?.click());
 
   fileInput?.addEventListener('change', (e) => {
     const file = e.target.files?.[0];
