@@ -42,6 +42,17 @@ const { title, description, lang, currentLang, availableLangs, resume, t } = Ast
   <meta name="description" content={description} />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{title}</title>
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={`${Astro.url.origin}${Astro.url.pathname}`} />
+  <meta property="og:image" content={`${Astro.url.origin}/opengraph.png`} />
+  <meta property="og:image:alt" content={title} />
+  <meta property="og:site_name" content="CV para Todos" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={title} />
+  <meta name="twitter:description" content={description} />
+  <meta name="twitter:image" content={`${Astro.url.origin}/opengraph.png`} />
   <link rel="icon" type="image/png" href="/favicon.png" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
