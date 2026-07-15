@@ -1,7 +1,33 @@
-<script is:inline>
-  const available = ['es', 'it', 'en'];
-  const preferred = (navigator.languages || [navigator.language])
-    .map(function(l) { return l.split('-')[0]; })
-    .find(function(l) { return available.includes(l); }) || 'en';
-  window.location.replace('/' + preferred);
-</script>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="refresh" content="0;url=/es" />
+  <meta name="description" content="CV para Todos - Crea tu curriculum profesional gratis" />
+  <meta property="og:title" content="CV para Todos" />
+  <meta property="og:description" content="Crea tu curriculum profesional gratis" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://cv.raulmguerrero.com/" />
+  <meta property="og:image" content="https://cv.raulmguerrero.com/opengraph.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="1200" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:alt" content="CV para Todos" />
+  <meta property="og:site_name" content="CV para Todos" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="CV para Todos" />
+  <meta name="twitter:description" content="Crea tu curriculum profesional gratis" />
+  <meta name="twitter:image" content="https://cv.raulmguerrero.com/opengraph.png" />
+</head>
+<body>
+  <script is:inline>
+    const available = ['es', 'it', 'en'];
+    const preferred = (navigator.languages || [navigator.language])
+      .map(function(l) { return l.split('-')[0]; })
+      .find(function(l) { return available.includes(l); }) || 'en';
+    window.location.replace('/' + preferred);
+  </script>
+  <noscript>
+    <meta http-equiv="refresh" content="0;url=/es" />
+  </noscript>
+</body>
+</html>
