@@ -189,10 +189,12 @@ const audience = {
   ]
 };
 
+const SUPPORT_URL = 'https://buy.stripe.com/6oU28sa6HgvK8VH30Ye3e00';
+
 // FAQ
 const faqs = {
   es: [
-    { q: '¿Es realmente gratis?', a: 'Sí. Completamente gratis. Sin suscripciones, sin anuncios, sin planes de pago. El código es abierto y el CV se aloja en GitHub Pages, un servicio gratuito de GitHub.' },
+    { q: '¿Es realmente gratis?', a: '', aHtml: 'Sí. Completamente gratis. Sin suscripciones, sin anuncios y sin planes de pago. CV Para Todos es un proyecto de código abierto y los currículums se alojan en GitHub Pages, un servicio gratuito de GitHub. Si la herramienta te resulta útil y quieres ayudar a mantener el proyecto, puedes apoyarlo con una <a id="support-link-homepage" href="' + SUPPORT_URL + '" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline hover:text-blue-800">contribución voluntaria</a>.' },
     { q: '¿Necesito saber programar?', a: 'No. El editor es 100% visual. Rellenas formularios con tus datos y el CV se genera automáticamente. No necesitas tocar una línea de código.' },
     { q: '¿Qué es JSON Resume?', a: 'Es un formato abierto y estándar para currículums. Permite que tus datos vivan separados del diseño, para que puedas cambiar de plantilla sin perder nada.' },
     { q: '¿Por qué usáis GitHub?', a: 'GitHub Pages es gratuito, fiable y no depende de nosotros. Tus datos viven en tu propia cuenta. Si la aplicación dejara de existir, tu CV seguiría disponible.' },
@@ -209,7 +211,7 @@ const faqs = {
     { q: '¿Por qué es mejor que un editor tradicional?', a: 'Porque separa los datos del diseño. En Word o Canva, cada cambio puede romper el formato. Aquí, cambias lo que quieras y el diseño siempre se mantiene.' }
   ],
   it: [
-    { q: 'È veramente gratuito?', a: 'Sì. Completamente gratuito. Nessun abbonamento, nessuna pubblicità, nessun piano a pagamento. Il codice è aperto e il CV è ospitato su GitHub Pages, un servizio gratuito di GitHub.' },
+    { q: 'È veramente gratuito?', a: '', aHtml: 'Sì. Completamente gratuito. Nessun abbonamento, nessuna pubblicità e nessun piano a pagamento. CV per Tutti è un progetto open source e i curriculum sono ospitati su GitHub Pages, un servizio gratuito di GitHub. Se lo strumento ti è utile e vuoi aiutare a mantenere il progetto, puoi supportarlo con una <a id="support-link-homepage" href="' + SUPPORT_URL + '" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline hover:text-blue-800">contribuzione volontaria</a>.' },
     { q: 'Devo saper programmare?', a: 'No. L\'editor è al 100% visuale. Compili i moduli con i tuoi dati e il CV viene generato automaticamente. Non devi toccare una riga di codice.' },
     { q: 'Che cos\'è JSON Resume?', a: 'È un formato aperto e standard per i curriculum. Permette che i tuoi dati vivano separati dal design, cosicché tu possa cambiare modello senza perdere nulla.' },
     { q: 'Perché usate GitHub?', a: 'GitHub Pages è gratuito, affidabile e non dipende da noi. I tuoi dati vivono nel tuo account. Se l\'app smettesse di esistere, il tuo CV rimarrebbe disponibile.' },
@@ -226,7 +228,7 @@ const faqs = {
     { q: 'Perché è meglio di un editor tradizionale?', a: 'Perché separa i dati dal design. In Word o Canva, ogni modifica può rompere il formato. Qui, cambi quello che vuoi e il design si mantiene sempre.' }
   ],
   en: [
-    { q: 'Is it really free?', a: 'Yes. Completely free. No subscriptions, no ads, no paid plans. The code is open source and your CV is hosted on GitHub Pages, a free service from GitHub.' },
+    { q: 'Is it really free?', a: '', aHtml: 'Yes. Completely free. No subscriptions, no ads, and no paid plans. CV for Everyone is an open source project and resumes are hosted on GitHub Pages, a free service from GitHub. If you find the tool useful and want to help maintain the project, you can support it with a <a id="support-link-homepage" href="' + SUPPORT_URL + '" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline hover:text-blue-800">voluntary contribution</a>.' },
     { q: 'Do I need to know how to code?', a: 'No. The editor is 100% visual. You fill in forms with your data and the CV is generated automatically. You don\'t need to touch a single line of code.' },
     { q: 'What is JSON Resume?', a: 'It\'s an open, standard format for resumes. It keeps your data separate from the design, so you can switch templates without losing anything.' },
     { q: 'Why do you use GitHub?', a: 'GitHub Pages is free, reliable and doesn\'t depend on us. Your data lives in your own account. If the app stopped existing, your CV would still be available.' },
@@ -551,7 +553,7 @@ const currentFaqs = faqs[lang] || faqs.es;
                   </span>
                 </summary>
                 <div class="px-4 pb-4 text-sm text-gray-600 leading-relaxed">
-                  {faq.a}
+                  {faq.aHtml ? <Fragment set:html={faq.aHtml} /> : faq.a}
                 </div>
               </details>
             ))}
@@ -776,6 +778,12 @@ const currentFaqs = faqs[lang] || faqs.es;
     .forEach((el, i) => {
       (el.style).transitionDelay = `${0.1 + i * 0.08}s`;
     });
+
+  document.getElementById('support-link-homepage')?.addEventListener('click', () => {
+    if (typeof posthog !== 'undefined') {
+      posthog.capture('support_click', { location: 'homepage' });
+    }
+  });
 </script>
 
 <!-- Cookie Consent + Google Analytics (RGPD) - LANDING -->

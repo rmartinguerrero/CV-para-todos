@@ -68,6 +68,19 @@ const year = new Date().getFullYear();
       </a>
     </p>
 
+    <!-- Support -->
+    <p class="mb-2">
+      <a
+        id="support-link-footer"
+        href="https://buy.stripe.com/6oU28sa6HgvK8VH30Ye3e00"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="hover:text-gray-700 underline underline-offset-2"
+      >
+        {t('support.footerText')}
+      </a>
+    </p>
+
     <!-- Copyright -->
     <p>
       &copy; {year} ·
@@ -80,3 +93,11 @@ const year = new Date().getFullYear();
 
   </div>
 </footer>
+
+<script is:inline>
+  document.getElementById('support-link-footer')?.addEventListener('click', () => {
+    if (typeof posthog !== 'undefined') {
+      posthog.capture('support_click', { location: 'footer' });
+    }
+  });
+</script>
