@@ -69,10 +69,10 @@ const t = (key: string) => strictT(key as UIKeys);
 
       <p class="text-gray-700 mb-6 md:mb-8">
         {lang === 'es'
-          ? 'En CV para Todos utilizamos cookies únicamente cuando es estrictamente necesario para el funcionamiento del sitio y para analizar el uso de forma anónima. El uso de cookies no esenciales, como Google Analytics, requiere tu consentimiento previo y explícito a través del banner de cookies.'
+          ? 'En CV para Todos utilizamos cookies únicamente cuando es estrictamente necesario para el funcionamiento del sitio y para analizar el uso de forma anónima. El uso de cookies no esenciales, como Google Analytics y PostHog, requiere tu consentimiento previo y explícito a través del banner de cookies.'
           : lang === 'it'
-            ? 'In CV para Todos utilizziamo cookie solo quando strettamente necessario per il funzionamento del sito e per analizzare l’utilizzo in forma anonima. I cookie non essenziali, come Google Analytics, richiedono il tuo consenso esplicito tramite il banner cookie.'
-            : 'At CV para Todos we only use cookies when strictly necessary for the site to function and for anonymous analytics. Non-essential cookies such as Google Analytics require your explicit consent through the cookie banner.'}
+            ? 'In CV para Todos utilizziamo cookie solo quando strettamente necessario per il funzionamento del sito e per analizzare l\'utilizzo in forma anonima. I cookie non essenziali, come Google Analytics e PostHog, richiedono il tuo consenso esplicito tramite il banner cookie.'
+            : 'At CV para Todos we only use cookies when strictly necessary for the site to function and for anonymous analytics. Non-essential cookies such as Google Analytics and PostHog require your explicit consent through the cookie banner.'}
       </p>
 
       <h2 class="text-xl font-semibold mt-8 md:mt-10 mb-3">
@@ -100,6 +100,15 @@ const t = (key: string) => strictT(key as UIKeys);
             : lang === 'it'
               ? ' attivato solo con il tuo consenso. Usato per statistiche anonime.'
               : ' only activated with your consent. Used for anonymous analytics.'}
+        </li>
+
+        <li>
+          <strong>PostHog:</strong>
+          {lang === 'es'
+            ? ' solo se activa con tu consentimiento previo. Se utiliza para analítica de producto (mapas de calor, grabaciones de sesión anonimizadas). Los textos se enmascaran automáticamente y las entradas de formulario nunca se graban.'
+            : lang === 'it'
+              ? ' attivato solo con il tuo consenso. Usato per analisi prodotto (mappe di calore, registrazioni di sessione anonimizzate). I testi vengono automaticamente oscurati e i dati dei moduli non vengono mai registrati.'
+              : ' only activated with your consent. Used for product analytics (heatmaps, anonymized session recordings). Text is automatically masked and form inputs are never recorded.'}
         </li>
 
         <li>

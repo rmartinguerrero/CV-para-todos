@@ -105,10 +105,22 @@ const t = (key: string) => strictT(key as UIKeys);
 
       <p class="text-gray-700 mb-6">
         {lang === 'es'
-          ? 'Google Analytics solo se activa tras tu consentimiento explícito mediante el banner de cookies. Los datos recopilados son agregados y anónimos.'
+          ? 'Google Analytics solo se activa tras tu consentimiento explícito mediante el banner de cookies. Los datos recopilados son agregados y anónimos. Se utiliza la opción de anonimización de IP.'
           : lang === 'it'
-            ? 'Google Analytics si attiva solo dopo il tuo consenso esplicito tramite il banner cookie. I dati sono aggregati e anonimi.'
-            : 'Google Analytics is only activated after explicit consent via the cookie banner. Data collected is aggregated and anonymous.'}
+            ? 'Google Analytics si attiva solo dopo il tuo consenso esplicito tramite il banner cookie. I dati sono aggregati e anonimi. Viene utilizzata l\'opzione di anonimizzazione dell\'IP.'
+            : 'Google Analytics is only activated after explicit consent via the cookie banner. Data collected is aggregated and anonymous. IP anonymization is enabled.'}
+      </p>
+
+      <h2 class="text-xl font-semibold mt-8 md:mt-10 mb-3">
+        PostHog
+      </h2>
+
+      <p class="text-gray-700 mb-6">
+        {lang === 'es'
+          ? 'PostHog es una herramienta de analítica de producto que utilizamos para mejorar la experiencia de usuario. Solo se activa tras tu consentimiento explícito. Recopila datos agregados de uso (mapas de calor, grabaciones de sesión anonimizadas). Los textos se enmascaran automáticamente y las entradas de formulario nunca se graban. Los datos se almacenan en la Unión Europea (Frankfurt).'
+          : lang === 'it'
+            ? 'PostHog è uno strumento di analisi prodotto che utilizziamo per migliorare l\'esperienza utente. Si attiva solo dopo il tuo consenso esplicito. Raccoglie dati aggregati di utilizzo (mappe di calore, registrazioni di sessione anonimizzate). I testi vengono automaticamente oscurati e i dati dei moduli non vengono mai registrati. I dati sono memorizzati nell\'Unione Europea (Francoforte).'
+            : 'PostHog is a product analytics tool we use to improve user experience. It is only activated after your explicit consent. It collects aggregated usage data (heatmaps, anonymized session recordings). Text is automatically masked and form inputs are never recorded. Data is stored in the European Union (Frankfurt).'}
       </p>
 
       <h2 class="text-xl font-semibold mt-8 md:mt-10 mb-3">

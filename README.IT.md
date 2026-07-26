@@ -23,7 +23,7 @@ La filosofia di questo progetto è la **semplicità e l'autonomia (No-Code / Low
 * 🌍 **Multilingua Dinamico e Nativo:** Gestione intelligente delle lingue (Spagnolo, Inglese, Italiano...) strutturata in modo pulito nella cartella `src/pages/[lang]/`. Cambia lingua mantenendo posizione e velocità.
 * ✍️ **Dati Centralizzati e Puliti:** Tutte le informazioni sulla tua esperienza, studi e progetti sono salvate in file di testo strutturati in `src/data/`, seguendo standard puliti e leggibili.
 * 🛠️ **Pannello di Amministrazione Visivo:** Dimenticati di toccare codice per aggiornare il tuo CV! Include un modulo di amministrazione molto amichevole e intuitivo per modificare i tuoi dati visivamente in pochi secondi.
-* 🔒 **Privacy Assoluta (FOSS):** Zero cookie, zero telemetria e nessun tracciatore esterno. Il tuo sito è tuo, il codice è aperto e i tuoi dati rimangono con te.
+* 🔒 **Privacy Assoluta (FOSS):** Cookie funzionali minimi (OAuth), analisi con consenso esplicito (Google Analytics, PostHog). Il tuo sito è tuo, il codice è aperto e i tuoi dati rimangono con te.
 * ⚡ **Prestazioni Strepitose:** Costruito su Astro e Tailwind CSS per garantire che il sito si carichi istantaneamente su qualsiasi dispositivo, con una SEO impeccabile.
 
 ---
@@ -62,9 +62,9 @@ Per mantenere le cose organizzate e semplici, il progetto è così suddiviso:
             ├── auth-login.ts \\ Gestione centralizzata della logica di accesso.
             ├── deploy.ts \\ API per attivare il processo di deployment tramite GitHub API.
             ├── load-resume.ts \\ Endpoint per recuperare il file JSON Resume dal repository.
-            ├── save.js \\ API per persistere le modifiche dell'utente nel repository.
     └── 📁public
         ├── favicon.png \\ Icona del sito web.
+        ├── robots.txt \\ Direttive di crawling per i motori di ricerca.
     └── 📁src
         └── 📁components
             ├── ArtisticLayout.astro \\ Blocco componente per il layout artistico (usato per l'iniezione di sezioni).
@@ -97,6 +97,7 @@ Per mantenere le cose organizzate e semplici, il progetto è così suddiviso:
                 ├── index.astro \\ Pagina del CV pubblico renderizzato per i reclutatori.
                 ├── privacy-policy.astro \\ Pagina dinamica dell'informativa sulla privacy.
             ├── index.astro \\ Pagina di destinazione (Landing) con rilevamento della lingua.
+            ├── sitemap.xml.ts \\ Generatore dinamico di sitemap con hreflang.
         └── 📁styles
             ├── cv-themes.ts \\ Definizioni dei token di design e temi visivi.
         └── 📁utils
@@ -115,6 +116,12 @@ Per mantenere le cose organizzate e semplici, il progetto è così suddiviso:
     ├── tailwind.config.mjs \\ Configurazione globale di Tailwind CSS.
     ├── tsconfig.json \\ Configurazione TypeScript per il progetto.
 ```
+
+> **Nota sui file non utilizzati (dead code):** I seguenti file esistono nel repository ma non sono importati da nessun modulo attivo. Sono mantenuti per compatibilità e possono essere rimossi in futuro:
+> * `netlify/functions/auth/login.ts` / `callback.ts` — sostituiti da `auth-login.ts` e `auth-callback.ts`
+> * `src/deploy-templates/renderer.ts` — non importato (si usa `src/lib/cv-renderer.ts`)
+> * `src/components/TechLayout.astro` — sostituito da `TechyLayout.astro`
+> * `src/components/ArtisticLayout.astro` — senza uso attivo
 ---
 
 ## 🚀 Stack Tecnologico
