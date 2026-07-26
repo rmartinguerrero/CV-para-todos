@@ -7,89 +7,92 @@ interface Props {
 }
 
 const { lang } = Astro.props;
-
 const t = useTranslations(lang);
 const year = new Date().getFullYear();
 ---
 
 <footer class="mt-16 border-t border-gray-200 bg-white print:hidden">
-  <div class="max-w-3xl mx-auto px-4 sm:px-6 py-8 text-center text-sm text-gray-500">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 py-8 text-sm text-gray-500 text-center">
 
-    <!-- Legal links -->
-    <nav class="flex flex-wrap justify-center gap-x-6 gap-y-2 mb-4">
-      <a href={`/${lang}/cookie-policy`} class="hover:text-gray-700 underline underline-offset-2">
-        {lang === 'it'
-          ? 'Cookie Policy'
-          : lang === 'en'
-          ? 'Cookie Policy'
-          : 'Política de Cookies'}
-      </a>
+    <!-- Top: Project + Repository -->
+    <div class="flex flex-col items-center gap-2 mb-6">
 
-      <span class="text-gray-300 select-none">|</span>
-
-      <a href={`/${lang}/privacy-policy`} class="hover:text-gray-700 underline underline-offset-2">
-        {lang === 'it'
-          ? 'Informativa sulla Privacy'
-          : lang === 'en'
-          ? 'Privacy Policy'
-          : 'Política de Privacidad'}
-      </a>
-    </nav>
-
-    <!-- Author -->
-    <p class="mb-2">
+      <!-- Project -->
       <a
         href="https://raulmguerrero.com"
         target="_blank"
         rel="noopener noreferrer"
-        class="hover:text-gray-700 underline underline-offset-2"
+        class="inline-flex items-center gap-2.5 group"
       >
-        {lang === 'it'
-          ? 'Un progetto di RaulMGuerrero'
-          : lang === 'en'
-          ? 'A project by RaulMGuerrero'
-          : 'Un proyecto de RaulMGuerrero'}
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-400 group-hover:text-gray-600 transition-colors flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+          <polyline points="17 21 17 13 7 13 7 21"></polyline>
+          <polyline points="7 3 7 8 15 8"></polyline>
+        </svg>
+        <span class="text-gray-600 group-hover:text-gray-900 transition-colors">
+          {t('footer.project')} <span class="font-bold text-gray-700">RaulMGuerrero</span>
+        </span>
       </a>
-    </p>
 
-    <!-- GitHub Repository -->
-    <p class="mb-2">
+      <!-- Repository -->
       <a
         href="https://github.com/rmartinguerrero/CV-para-todos"
         target="_blank"
         rel="noopener noreferrer"
-        class="hover:text-gray-700 underline underline-offset-2"
+        class="inline-flex items-center gap-2.5 group"
       >
-        {lang === 'it'
-          ? 'Puoi vedere il repository su GitHub con il link al progetto open source'
-          : lang === 'en'
-          ? 'You can see the repository on GitHub with the link to the open source project'
-          : 'Puedes ver el repositorio en GitHub con el enlace al proyecto open source'}
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-400 group-hover:text-gray-600 transition-colors flex-shrink-0" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+          <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 1.49 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+        </svg>
+        <span class="text-gray-600 group-hover:text-gray-900 transition-colors">
+          {t('footer.repo')}
+        </span>
       </a>
-    </p>
+    </div>
 
-    <!-- Support -->
-    <p class="mb-2">
+    <!-- Donations -->
+    <div class="mb-6 text-center">
       <a
         id="support-link-footer"
         href="https://buy.stripe.com/6oU28sa6HgvK8VH30Ye3e00"
         target="_blank"
         rel="noopener noreferrer"
-        class="hover:text-gray-700 underline underline-offset-2"
+        class="inline-flex items-center gap-2.5 group"
       >
-        {t('support.footerText')}
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-400 group-hover:text-gray-600 transition-colors flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+          <line x1="1" y1="10" x2="23" y2="10"></line>
+        </svg>
+        <span class="text-gray-600 group-hover:text-gray-900 transition-colors">
+          {t('support.footerText')}
+        </span>
       </a>
-    </p>
+    </div>
 
-    <!-- Copyright -->
-    <p>
-      &copy; {year} ·
-      {lang === 'it'
-        ? 'Tutti i diritti riservati'
-        : lang === 'en'
-        ? 'All rights reserved'
-        : 'Todos los derechos reservados'}
-    </p>
+    <!-- Legal -->
+    <div class="border-t border-gray-100 pt-4 text-center">
+      <div class="flex flex-wrap justify-center gap-x-6 gap-y-2 mb-2">
+        <a
+          href={`/${lang}/cookie-policy`}
+          class="hover:text-gray-700 underline underline-offset-2"
+        >
+          {lang === 'it' ? 'Cookie Policy' : lang === 'en' ? 'Cookie Policy' : 'Política de Cookies'}
+        </a>
+
+        <span class="text-gray-300 select-none">|</span>
+
+        <a
+          href={`/${lang}/privacy-policy`}
+          class="hover:text-gray-700 underline underline-offset-2"
+        >
+          {lang === 'it' ? 'Informativa sulla Privacy' : lang === 'en' ? 'Privacy Policy' : 'Política de Privacidad'}
+        </a>
+      </div>
+
+      <p>
+        &copy; {year} · {t('footer.rights')}
+      </p>
+    </div>
 
   </div>
 </footer>
