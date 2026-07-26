@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /es/edit
+Disallow: /it/edit
+Disallow: /en/edit
+Disallow: /.netlify/
+
+Sitemap: https://cv.raulmguerrero.com/sitemap.xml
