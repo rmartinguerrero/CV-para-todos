@@ -10,7 +10,7 @@ const { resume, t } = Astro.props;
 <section class="mb-10 print:mb-6" aria-labelledby="education-heading">
   <h2
     id="education-heading"
-    class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-5 pb-2 border-b border-gray-100"
+    class="text-xs font-semibold uppercase tracking-widest text-gray-500 mb-5 pb-2 border-b border-gray-100"
   >
     {t('section.education')}
   </h2>
@@ -49,7 +49,7 @@ const { resume, t } = Astro.props;
             </ul>
           )}
         </div>
-        <time class="text-xs text-gray-400 whitespace-nowrap sm:text-right mt-0.5">
+        <time class="text-xs text-gray-500 whitespace-nowrap sm:text-right mt-0.5">
           {edu.startDate}
           {edu.startDate && edu.endDate && ' — '}
           {edu.endDate}

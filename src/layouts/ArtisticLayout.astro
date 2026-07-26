@@ -33,9 +33,16 @@ interface Props {
   availableLangs: string[];
   resume: any;
   t: (key: string) => string;
+  robots?: string;
+  ogType?: string;
+  jsonLd?: Record<string, any>;
 }
 
-const { title, description, lang, currentLang, availableLangs, resume, t } = Astro.props;
+const { title, description, lang, currentLang, availableLangs, resume, t, robots, ogType = 'website', jsonLd } = Astro.props;
+
+const canonicalURL = `${Astro.url.origin}${Astro.url.pathname}`;
+const langs = ['es', 'it', 'en'] as const;
+const pathname = Astro.url.pathname;
 ---
 <!DOCTYPE html>
 <html lang={lang}>
@@ -46,8 +53,14 @@ const { title, description, lang, currentLang, availableLangs, resume, t } = Ast
   <title>{title}</title>
   <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content={`${Astro.url.origin}${Astro.url.pathname}`} />
+  <meta property="og:type" content={ogType} />
+  <meta property="og:url" content={canonicalURL} />
+  <link rel="canonical" href={canonicalURL} />
+  {langs.map((l) => (
+    <link rel="alternate" hreflang={l} href={`${Astro.url.origin}/${l}${pathname.replace(/^\/[a-z]{2}(\/|$)/, '$1')}`} />
+  ))}
+  <link rel="alternate" hreflang="x-default" href={`${Astro.url.origin}/es${pathname.replace(/^\/[a-z]{2}(\/|$)/, '$1')}`} />
+  {robots && <meta name="robots" content={robots} />}
   <meta property="og:image" content={`${Astro.url.origin}/opengraph.png`} />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="1200" />
@@ -61,6 +74,7 @@ const { title, description, lang, currentLang, availableLangs, resume, t } = Ast
   <link rel="icon" type="image/png" href="/favicon.png" />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
   <PostHogAnalytics />
+  {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
 </head>
 <body class="bg-[#faf6f0] artistic-layout min-h-screen text-stone-800 antialiased font-sans">
   <main class="max-w-3xl mx-auto px-4 sm:px-6 py-12 sm:py-16 print:p-0 min-w-0" style="overflow-wrap:anywhere">

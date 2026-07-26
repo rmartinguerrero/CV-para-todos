@@ -295,12 +295,10 @@ const currentFaqs = faqs[lang] || faqs.es;
 
     <!-- Hero Section -->
     <div class="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div class="max-w-6xl mx-auto w-full space-y-12">
+      <div class="max-w-6xl mx-auto w-full space-y-16">
 
         <!-- SEO hidden H2s -->
         <h2 class="sr-only">{t('wizard.heroTagline')}</h2>
-        <h2 class="sr-only">Free CV builder online — JSON Resume generator</h2>
-        <h2 class="sr-only">GitHub resume builder — CV online gratis</h2>
 
         <!-- Header Hero -->
         <div class="text-center space-y-4 fade-in">
@@ -347,7 +345,7 @@ const currentFaqs = faqs[lang] || faqs.es;
         </div>
 
         <!-- El problema -->
-        <div class="py-8 space-y-8 fade-in">
+        <div class="py-10 space-y-8 fade-in">
           <h2 class="text-3xl font-bold text-gray-900 text-center">
             {t('wizard.problemTitle')}
           </h2>
@@ -372,7 +370,7 @@ const currentFaqs = faqs[lang] || faqs.es;
         </div>
 
         <!-- La solución -->
-        <div class="py-8 space-y-8 fade-in">
+        <div class="py-10 space-y-8 fade-in">
           <h2 class="text-3xl font-bold text-gray-900 text-center">
             {t('wizard.solutionTitle')}
           </h2>
@@ -397,7 +395,7 @@ const currentFaqs = faqs[lang] || faqs.es;
         </div>
 
         <!-- Cómo funciona -->
-        <div class="py-8 space-y-8 fade-in">
+        <div class="py-10 space-y-8 fade-in">
           <h2 class="text-3xl font-bold text-gray-900 text-center">
             {t('wizard.howTitle')}
           </h2>
@@ -419,7 +417,7 @@ const currentFaqs = faqs[lang] || faqs.es;
         </div>
 
         <!-- Qué puedes hacer -->
-        <div class="py-8 space-y-8 fade-in">
+        <div class="py-10 space-y-8 fade-in">
           <h2 class="text-3xl font-bold text-gray-900 text-center">
             {t('wizard.capabilitiesTitle')}
           </h2>
@@ -435,7 +433,7 @@ const currentFaqs = faqs[lang] || faqs.es;
         </div>
 
         <!-- Beneficios reales -->
-        <div class="py-8 space-y-8 fade-in">
+        <div class="py-10 space-y-8 fade-in">
           <h2 class="text-3xl font-bold text-gray-900 text-center">
             {t('wizard.resultsTitle')}
           </h2>
@@ -452,7 +450,7 @@ const currentFaqs = faqs[lang] || faqs.es;
         </div>
 
         <!-- ¿Por qué es diferente? -->
-        <div class="py-8 space-y-8 fade-in">
+        <div class="py-10 space-y-8 fade-in">
           <h2 class="text-3xl font-bold text-gray-900 text-center">
             {t('wizard.whyDifferentTitle')}
           </h2>
@@ -519,7 +517,7 @@ const currentFaqs = faqs[lang] || faqs.es;
         </div>
 
         <!-- Para quién es -->
-        <div class="py-8 space-y-8 fade-in">
+        <div class="py-10 space-y-8 fade-in">
           <h2 class="text-3xl font-bold text-gray-900 text-center">
             {t('wizard.audienceTitle')}
           </h2>
@@ -538,7 +536,7 @@ const currentFaqs = faqs[lang] || faqs.es;
         </div>
 
         <!-- FAQ -->
-        <div class="py-8 space-y-8 fade-in">
+        <div class="py-10 space-y-8 fade-in">
           <h2 class="text-3xl font-bold text-gray-900 text-center">
             {t('wizard.faqTitle')}
           </h2>
@@ -561,7 +559,7 @@ const currentFaqs = faqs[lang] || faqs.es;
         </div>
 
         <!-- CTA Final -->
-        <div class="py-8 text-center space-y-6 fade-in">
+        <div class="py-10 text-center space-y-6 fade-in">
           <h2 class="text-3xl font-bold text-gray-900">
             {t('wizard.ctaTitle')}
           </h2>
@@ -616,6 +614,9 @@ const currentFaqs = faqs[lang] || faqs.es;
 
 <!-- Cookie Consent Banner (Landing) -->
 <div id="privacy-banner"
+  role="dialog"
+  aria-label={lang === 'it' ? 'Consenso cookie' : lang === 'en' ? 'Cookie consent' : 'Consentimiento de cookies'}
+  aria-modal="false"
   class="fixed bottom-3 left-3 right-3 sm:left-6 sm:bottom-6 sm:right-auto sm:max-w-md 
   bg-white border border-gray-200 p-4 rounded-xl shadow-2xl z-50 
   opacity-0 translate-y-8 pointer-events-none flex flex-col gap-3 
@@ -623,15 +624,15 @@ const currentFaqs = faqs[lang] || faqs.es;
 
   <div>
     <h4 class="text-sm font-bold text-gray-900 mb-1">
-      {lang === 'it' ? 'Uso dei Cookie' : lang === 'es' ? 'Uso de Cookies' : 'Cookie Usage'}
+      {lang === 'it' ? 'Uso dei Cookie' : lang === 'en' ? 'Cookie Usage' : 'Uso de Cookies'}
     </h4>
 
     <p class="text-xs text-gray-500 leading-relaxed">
       {lang === 'it'
         ? 'Usiamo cookie per analisi e miglioramento dell\'esperienza.'
-        : lang === 'es'
-        ? 'Usamos cookies para analizar el rendimiento y mejorar la experiencia.'
-        : 'We use cookies to analyze performance and improve experience.'}
+        : lang === 'en'
+        ? 'We use cookies for analytics and to improve your experience.'
+        : 'Usamos cookies para analizar el rendimiento y mejorar la experiencia.'}
       <a href={`/${lang}/cookie-policy`} class="text-blue-600 underline font-semibold">Policy</a>
       {' · '}
       <a href={`/${lang}/privacy-policy`} class="text-blue-600 underline font-semibold">Privacy</a>
@@ -641,15 +642,45 @@ const currentFaqs = faqs[lang] || faqs.es;
   <div class="flex gap-2 justify-end">
     <button id="accept-privacy"
       class="bg-blue-600 text-white text-xs font-semibold py-2 px-4 rounded-lg hover:brightness-110">
-      {lang === 'it' ? 'Accetta tutto' : lang === 'es' ? 'Aceptar' : 'Accept'}
+      {lang === 'it' ? 'Accetta tutto' : lang === 'en' ? 'Accept all' : 'Aceptar todo'}
     </button>
 
     <button id="deny-privacy"
       class="bg-gray-100 text-gray-600 text-xs font-semibold py-2 px-4 rounded-lg hover:bg-gray-200">
-      {lang === 'it' ? 'Rifiuta' : lang === 'es' ? 'Rechazar' : 'Reject'}
+      {lang === 'it' ? 'Rifiuta' : lang === 'en' ? 'Reject' : 'Rechazar'}
     </button>
   </div>
 </div>
+<script is:inline set:html={JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'CV para Todos',
+  applicationCategory: 'DeveloperApplication',
+  operatingSystem: 'Web',
+  description: lang === 'es' ? 'Constructor online de CV con JSON Resume. Publica tu currículum como web estática en GitHub Pages.' : lang === 'it' ? 'Costruttore online di CV con JSON Resume. Pubblica il tuo curriculum come sito statico su GitHub Pages.' : 'Online CV builder with JSON Resume. Publish your resume as a static website on GitHub Pages.',
+  url: 'https://cv.raulmguerrero.com',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'EUR' },
+  featureList: [
+    lang === 'es' ? 'Editor de CV sin código' : lang === 'it' ? 'Editor CV senza codice' : 'No-code CV editor',
+    lang === 'es' ? 'Exportación a PDF' : lang === 'it' ? 'Esportazione PDF' : 'PDF export',
+    lang === 'es' ? 'Publicación en GitHub Pages' : lang === 'it' ? 'Pubblicazione su GitHub Pages' : 'GitHub Pages publishing',
+    lang === 'es' ? 'Múltiples plantillas' : lang === 'it' ? 'Modelli multipli' : 'Multiple templates',
+    lang === 'es' ? 'Soporte multilenguaje' : lang === 'it' ? 'Supporto multilingua' : 'Multi-language support'
+  ]
+})} />
+
+<script is:inline set:html={JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: currentFaqs.map((faq) => ({
+    '@type': 'Question',
+    name: faq.q,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: faq.aHtml ? faq.aHtml.replace(/<[^>]*>/g, '') : faq.a
+    }
+  }))
+})} />
 </MinimalistLayout>
 
 <style>
@@ -791,6 +822,8 @@ const currentFaqs = faqs[lang] || faqs.es;
   (() => {
     const consent = localStorage.getItem('cookie-consent');
     if (consent !== 'accepted') return;
+    if (window._gaLoaded) return;
+    window._gaLoaded = true;
 
     window.dataLayer = window.dataLayer || [];
     function gtag(){ dataLayer.push(arguments); }

@@ -45,6 +45,18 @@ const LAYOUTS_MAP = Object.entries(layoutModules).reduce((acc, [path, mod]: [str
 
 const templateKey = (resume as any)?.meta?.template?.toLowerCase() || 'minimalist';
 const DynamicLayout = LAYOUTS_MAP[templateKey] || MinimalistLayout;
+
+const personJsonLd = !isEmpty ? {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: resume.basics.name,
+  jobTitle: resume.basics.label,
+  email: resume.basics.email,
+  url: resume.basics.url || resume.basics.web,
+  image: resume.basics.image,
+  description: resume.basics.summary,
+  sameAs: resume.basics.profiles?.map((p: any) => p.url).filter(Boolean),
+} : undefined;
 ---
 
 {isEmpty ? (
@@ -52,12 +64,14 @@ const DynamicLayout = LAYOUTS_MAP[templateKey] || MinimalistLayout;
 ) : (
   <DynamicLayout
     title={`${resume.basics.name} — ${resume.basics.label}`}
-    description={`CV of ${resume.basics.name}`}
+    description={lang === 'es' ? `Currículum de ${resume.basics.name}` : lang === 'it' ? `Curriculum di ${resume.basics.name}` : `CV of ${resume.basics.name}`}
     lang={lang}
     currentLang={lang}
     availableLangs={availableLangs}
     resume={resume}
     t={t}
+    ogType="profile"
+    jsonLd={personJsonLd}
   >
     <Header      resume={resume} lang={lang} t={t} availableLangs={availableLangs} />
     {resume.work?.length      > 0 && <Experience resume={resume} t={t} />}

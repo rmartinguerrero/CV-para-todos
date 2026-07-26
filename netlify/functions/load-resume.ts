@@ -130,7 +130,7 @@ export const handler = async (event: any) => {
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ error: error.message || "Error al cargar el CV." })
+      body: JSON.stringify({ error: "Error al cargar el CV. Por favor, inténtalo de nuevo." })
     };
   }
 };

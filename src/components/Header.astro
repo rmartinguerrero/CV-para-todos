@@ -100,7 +100,7 @@ const { basics } = resume;
           </li>
         )}
         {basics.location?.city && (
-          <li class="text-gray-400 min-w-0">
+          <li class="text-gray-500 min-w-0">
             {[basics.location.city, basics.location.region].filter(Boolean).join(', ')}
           </li>
         )}
@@ -118,7 +118,7 @@ const { basics } = resume;
                 class="text-gray-500 hover:text-gray-900 transition-colors break-words"
               >
                 {profile.network}
-                {profile.username && <span class="text-gray-400"> @{profile.username}</span>}
+                {profile.username && <span class="text-gray-500"> @{profile.username}</span>}
               </a>
             </li>
           ))}

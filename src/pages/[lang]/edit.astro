@@ -38,16 +38,38 @@ const templates = Object.entries(layoutModules)
 
 <MinimalistLayout
   title={t('edit.title')}
-  description="CV Editor"
+  description={lang === 'es' ? 'Editor de currículum profesional sin código' : lang === 'it' ? 'Editor di curriculum professionale senza codice' : 'Professional no-code resume editor'}
   lang={lang}
   currentLang={lang}
   availableLangs={['es', 'it', 'en']}
   resume={initialData}
   t={t}
+  robots="noindex, nofollow"
 >
 
+<a href="#cv-form" class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:bg-blue-600 focus:text-white focus:px-4 focus:py-2 focus:rounded-lg focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-300">
+  {t('nav.previousSection')}
+</a>
+
 <style is:global>
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
   main { max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
+  .tab-btn:focus-visible,
+  #cv-form button:focus-visible,
+  #cv-form input:focus-visible,
+  #cv-form textarea:focus-visible,
+  #cv-form select:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
   body.minimalist-layout { background-color: #f9fafb !important; }
   #preview-section, #cv-form { overflow-wrap: anywhere; }
   #preview-section img, #cv-form img { overflow-wrap: normal; }
@@ -93,9 +115,9 @@ const templates = Object.entries(layoutModules)
       </a>
 
       <div class="inline-flex rounded-xl bg-gray-100 p-0.5 border border-gray-200 shadow-inner">
-        <button onclick="window.location.href='/es/edit'" class={`px-2 py-1 rounded-lg text-sm leading-none transition-all ${lang === 'es' ? 'bg-white text-gray-900 shadow-xs border border-gray-200/60' : 'text-gray-500 hover:text-gray-900'}`}>&#127466;&#127480;</button>
-        <button onclick="window.location.href='/it/edit'" class={`px-2 py-1 rounded-lg text-sm leading-none transition-all ${lang === 'it' ? 'bg-white text-gray-900 shadow-xs border border-gray-200/60' : 'text-gray-500 hover:text-gray-900'}`}>&#127470;&#127481;</button>
-        <button onclick="window.location.href='/en/edit'" class={`px-2 py-1 rounded-lg text-sm leading-none transition-all ${lang === 'en' ? 'bg-white text-gray-900 shadow-xs border border-gray-200/60' : 'text-gray-500 hover:text-gray-900'}`}>&#127482;&#127480;</button>
+        <button onclick="window.location.href='/es/edit'" aria-label="Español" class={`px-2 py-1 rounded-lg text-sm leading-none transition-all ${lang === 'es' ? 'bg-white text-gray-900 shadow-xs border border-gray-200/60' : 'text-gray-500 hover:text-gray-900'}`}>&#127466;&#127480;</button>
+        <button onclick="window.location.href='/it/edit'" aria-label="Italiano" class={`px-2 py-1 rounded-lg text-sm leading-none transition-all ${lang === 'it' ? 'bg-white text-gray-900 shadow-xs border border-gray-200/60' : 'text-gray-500 hover:text-gray-900'}`}>&#127470;&#127481;</button>
+        <button onclick="window.location.href='/en/edit'" aria-label="English" class={`px-2 py-1 rounded-lg text-sm leading-none transition-all ${lang === 'en' ? 'bg-white text-gray-900 shadow-xs border border-gray-200/60' : 'text-gray-500 hover:text-gray-900'}`}>&#127482;&#127480;</button>
       </div>
 
       <div class="flex items-center gap-2">
@@ -121,15 +143,15 @@ const templates = Object.entries(layoutModules)
           <span class="text-sm font-semibold text-gray-900 truncate">{t('brand.name')}</span>
         </a>
         <div class="inline-flex rounded-lg bg-gray-100 p-0.5 border border-gray-200 shadow-inner">
-          <button onclick="window.location.href='/es/edit'"
+          <button onclick="window.location.href='/es/edit'" aria-label="Español"
             class={`px-1.5 py-1 rounded-md text-xs leading-none transition-all ${lang === 'es' ? 'bg-white text-gray-900 shadow-xs border border-gray-200/60' : 'text-gray-500 hover:text-gray-900'}`}>
             &#127466;&#127480;
           </button>
-          <button onclick="window.location.href='/it/edit'"
+          <button onclick="window.location.href='/it/edit'" aria-label="Italiano"
             class={`px-1.5 py-1 rounded-md text-xs leading-none transition-all ${lang === 'it' ? 'bg-white text-gray-900 shadow-xs border border-gray-200/60' : 'text-gray-500 hover:text-gray-900'}`}>
             &#127470;&#127481;
           </button>
-          <button onclick="window.location.href='/en/edit'"
+          <button onclick="window.location.href='/en/edit'" aria-label="English"
             class={`px-1.5 py-1 rounded-md text-xs leading-none transition-all ${lang === 'en' ? 'bg-white text-gray-900 shadow-xs border border-gray-200/60' : 'text-gray-500 hover:text-gray-900'}`}>
             &#127482;&#127480;
           </button>
@@ -148,7 +170,7 @@ const templates = Object.entries(layoutModules)
     </div>
   </div>
 
-  <div class="flex flex-col lg:grid lg:grid-cols-2 gap-6 lg:gap-8 lg:items-start min-h-[calc(100vh-4rem)] p-4 sm:p-6 print:block print:p-0">
+  <div class="flex flex-col lg:grid lg:grid-cols-2 gap-6 lg:gap-10 lg:items-start min-h-[calc(100vh-4rem)] p-4 sm:p-6 print:block print:p-0">
 
     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm print:hidden flex flex-col lg:sticky lg:top-20 lg:max-h-[82vh] w-full min-w-0">
 
@@ -157,109 +179,109 @@ const templates = Object.entries(layoutModules)
       </div>
 
       <div class="px-4 sm:px-6 pt-3 relative">
-        <button id="tab-prev" type="button" class="lg:hidden absolute left-0 top-1/2 z-10 -translate-y-1/2 rounded-full border border-gray-200 bg-white/90 px-1.5 py-1 text-sm text-gray-600 shadow-sm transition-all hover:bg-gray-100" aria-label="Anterior secci\u00f3n">&lsaquo;</button>
-        <nav id="tab-nav" class="flex text-xs sm:text-sm overflow-x-auto whitespace-nowrap scroll-smooth flex-nowrap touch-pan-x gap-0.5 sm:gap-1 px-5" aria-label="Tabs">
-          <button class="tab-btn px-2.5 sm:px-4 py-2 border-b-2 border-blue-600 font-medium text-blue-600 flex-shrink-0" data-tab="basics">{t('nav.contact')}</button>
-          <button class="tab-btn px-2.5 sm:px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700 flex-shrink-0" data-tab="work">{lang === 'es' ? 'Experiencia' : lang === 'it' ? 'Esperienza' : 'Experience'}</button>
-          <button class="tab-btn px-2.5 sm:px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700 flex-shrink-0" data-tab="education">{lang === 'es' ? 'Formación' : lang === 'it' ? 'Formazione' : 'Education'}</button>
-          <button class="tab-btn px-2.5 sm:px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700 flex-shrink-0" data-tab="extras">{lang === 'es' ? 'Formación extra' : lang === 'it' ? 'Formazione extra' : 'Extra training'}</button>
-          <button class="tab-btn px-2.5 sm:px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700 flex-shrink-0" data-tab="skills">{lang === 'es' ? 'Habilidades' : lang === 'it' ? 'Competenze' : 'Skills'}</button>
-          <button class="tab-btn px-2.5 sm:px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700 flex-shrink-0" data-tab="templates">{t('templates.title')}</button>
+        <button id="tab-prev" type="button" class="lg:hidden absolute left-0 top-1/2 z-10 -translate-y-1/2 rounded-full border border-gray-200 bg-white/90 px-1.5 py-1 text-sm text-gray-600 shadow-sm transition-all hover:bg-gray-100" aria-label={t('nav.previousSection')}>&lsaquo;</button>
+        <nav id="tab-nav" class="flex text-xs sm:text-sm overflow-x-auto whitespace-nowrap scroll-smooth flex-nowrap touch-pan-x gap-0.5 sm:gap-1 px-5" role="tablist" aria-label={t('nav.tabs')}>
+          <button class="tab-btn px-2.5 sm:px-4 py-2 border-b-2 border-blue-600 font-medium text-blue-600 flex-shrink-0" data-tab="basics" id="tab-btn-basics" role="tab" aria-selected="true" aria-controls="tab-basics">{t('nav.contact')}</button>
+          <button class="tab-btn px-2.5 sm:px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700 flex-shrink-0" data-tab="work" id="tab-btn-work" role="tab" aria-selected="false" aria-controls="tab-work">{t('section.experience')}</button>
+          <button class="tab-btn px-2.5 sm:px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700 flex-shrink-0" data-tab="education" id="tab-btn-education" role="tab" aria-selected="false" aria-controls="tab-education">{t('section.education')}</button>
+          <button class="tab-btn px-2.5 sm:px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700 flex-shrink-0" data-tab="extras" id="tab-btn-extras" role="tab" aria-selected="false" aria-controls="tab-extras">{t('section.educationExtra')}</button>
+          <button class="tab-btn px-2.5 sm:px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700 flex-shrink-0" data-tab="skills" id="tab-btn-skills" role="tab" aria-selected="false" aria-controls="tab-skills">{t('section.skills')}</button>
+          <button class="tab-btn px-2.5 sm:px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700 flex-shrink-0" data-tab="templates" id="tab-btn-templates" role="tab" aria-selected="false" aria-controls="tab-templates">{t('templates.title')}</button>
         </nav>
-        <button id="tab-next" type="button" class="lg:hidden absolute right-4 top-1/2 z-10 -translate-y-1/2 rounded-full border border-gray-200 bg-white/90 px-2 py-1 text-sm text-gray-600 shadow-sm transition-all hover:bg-gray-100" aria-label="Siguiente sección">&rsaquo;</button>
+        <button id="tab-next" type="button" class="lg:hidden absolute right-4 top-1/2 z-10 -translate-y-1/2 rounded-full border border-gray-200 bg-white/90 px-2 py-1 text-sm text-gray-600 shadow-sm transition-all hover:bg-gray-100" aria-label={t('nav.nextSection')}>&rsaquo;</button>
       </div>
 
-      <div id="cv-form" class="flex-1 lg:overflow-y-auto px-4 sm:px-6 pb-4 space-y-6">
-        <div id="tab-basics" class="tab-content space-y-4">
+      <div id="cv-form" class="flex-1 lg:overflow-y-auto px-4 sm:px-6 pt-3 pb-6 space-y-7">
+        <div id="tab-basics" class="tab-content space-y-5" role="tabpanel" aria-labelledby="tab-btn-basics">
           <div class="grid sm:grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">{t('form.name')}</label>
-              <input type="text" data-path="basics.name" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-blue-500" />
+              <label for="field-name" class="block text-xs font-semibold text-gray-500 uppercase mb-1">{t('form.name')}</label>
+              <input type="text" id="field-name" data-path="basics.name" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-blue-500" />
             </div>
             <div>
-              <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">{t('form.label')}</label>
-              <input type="text" data-path="basics.label" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-blue-500" />
+              <label for="field-label" class="block text-xs font-semibold text-gray-500 uppercase mb-1">{t('form.label')}</label>
+              <input type="text" id="field-label" data-path="basics.label" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-blue-500" />
             </div>
           </div>
           <div class="grid sm:grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Email</label>
-              <input type="email" data-path="basics.email" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-blue-500" />
+              <label for="field-email" class="block text-xs font-semibold text-gray-500 uppercase mb-1">Email</label>
+              <input type="email" id="field-email" data-path="basics.email" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-blue-500" />
             </div>
             <div>
-              <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">{lang === 'es' ? 'Teléfono' : lang === 'it' ? 'Telefono' : 'Phone'}</label>
-              <input type="tel" data-path="basics.phone" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-blue-500" />
+              <label for="field-phone" class="block text-xs font-semibold text-gray-500 uppercase mb-1">{t('form.phone')}</label>
+              <input type="tel" id="field-phone" data-path="basics.phone" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-blue-500" />
             </div>
           </div>
           <div class="mt-3">
-            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">{t('form.website')}</label>
-            <input type="url" data-path="basics.web" placeholder="https://" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-blue-500" />
+            <label for="field-web" class="block text-xs font-semibold text-gray-500 uppercase mb-1">{t('form.website')}</label>
+            <input type="url" id="field-web" data-path="basics.web" placeholder="https://" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-blue-500" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">{lang === 'es' ? 'Fotografía' : lang === 'it' ? 'Fotografia' : 'Photo'}</label>
+              <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">{t('form.photo')}</label>
             <div class="flex flex-wrap items-center gap-2 sm:gap-3 bg-gray-50 p-3 rounded-xl border border-dashed border-gray-300">
               <input type="file" id="photo-file" accept="image/*" class="hidden" />
               <button type="button" onclick="document.getElementById('photo-file').click()" class="px-3 py-1.5 bg-white border border-gray-200 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-50 shadow-sm">
-                {lang === 'es' ? 'Seleccionar archivo' : lang === 'it' ? 'Seleziona file' : 'Choose file'}
+                {t('form.chooseFile')}
               </button>
-              <button type="button" id="btn-remove-photo" class="text-xs text-red-500 font-medium hidden hover:underline">{lang === 'es' ? 'Eliminar' : lang === 'it' ? 'Elimina' : 'Remove'}</button>
-              <span id="photo-status" class="text-xs text-gray-400 truncate max-w-[100px] sm:max-w-[180px]">{lang === 'es' ? 'Sin archivo' : lang === 'it' ? 'Nessun file' : 'No file'}</span>
+              <button type="button" id="btn-remove-photo" class="text-xs text-red-500 font-medium hidden hover:underline">{t('form.remove')}</button>
+              <span id="photo-status" class="text-xs text-gray-500 truncate max-w-[100px] sm:max-w-[180px]">{t('form.noFile')}</span>
             </div>
             <input type="url" id="photo-url" placeholder="https://" class="mt-2 w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-blue-500" />
-            <p class="mt-1 text-xs text-gray-400">{t('form.photoHelp')}</p>
+            <p class="mt-1 text-xs text-gray-500">{t('form.photoHelp')}</p>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">{lang === 'es' ? 'Extracto Profesional' : lang === 'it' ? 'Profilo Professionale' : 'Professional Summary'}</label>
-            <textarea data-path="basics.summary" rows="4" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-blue-500"></textarea>
+            <label for="field-summary" class="block text-xs font-semibold text-gray-500 uppercase mb-1">{t('form.summary')}</label>
+            <textarea id="field-summary" data-path="basics.summary" rows="4" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-blue-500"></textarea>
           </div>
         </div>
 
-        <div id="tab-work" class="tab-content space-y-4 hidden">
+        <div id="tab-work" class="tab-content space-y-4 hidden" role="tabpanel" aria-labelledby="tab-btn-work">
           <div id="work-container" class="space-y-4"></div>
           <button type="button" id="btn-add-work" class="w-full py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-semibold rounded-xl border border-dashed border-blue-200">
-            {lang === 'es' ? '+ Añadir Experiencia' : lang === 'it' ? '+ Aggiungi Esperienza' : '+ Add Experience'}
+            {t('section.addExperience')}
           </button>
         </div>
 
-        <div id="tab-education" class="tab-content space-y-4 hidden">
+        <div id="tab-education" class="tab-content space-y-4 hidden" role="tabpanel" aria-labelledby="tab-btn-education">
           <div id="education-container" class="space-y-4"></div>
           <button type="button" id="btn-add-edu" class="w-full py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-semibold rounded-xl border border-dashed border-blue-200">
-            {lang === 'es' ? '+ Añadir Formación' : lang === 'it' ? '+ Aggiungi Formazione' : '+ Add Education'}
+            {t('section.addEducation')}
           </button>
         </div>
 
-        <div id="tab-extras" class="tab-content space-y-6 hidden">
+        <div id="tab-extras" class="tab-content space-y-6 hidden" role="tabpanel" aria-labelledby="tab-btn-extras">
           <div>
             <div class="flex items-center justify-between border-b border-gray-100 pb-3 mb-3">
-              <h2 class="text-sm font-bold text-gray-900">{lang === 'es' ? 'Certificados y titulaciones' : lang === 'it' ? 'Certificati e titoli' : 'Certificates & Degrees'}</h2>
+              <h2 class="text-sm font-bold text-gray-900">{t('section.certificatesTitle')}</h2>
             </div>
             <div id="certificates-container" class="space-y-4"></div>
             <button type="button" id="btn-add-certificate" class="w-full py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-semibold rounded-xl border border-dashed border-blue-200">
-              {lang === 'es' ? '+ Añadir Certificado' : lang === 'it' ? '+ Aggiungi Certificato' : '+ Add Certificate'}
+              {t('section.addCertificate')}
             </button>
           </div>
           <div>
             <div class="flex items-center justify-between border-b border-gray-100 pb-3 mb-3">
-              <h2 class="text-sm font-bold text-gray-900">{lang === 'es' ? 'Idiomas' : lang === 'it' ? 'Lingue' : 'Languages'}</h2>
+              <h2 class="text-sm font-bold text-gray-900">{t('section.languages')}</h2>
             </div>
             <div id="languages-container" class="space-y-4"></div>
             <button type="button" id="btn-add-language" class="w-full py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-semibold rounded-xl border border-dashed border-blue-200">
-              {lang === 'es' ? '+ Añadir Idioma' : lang === 'it' ? '+ Aggiungi Lingua' : '+ Add Language'}
+              {t('section.addLanguage')}
             </button>
           </div>
         </div>
 
-        <div id="tab-skills" class="tab-content space-y-4 hidden">
+        <div id="tab-skills" class="tab-content space-y-4 hidden" role="tabpanel" aria-labelledby="tab-btn-skills">
           <div class="hidden sm:block bg-blue-50/60 p-3.5 rounded-xl border border-blue-100 text-xs text-blue-800">
-            <strong>{lang === 'es' ? 'Instrucciones:' : lang === 'it' ? 'Istruzioni:' : 'Instructions:'}</strong> {lang === 'es' ? 'Escribe una habilidad y pulsa Enter o coma (,).' : lang === 'it' ? 'Scrivi una competenza e premi Invio o virgola (,).' : 'Type a skill and press Enter or comma (,).'}
+            <strong>{lang === 'es' ? 'Instrucciones:' : lang === 'it' ? 'Istruzioni:' : 'Instructions:'}</strong> {t('form.skillsHint')}
           </div>
           <div>
-            <input type="text" id="skills-input" placeholder="Ej: JavaScript..." class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none" />
+            <input type="text" id="skills-input" placeholder={t('form.skillsPlaceholder')} class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none" />
           </div>
           <div id="skills-tag-container" class="flex flex-wrap gap-1.5 p-3 border border-gray-200 rounded-xl bg-gray-50/50 min-h-[60px]"></div>
         </div>
 
-        <div id="tab-templates" class="tab-content hidden">
+        <div id="tab-templates" class="tab-content hidden" role="tabpanel" aria-labelledby="tab-btn-templates">
           <label class="block text-xs font-semibold text-gray-500 uppercase mb-3">
             {t('templates.subtitle') || (lang === 'es' ? 'Elige el aspecto visual de tu CV' : lang === 'it' ? "Scegli l'aspetto visivo del tuo CV" : 'Choose the visual style of your resume')}
           </label>
@@ -295,6 +317,7 @@ const templates = Object.entries(layoutModules)
     <div
       id="preview-section"
       class="bg-white p-4 sm:p-6 lg:p-8 rounded-2xl border border-gray-200 shadow-lg xl:min-h-[297mm] print:block print:shadow-none print:border-0 print:p-0 mt-6 lg:mt-0 w-full min-w-0"
+      aria-live="polite"
     >
       <header id="preview-header" class="flex justify-between items-start pb-6 border-b border-gray-100">
         <div class="flex-1">
@@ -302,47 +325,47 @@ const templates = Object.entries(layoutModules)
           <p id="view-label" class="mt-1 text-base text-gray-600 font-medium"></p>
           <div id="view-contact" class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500"></div>
         </div>
-        <img id="view-image" class="w-24 h-24 rounded-xl object-cover border border-gray-200 hidden" alt="Foto" />
+        <img id="view-image" class="w-24 h-24 rounded-xl object-cover border border-gray-200 hidden" alt={t('form.photo')} />
       </header>
 
-      <section id="section-summary" class="mt-6" style="display:none">
-        <h3 class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2 pb-1 border-b border-gray-100">
-          {lang === 'es' ? 'Perfil' : lang === 'it' ? 'Profilo' : 'Profile'}
+      <section id="section-summary" class="mt-8" style="display:none">
+        <h3 class="text-xs font-semibold uppercase tracking-widest text-gray-500 mb-2 pb-1 border-b border-gray-100">
+          {t('section.profile')}
         </h3>
         <p id="view-summary" class="text-sm text-gray-600 leading-relaxed whitespace-pre-line"></p>
       </section>
 
-      <section id="section-experience" class="mt-6" style="display:none">
-        <h3 class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3 pb-1 border-b border-gray-100">
-          {lang === 'es' ? 'Experiencia' : lang === 'it' ? 'Esperienza' : 'Experience'}
+      <section id="section-experience" class="mt-8" style="display:none">
+        <h3 class="text-xs font-semibold uppercase tracking-widest text-gray-500 mb-3 pb-1 border-b border-gray-100">
+          {t('section.experience')}
         </h3>
         <div id="view-experience" class="space-y-4"></div>
       </section>
 
-      <section id="section-education" class="mt-6" style="display:none">
-        <h3 class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3 pb-1 border-b border-gray-100">
-          {lang === 'es' ? 'Formación' : lang === 'it' ? 'Formazione' : 'Education'}
+      <section id="section-education" class="mt-8" style="display:none">
+        <h3 class="text-xs font-semibold uppercase tracking-widest text-gray-500 mb-3 pb-1 border-b border-gray-100">
+          {t('section.education')}
         </h3>
         <div id="view-education" class="space-y-4"></div>
       </section>
 
-      <section id="section-certificates" class="mt-6" style="display:none">
-        <h3 class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3 pb-1 border-b border-gray-100">
-          {lang === 'es' ? 'Certificados' : lang === 'it' ? 'Certificati' : 'Certificates'}
+      <section id="section-certificates" class="mt-8" style="display:none">
+        <h3 class="text-xs font-semibold uppercase tracking-widest text-gray-500 mb-3 pb-1 border-b border-gray-100">
+          {t('section.certificates')}
         </h3>
         <div id="view-certificates" class="space-y-4"></div>
       </section>
 
-      <section id="section-languages" class="mt-6" style="display:none">
-        <h3 class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3 pb-1 border-b border-gray-100">
-          {lang === 'es' ? 'Idiomas' : lang === 'it' ? 'Lingue' : 'Languages'}
+      <section id="section-languages" class="mt-8" style="display:none">
+        <h3 class="text-xs font-semibold uppercase tracking-widest text-gray-500 mb-3 pb-1 border-b border-gray-100">
+          {t('section.languages')}
         </h3>
         <div id="view-languages" class="space-y-2"></div>
       </section>
 
-      <section id="section-skills" class="mt-6" style="display:none">
-        <h3 class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2 pb-1 border-b border-gray-100">
-          {lang === 'es' ? 'Habilidades' : lang === 'it' ? 'Competenze' : 'Skills'}
+      <section id="section-skills" class="mt-8" style="display:none">
+        <h3 class="text-xs font-semibold uppercase tracking-widest text-gray-500 mb-2 pb-1 border-b border-gray-100">
+          {t('section.skills')}
         </h3>
         <div id="view-skills-badges" class="flex flex-wrap gap-1.5"></div>
       </section>
@@ -516,8 +539,10 @@ const templates = Object.entries(layoutModules)
     document.querySelectorAll('.tab-btn').forEach(b => {
       b.classList.remove('border-blue-600', 'text-blue-600');
       b.classList.add('border-transparent', 'text-gray-500');
+      b.setAttribute('aria-selected', 'false');
     });
     btn.classList.add('border-blue-600', 'text-blue-600');
+    btn.setAttribute('aria-selected', 'true');
     document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
     const target = document.getElementById('tab-' + btn.dataset.tab);
     if (target) target.classList.remove('hidden');
@@ -575,14 +600,14 @@ const templates = Object.entries(layoutModules)
   function createWorkBlock(item, i) {
     const div = document.createElement('div');
     div.className = 'p-4 bg-gray-50 rounded-xl border border-gray-200 relative space-y-3';
-    div.innerHTML = `<button type="button" class="absolute top-2 right-2 text-red-500 text-xs font-medium" data-remove="work" data-index="${i}">${labels.remove}</button><div class="grid sm:grid-cols-2 gap-3 pt-3"><div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${labels.company}</label><input type="text" data-path="work.${i}.name" value="${escAttr(item.name || '')}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div><div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${labels.position}</label><input type="text" data-path="work.${i}.position" value="${escAttr(item.position || '')}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div></div><div class="grid grid-cols-2 gap-3"><div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${labels.start}</label><input type="month" data-path="work.${i}.startDate" value="${escAttr(normalizeMonthValue(item.startDate || ''))}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div><div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${labels.end}</label><input type="month" data-path="work.${i}.endDate" value="${escAttr(normalizeMonthValue(item.endDate || ''))}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div></div><div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${labels.desc}</label><textarea data-path="work.${i}.summary" rows="2" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm">${escText(item.summary || '')}</textarea></div>`;
+    div.innerHTML = `<button type="button" class="absolute top-2 right-2 text-red-500 text-xs font-medium" data-remove="work" data-index="${i}">${labels.remove}</button><div class="grid sm:grid-cols-2 gap-3 pt-3"><div><label class="block text-[10px] font-bold text-gray-500 uppercase mb-0.5">${labels.company}</label><input type="text" data-path="work.${i}.name" value="${escAttr(item.name || '')}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div><div><label class="block text-[10px] font-bold text-gray-500 uppercase mb-0.5">${labels.position}</label><input type="text" data-path="work.${i}.position" value="${escAttr(item.position || '')}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div></div><div class="grid grid-cols-2 gap-3"><div><label class="block text-[10px] font-bold text-gray-500 uppercase mb-0.5">${labels.start}</label><input type="month" data-path="work.${i}.startDate" value="${escAttr(normalizeMonthValue(item.startDate || ''))}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div><div><label class="block text-[10px] font-bold text-gray-500 uppercase mb-0.5">${labels.end}</label><input type="month" data-path="work.${i}.endDate" value="${escAttr(normalizeMonthValue(item.endDate || ''))}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div></div><div><label class="block text-[10px] font-bold text-gray-500 uppercase mb-0.5">${labels.desc}</label><textarea data-path="work.${i}.summary" rows="2" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm">${escText(item.summary || '')}</textarea></div>`;
     return div;
   }
 
   function createEduBlock(item, i) {
     const div = document.createElement('div');
     div.className = 'p-4 bg-gray-50 rounded-xl border border-gray-200 relative space-y-3';
-    div.innerHTML = `<button type="button" class="absolute top-2 right-2 text-red-500 text-xs font-medium" data-remove="education" data-index="${i}">${labels.remove}</button><div class="grid sm:grid-cols-2 gap-3 pt-3"><div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${labels.inst}</label><input type="text" data-path="education.${i}.institution" value="${escAttr(item.institution || '')}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div><div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${labels.area}</label><input type="text" data-path="education.${i}.area" value="${escAttr(item.area || '')}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div></div><div class="grid grid-cols-2 gap-3"><div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${labels.start}</label><input type="month" data-path="education.${i}.startDate" value="${escAttr(normalizeMonthValue(item.startDate || ''))}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div><div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${labels.end}</label><input type="month" data-path="education.${i}.endDate" value="${escAttr(normalizeMonthValue(item.endDate || ''))}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div></div>`;
+    div.innerHTML = `<button type="button" class="absolute top-2 right-2 text-red-500 text-xs font-medium" data-remove="education" data-index="${i}">${labels.remove}</button><div class="grid sm:grid-cols-2 gap-3 pt-3"><div><label class="block text-[10px] font-bold text-gray-500 uppercase mb-0.5">${labels.inst}</label><input type="text" data-path="education.${i}.institution" value="${escAttr(item.institution || '')}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div><div><label class="block text-[10px] font-bold text-gray-500 uppercase mb-0.5">${labels.area}</label><input type="text" data-path="education.${i}.area" value="${escAttr(item.area || '')}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div></div><div class="grid grid-cols-2 gap-3"><div><label class="block text-[10px] font-bold text-gray-500 uppercase mb-0.5">${labels.start}</label><input type="month" data-path="education.${i}.startDate" value="${escAttr(normalizeMonthValue(item.startDate || ''))}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div><div><label class="block text-[10px] font-bold text-gray-500 uppercase mb-0.5">${labels.end}</label><input type="month" data-path="education.${i}.endDate" value="${escAttr(normalizeMonthValue(item.endDate || ''))}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div></div>`;
     return div;
   }
 
@@ -592,7 +617,7 @@ const templates = Object.entries(layoutModules)
     const certNameLabel = lang === 'es' ? 'Nombre del certificado' : lang === 'it' ? 'Nome certificato' : 'Certificate name';
     const issuerLabel = lang === 'es' ? 'Emisor' : lang === 'it' ? 'Emittente' : 'Issuer';
     const dateLabel = lang === 'es' ? 'Fecha' : lang === 'it' ? 'Data' : 'Date';
-    div.innerHTML = `<button type="button" class="absolute top-2 right-2 text-red-500 text-xs font-medium" data-remove="certificates" data-index="${i}">${labels.remove}</button><div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${certNameLabel}</label><input type="text" data-path="certificates.${i}.name" value="${escAttr(item.name || '')}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div><div class="grid sm:grid-cols-2 gap-3"><div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${issuerLabel}</label><input type="text" data-path="certificates.${i}.issuer" value="${escAttr(item.issuer || '')}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div><div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${dateLabel}</label><input type="month" data-path="certificates.${i}.date" value="${escAttr(normalizeMonthValue(item.date || ''))}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div></div>`;
+    div.innerHTML = `<button type="button" class="absolute top-2 right-2 text-red-500 text-xs font-medium" data-remove="certificates" data-index="${i}">${labels.remove}</button><div><label class="block text-[10px] font-bold text-gray-500 uppercase mb-0.5">${certNameLabel}</label><input type="text" data-path="certificates.${i}.name" value="${escAttr(item.name || '')}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div><div class="grid sm:grid-cols-2 gap-3"><div><label class="block text-[10px] font-bold text-gray-500 uppercase mb-0.5">${issuerLabel}</label><input type="text" data-path="certificates.${i}.issuer" value="${escAttr(item.issuer || '')}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div><div><label class="block text-[10px] font-bold text-gray-500 uppercase mb-0.5">${dateLabel}</label><input type="month" data-path="certificates.${i}.date" value="${escAttr(normalizeMonthValue(item.date || ''))}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div></div>`;
     return div;
   }
 
@@ -601,7 +626,7 @@ const templates = Object.entries(layoutModules)
     div.className = 'p-4 bg-gray-50 rounded-xl border border-gray-200 relative space-y-3';
     const langLabel = lang === 'es' ? 'Idioma' : lang === 'it' ? 'Lingua' : 'Language';
     const levelLabel = lang === 'es' ? 'Nivel' : lang === 'it' ? 'Livello' : 'Fluency';
-    div.innerHTML = `<button type="button" class="absolute top-2 right-2 text-red-500 text-xs font-medium" data-remove="languages" data-index="${i}">${labels.remove}</button><div class="grid sm:grid-cols-2 gap-3"><div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${langLabel}</label><input type="text" data-path="languages.${i}.language" value="${escAttr(item.language || '')}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div><div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-0.5">${levelLabel}</label><input type="text" data-path="languages.${i}.fluency" value="${escAttr(item.fluency || '')}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div></div>`;
+    div.innerHTML = `<button type="button" class="absolute top-2 right-2 text-red-500 text-xs font-medium" data-remove="languages" data-index="${i}">${labels.remove}</button><div class="grid sm:grid-cols-2 gap-3"><div><label class="block text-[10px] font-bold text-gray-500 uppercase mb-0.5">${langLabel}</label><input type="text" data-path="languages.${i}.language" value="${escAttr(item.language || '')}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div><div><label class="block text-[10px] font-bold text-gray-500 uppercase mb-0.5">${levelLabel}</label><input type="text" data-path="languages.${i}.fluency" value="${escAttr(item.fluency || '')}" class="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm" /></div></div>`;
     return div;
   }
 
@@ -639,7 +664,7 @@ const templates = Object.entries(layoutModules)
       if (!skillObj.name) return;
       const div = document.createElement('div');
       div.className = 'skill-tag-item inline-flex items-center gap-1.5 bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded-lg';
-      div.innerHTML = `<span>${escText(skillObj.name)}</span><button type="button" class="text-blue-200 hover:text-white font-extrabold ml-0.5" data-remove="skill" data-index="${idx}">&times;</button>`;
+      div.innerHTML = `<span>${escText(skillObj.name)}</span><button type="button" class="text-blue-200 hover:text-white font-extrabold ml-0.5 min-w-[44px] min-h-[44px] flex items-center justify-center" data-remove="skill" data-index="${idx}" aria-label="${labels.remove}">&times;</button>`;
       skillsTagContainer.appendChild(div);
     });
     renderPreview();
@@ -876,6 +901,9 @@ const templates = Object.entries(layoutModules)
 
 <!-- Cookie Consent Banner -->
 <div id="privacy-banner"
+  role="dialog"
+  aria-label={lang === 'it' ? 'Consenso cookie' : lang === 'en' ? 'Cookie consent' : 'Consentimiento de cookies'}
+  aria-modal="false"
   class="fixed bottom-2 sm:bottom-4 left-2 sm:left-4 right-2 md:right-auto md:max-w-md bg-white border border-gray-200 p-3 sm:p-4 rounded-xl shadow-2xl z-50 opacity-0 translate-y-8 pointer-events-none flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 transition-all duration-500 ease-out"
 >
   <div class="hidden sm:flex flex-shrink-0 w-16 h-16 overflow-hidden items-end self-end -mb-4">
@@ -885,31 +913,33 @@ const templates = Object.entries(layoutModules)
   <div class="flex-1 flex flex-col gap-3">
     <div>
       <h4 class="text-sm font-bold text-gray-900 mb-1">
-        {lang === 'it' ? 'Uso dei Cookie' : 'Uso de Cookies'}
+        {lang === 'it' ? 'Uso dei Cookie' : lang === 'en' ? 'Cookie Usage' : 'Uso de Cookies'}
       </h4>
       <p class="text-xs text-gray-500 leading-relaxed m-0 text-left">
         {lang === 'it'
           ? 'Utilizziamo cookie propri e di terze parti per analizzare le prestazioni del sito e migliorare la tua esperienza. Puoi accettare tutti i cookie o rifiutarli.'
+          : lang === 'en'
+          ? 'We use first-party and third-party cookies to analyze site performance and improve your experience. You can accept or reject all cookies.'
           : 'Utilizamos cookies propias y de terceros para analizar el rendimiento de la web y mejorar tu experiencia. Puedes aceptar todas las cookies o rechazarlas.'}
         <a href={`/${lang}/cookie-policy`} rel="noopener"
           class="text-blue-600 font-bold underline hover:opacity-80 transition-opacity">
-          {lang === 'it' ? 'Cookie Policy' : 'Pol\u00edtica de Cookies'}
+          {lang === 'it' ? 'Cookie Policy' : lang === 'en' ? 'Cookie Policy' : 'Pol\u00edtica de Cookies'}
         </a>
-        {lang === 'it' ? ' e ' : ' y '}
+        {lang === 'it' ? ' e ' : lang === 'en' ? ' and ' : ' y '}
         <a href={`/${lang}/privacy-policy`} rel="noopener"
           class="text-blue-600 font-bold underline hover:opacity-80 transition-opacity">
-          {lang === 'it' ? 'informativa sulla privacy' : 'pol\u00edtica de privacidad'}
+          {lang === 'it' ? 'informativa sulla privacy' : lang === 'en' ? 'privacy policy' : 'pol\u00edtica de privacidad'}
         </a>.
       </p>
     </div>
     <div class="flex items-center gap-2 self-end sm:self-start w-full sm:w-auto">
       <button id="accept-privacy"
         class="flex-1 sm:flex-initial text-center cursor-pointer bg-blue-600 text-white text-xs font-semibold py-2 px-4 rounded-lg shadow-sm hover:brightness-110 transition-all">
-        {lang === 'it' ? 'Accetta tutto' : 'Aceptar todo'}
+        {lang === 'it' ? 'Accetta tutto' : lang === 'en' ? 'Accept all' : 'Aceptar todo'}
       </button>
       <button id="deny-privacy"
         class="flex-1 sm:flex-initial text-center cursor-pointer bg-transparent text-gray-500 border border-gray-200 text-xs font-semibold py-2 px-4 rounded-lg hover:bg-gray-50 transition-all">
-        {lang === 'it' ? 'Rifiuta tutto' : 'Rechazar todo'}
+        {lang === 'it' ? 'Rifiuta tutto' : lang === 'en' ? 'Reject all' : 'Rechazar todo'}
       </button>
     </div>
   </div>

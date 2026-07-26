@@ -121,7 +121,7 @@ async function createOrUpdateFile(octokit: Octokit, owner: string, repo: string,
       owner, repo, path: filePath, message, content: base64, sha
     } as any);
   } catch (err: any) {
-    err.message = `Error escribiendo ${filePath}: ${err.message}`;
+    err.message = `Error writing file ${filePath}`;
     throw err;
   }
 }
@@ -335,7 +335,7 @@ export const handler = async (event: any) => {
       pagesConfigured = true;
     } catch (updateError: any) {
       if (updateError.status !== 404) {
-        return { statusCode: 500, headers, body: JSON.stringify({ error: `Error al configurar GitHub Pages: ${updateError.message || updateError}` }) };
+        return { statusCode: 500, headers, body: JSON.stringify({ error: 'Error al configurar GitHub Pages. Por favor, inténtalo de nuevo.' }) };
       }
     }
 
@@ -349,7 +349,7 @@ export const handler = async (event: any) => {
           source: { branch: 'main', path: '/' }
         } as any);
       } catch (createError: any) {
-        return { statusCode: 500, headers, body: JSON.stringify({ error: `No se pudo crear GitHub Pages: ${createError.message || createError}` }) };
+        return { statusCode: 500, headers, body: JSON.stringify({ error: 'No se pudo crear GitHub Pages. Por favor, inténtalo de nuevo.' }) };
       }
     }
 
@@ -357,14 +357,14 @@ export const handler = async (event: any) => {
     try {
       const { data: pagesInfo } = await octokit.repos.getPages({ owner: username, repo: PUBLISHED_REPO_NAME } as any);
       if (pagesInfo.build_type !== 'legacy') {
-        return { statusCode: 500, headers, body: JSON.stringify({ error: `GitHub Pages se configuró con build_type "${pagesInfo.build_type || 'indefinido'}" en lugar de "legacy". Revisa en https://github.com/${username}/${PUBLISHED_REPO_NAME}/settings/pages` }) };
+        return { statusCode: 500, headers, body: JSON.stringify({ error: 'GitHub Pages se configuró con un tipo de build inesperado. Por favor, revisa la configuración de GitHub Pages en tu repositorio.' }) };
       }
       if (pagesInfo.status === 'errored') {
-        return { statusCode: 500, headers, body: JSON.stringify({ error: `GitHub Pages reporta estado "errored". Revisa https://github.com/${username}/${PUBLISHED_REPO_NAME}/settings/pages` }) };
+        return { statusCode: 500, headers, body: JSON.stringify({ error: 'GitHub Pages reporta un error. Por favor, revisa la configuración de GitHub Pages en tu repositorio.' }) };
       }
       console.log(`GitHub Pages configurado y verificado: build_type=${pagesInfo.build_type}`);
     } catch (verifyError: any) {
-      return { statusCode: 500, headers, body: JSON.stringify({ error: `No se pudo verificar GitHub Pages: ${verifyError.message || verifyError}` }) };
+      return { statusCode: 500, headers, body: JSON.stringify({ error: 'No se pudo verificar GitHub Pages. Por favor, inténtalo de nuevo.' }) };
     }
 
     const pagePath = isUserSite ? '' : `${PUBLISHED_REPO_NAME}/`;
@@ -387,6 +387,6 @@ export const handler = async (event: any) => {
     if (error.status === 401 || error.status === 403) {
       return { statusCode: error.status, headers, body: JSON.stringify({ error: 'Tu sesión de GitHub ha expirado o no tienes permisos. Por favor, reautentica.' }) };
     }
-    return { statusCode: 500, headers, body: JSON.stringify({ error: error.message || 'Error al procesar el despliegue.' }) };
+    return { statusCode: 500, headers, body: JSON.stringify({ error: 'Error al procesar el despliegue. Por favor, inténtalo de nuevo.' }) };
   }
 };

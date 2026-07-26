@@ -10,7 +10,7 @@ const { resume, t } = Astro.props;
 <section class="mb-10 print:mb-6" aria-labelledby="projects-heading">
   <h2
     id="projects-heading"
-    class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-5 pb-2 border-b border-gray-100"
+    class="text-xs font-semibold uppercase tracking-widest text-gray-500 mb-5 pb-2 border-b border-gray-100"
   >
     {t('section.projects')}
   </h2>
@@ -35,7 +35,7 @@ const { resume, t } = Astro.props;
               );
             } catch (e) {
               return (
-                <span class="text-sm text-gray-400 italic break-words">
+                <span class="text-sm text-gray-500 italic break-words">
                   {project.url}
                 </span>
               );
@@ -46,7 +46,7 @@ const { resume, t } = Astro.props;
           <p class="mt-1 text-sm text-gray-600 leading-relaxed break-words">{project.description}</p>
         )}
         {project.keywords?.length > 0 && (
-          <ul class="mt-2 flex flex-wrap gap-1.5 min-w-0" aria-label="Tecnologías">
+          <ul class="mt-2 flex flex-wrap gap-1.5 min-w-0" aria-label={t('section.technologies')}>
             {project.keywords.filter(Boolean).map((kw: string) => (
               <li class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full max-w-full break-words">
                 {kw}

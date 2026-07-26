@@ -3,13 +3,14 @@ import MinimalistLayout from '../layouts/MinimalistLayout.astro';
 ---
 
 <MinimalistLayout
-  title="404"
-  description="404"
+  title="Page Not Found — CV para Todos"
+  description="The page you are looking for does not exist."
   lang="en"
   currentLang="en"
   availableLangs={['en']}
   resume={{}}
   t={(k: string) => k}
+  robots="noindex, nofollow"
 >
 
 <style is:global>
@@ -81,7 +82,7 @@ import MinimalistLayout from '../layouts/MinimalistLayout.astro';
   <div class="nf-content">
     <h1 class="nf-404">404</h1>
     <p class="nf-msg">Ooooops!</p>
-    <a class="nf-btn" href="/">
+    <a class="nf-btn" href="/es">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       Back to Home
     </a>

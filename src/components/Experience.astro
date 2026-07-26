@@ -10,7 +10,7 @@ const { resume, t } = Astro.props;
 <section class="mb-10 print:mb-6" aria-labelledby="experience-heading">
   <h2
     id="experience-heading"
-    class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-5 pb-2 border-b border-gray-100"
+    class="text-xs font-semibold uppercase tracking-widest text-gray-500 mb-5 pb-2 border-b border-gray-100"
   >
     {t('section.experience')}
   </h2>
@@ -46,7 +46,7 @@ const { resume, t } = Astro.props;
             </ul>
           )}
         </div>
-        <time class="text-xs text-gray-400 whitespace-nowrap sm:text-right mt-0.5">
+        <time class="text-xs text-gray-500 whitespace-nowrap sm:text-right mt-0.5">
           {job.startDate}
           {job.startDate && ' — '}
           {job.endDate || (job.startDate ? t('label.present') : '')}
